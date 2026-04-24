@@ -1,0 +1,422 @@
+{
+  "102928": {
+    "value": 21500,
+    "cost_percent": 0.348,
+    "revenue": 6450
+  },
+  "41232": {
+    "value": 14000,
+    "cost_percent": 0.3,
+    "revenue": 4200
+  },
+  "41233": {
+    "value": 5000,
+    "cost_percent": 0.8,
+    "revenue": 4000
+  },
+  "41238": {
+    "value": 25000,
+    "cost_percent": 0.6,
+    "revenue": 15000
+  },
+  "102311": {
+    "value": 16500,
+    "cost_percent": 0.464,
+    "revenue": 6600
+  },
+  "41251": {
+    "value": 17000,
+    "cost_percent": 0.294117,
+    "revenue": 4310.34
+  },
+  "41255": {
+    "value": 15500,
+    "cost_percent": 0.0774,
+    "revenue": 1033.62
+  },
+  "103963": {
+    "value": 70000,
+    "cost_percent": 0.348,
+    "revenue": 21000
+  },
+  "51293": {
+    "value": 57000.0,
+    "cost_percent": 0.3,
+    "revenue": 17100
+  },
+  "49648": {
+    "value": 95000.0,
+    "cost_percent": 0.3,
+    "revenue": 28500
+  },
+  "59210": {
+    "value": 38000.0,
+    "cost_percent": 0.3,
+    "revenue": 11400
+  },
+  "60096": {
+    "value": 50000.0,
+    "cost_percent": 0.3,
+    "revenue": 15000
+  },
+  "60316": {
+    "value": 37000.0,
+    "cost_percent": 0.3,
+    "revenue": 11100
+  },
+  "64124": {
+    "value": 25000.0,
+    "cost_percent": 0.3,
+    "revenue": 7500
+  },
+  "30771": {
+    "value": 34000.0,
+    "cost_percent": 0.3,
+    "revenue": 10200
+  },
+  "32476": {
+    "value": 37000.0,
+    "cost_percent": 0.348,
+    "revenue": 11100
+  },
+  "105299": {
+    "value": 95000,
+    "cost_percent": 0.27,
+    "revenue": 25650
+  },
+  "104462": {
+    "value": 33000,
+    "cost_percent": 0.27,
+    "revenue": 8910
+  },
+  "103722": {
+    "value": 45000,
+    "cost_percent": 0.348,
+    "revenue": 15660
+  },
+  "103511": {
+    "value": 45000,
+    "cost_percent": 0.348,
+    "revenue": 15660
+  },
+  "103270": {
+    "value": 45000,
+    "cost_percent": 0.27,
+    "revenue": 12150
+  },
+  "103000": {
+    "value": 120000,
+    "cost_percent": 0.348,
+    "revenue": 41760
+  },
+  "102650": {
+    "value": 26005,
+    "cost_percent": 0.27,
+    "revenue": 7021
+  },
+  "102048": {
+    "value": 40750,
+    "cost_percent": 0.27,
+    "revenue": 11003
+  },
+  "101520": {
+    "value": 29500,
+    "cost_percent": 0.27,
+    "revenue": 7965
+  },
+  "101138": {
+    "value": 40000,
+    "cost_percent": 0.27,
+    "revenue": 10800
+  },
+  "100705": {
+    "value": 34000,
+    "cost_percent": 0.27,
+    "revenue": 9180
+  },
+  "100679": {
+    "value": 39150,
+    "cost_percent": 0.27,
+    "revenue": 10571
+  },
+  "100503": {
+    "value": 50000,
+    "cost_percent": 0.3,
+    "revenue": 15000
+  },
+  "100414": {
+    "value": 65000,
+    "cost_percent": 0.348,
+    "revenue": 22620
+  },
+  "99133": {
+    "value": 46500,
+    "cost_percent": 0.27,
+    "revenue": 12555
+  },
+  "97455": {
+    "value": 39770,
+    "cost_percent": 0.27,
+    "revenue": 10738
+  },
+  "96920": {
+    "value": 37000,
+    "cost_percent": 0.27,
+    "revenue": 9990
+  },
+  "96783": {
+    "value": 18000,
+    "cost_percent": 0.348,
+    "revenue": 6264
+  },
+  "93963": {
+    "value": 60000,
+    "cost_percent": 0.116,
+    "revenue": 6960
+  },
+  "93616": {
+    "value": 14013,
+    "cost_percent": 0.356812,
+    "revenue": 5000
+  },
+  "93121": {
+    "value": 62214,
+    "cost_percent": 0.45,
+    "revenue": 27996
+  },
+  "92975": {
+    "value": 87500,
+    "cost_percent": 0.27,
+    "revenue": 23625
+  },
+  "92000": {
+    "value": 53500,
+    "cost_percent": 0.348,
+    "revenue": 16050
+  },
+  "91082": {
+    "value": 17500,
+    "cost_percent": 0.3,
+    "revenue": 5250
+  },
+  "90847": {
+    "value": 60000,
+    "cost_percent": 0.3,
+    "revenue": 18000
+  },
+  "90686": {
+    "value": 55000,
+    "cost_percent": 0.3,
+    "revenue": 16500
+  },
+  "88177": {
+    "value": 60471,
+    "cost_percent": 0.27,
+    "revenue": 16327
+  },
+  "87824": {
+    "value": 35000,
+    "cost_percent": 0.3,
+    "revenue": 10500
+  },
+  "87016": {
+    "value": 95000,
+    "cost_percent": 0.27,
+    "revenue": 25650
+  },
+  "86642": {
+    "value": 19000,
+    "cost_percent": 0.3,
+    "revenue": 5700
+  },
+  "86452": {
+    "value": 41000,
+    "cost_percent": 0.27,
+    "revenue": 11070
+  },
+  "86376": {
+    "value": 57500,
+    "cost_percent": 0.27,
+    "revenue": 15525
+  },
+  "85311": {
+    "value": 28000,
+    "cost_percent": 0.27,
+    "revenue": 7560
+  },
+  "85004": {
+    "value": 32000,
+    "cost_percent": 0.27,
+    "revenue": 8640
+  },
+  "84230": {
+    "value": 21000,
+    "cost_percent": 0.348,
+    "revenue": 6300
+  },
+  "83617": {
+    "value": 45000,
+    "cost_percent": 0.3,
+    "revenue": 13500
+  },
+  "82679": {
+    "value": 30380,
+    "cost_percent": 0.3132,
+    "revenue": 8203
+  },
+  "81977": {
+    "value": 22000,
+    "cost_percent": 0.3,
+    "revenue": 6600
+  },
+  "80451": {
+    "value": 21000,
+    "cost_percent": 0.348,
+    "revenue": 6300
+  },
+  "80321": {
+    "value": 55000,
+    "cost_percent": 0.3,
+    "revenue": 16500
+  },
+  "80178": {
+    "value": 105000,
+    "cost_percent": 0.3,
+    "revenue": 31500
+  },
+  "79995": {
+    "value": 52000,
+    "cost_percent": 0.27,
+    "revenue": 14040
+  },
+  "79625": {
+    "value": 33000,
+    "cost_percent": 0.27,
+    "revenue": 8910
+  },
+  "79355": {
+    "value": 38000,
+    "cost_percent": 0.5,
+    "revenue": 19000
+  },
+  "78098": {
+    "value": 46500,
+    "cost_percent": 0.27,
+    "revenue": 12555
+  },
+  "77941": {
+    "value": 60000,
+    "cost_percent": 0.27,
+    "revenue": 16200
+  },
+  "77802": {
+    "value": 38000,
+    "cost_percent": 0.3,
+    "revenue": 11400
+  },
+  "77360": {
+    "value": 18643,
+    "cost_percent": 0.3,
+    "revenue": 5593
+  },
+  "76848": {
+    "value": 22500,
+    "cost_percent": 0.3,
+    "revenue": 6750
+  },
+  "76266": {
+    "value": 26912,
+    "cost_percent": 0.27,
+    "revenue": 7266
+  },
+  "75128": {
+    "value": 34300,
+    "cost_percent": 0.0301347,
+    "revenue": 1034
+  },
+  "74349": {
+    "value": 45000,
+    "cost_percent": 0.3,
+    "revenue": 13500
+  },
+  "73394": {
+    "value": 61500,
+    "cost_percent": 0.348,
+    "revenue": 18450
+  },
+  "72980": {
+    "value": 65000,
+    "cost_percent": 0.3,
+    "revenue": 19500
+  },
+  "71964": {
+    "value": 24000,
+    "cost_percent": 0.27,
+    "revenue": 6480
+  },
+  "71791": {
+    "value": 42000,
+    "cost_percent": 0.3,
+    "revenue": 12600
+  },
+  "70310": {
+    "value": 52420,
+    "cost_percent": 0.27,
+    "revenue": 14153
+  },
+  "69530": {
+    "value": 54345,
+    "cost_percent": 0.0285373,
+    "revenue": 1551
+  },
+  "68506": {
+    "value": 55290,
+    "cost_percent": 0.27,
+    "revenue": 14928
+  },
+  "68411": {
+    "value": 20624,
+    "cost_percent": 0.3132,
+    "revenue": 5568
+  },
+  "66447": {
+    "value": 16999,
+    "cost_percent": 0.3,
+    "revenue": 5100
+  },
+  "66205": {
+    "value": 45000,
+    "cost_percent": 0.3,
+    "revenue": 13500
+  },
+  "65926": {
+    "value": 26000,
+    "cost_percent": 0.3,
+    "revenue": 7800
+  },
+  "64683": {
+    "value": 74500,
+    "cost_percent": 0.3,
+    "revenue": 22350
+  },
+  "64258": {
+    "value": 40000,
+    "cost_percent": 0.3,
+    "revenue": 12000
+  },
+  "64014": {
+    "value": 38443,
+    "cost_percent": 0.27,
+    "revenue": 10380
+  },
+  "63953": {
+    "value": 40750,
+    "cost_percent": 0.27,
+    "revenue": 11003
+  },
+  "62315": {
+    "value": 33000,
+    "cost_percent": 0.3,
+    "revenue": 9900
+  }
+}

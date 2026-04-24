@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CS Partner · Estrategia de Cartera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Merriweather:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --purple-dark:#671E75; --purple-mid:#772583; --lila:#B14EB5; --lavender:#E2ACD7;
+    --near-black:#12051A; --dark-gray:#6B6B78; --mid-gray:#BCBEC0; --light-gray:#E6E7E8;
+    --teal:#00C7B1; --blue:#06038D; --peach:#FFBE97; --sky:#74D1EA;
+    --bg:#F4F3F7; --card:#fff; --red:#DC2626; --amber:#D97706; --green:#059669;
+  }
+  body{font-family:'Figtree',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--near-black);min-height:100vh;font-size:13px}
+
+  header{background:linear-gradient(135deg,var(--purple-dark),var(--lila));color:#fff;padding:18px 32px;display:flex;align-items:center;gap:14px}
+  header .logo{width:40px;height:40px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+  header .logo img{width:32px;height:32px;object-fit:contain}
+  header h1{font-family:'Merriweather',serif;font-size:17px;font-weight:700;letter-spacing:.2px}
+  header p{font-size:11px;opacity:.8;margin-top:3px}
+
+  .tab-nav{background:#fff;border-bottom:1px solid var(--light-gray);padding:0 32px;display:flex;gap:0;position:sticky;top:0;z-index:50;overflow-x:auto}
+  .tab-btn{padding:14px 22px;font-size:13px;font-weight:600;color:var(--dark-gray);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;font-family:inherit}
+  .tab-btn:hover{color:var(--purple-dark)}
+  .tab-btn.active{color:var(--purple-dark);border-bottom-color:var(--purple-dark)}
+  .tab-btn .count{display:inline-block;margin-left:6px;background:var(--light-gray);color:var(--dark-gray);border-radius:10px;padding:1px 8px;font-size:11px;font-weight:700}
+  .tab-btn.active .count{background:var(--purple-dark);color:#fff}
+  .tab-pane{display:none}
+  .tab-pane.active{display:block}
+
+  main{max-width:1500px;margin:0 auto;padding:20px 32px 60px}
+
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+  .kpi{background:var(--card);border-radius:12px;padding:14px 18px;box-shadow:0 1px 3px rgba(18,5,26,.06);border:1px solid rgba(103,30,117,.06)}
+  .kpi .label{font-size:10px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+  .kpi .value{font-size:22px;font-weight:700;color:var(--purple-dark)}
+  .kpi .sub{font-size:11px;color:var(--dark-gray);margin-top:4px}
+  .kpi.accent{background:linear-gradient(135deg,var(--purple-dark),var(--lila));color:#fff}
+  .kpi.accent .label{color:rgba(255,255,255,.8)}
+  .kpi.accent .value{color:#fff}
+  .kpi.accent .sub{color:rgba(255,255,255,.8)}
+
+  .section{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(18,5,26,.06);border:1px solid rgba(103,30,117,.06);overflow:hidden;margin-bottom:18px}
+  .section-hdr{padding:14px 20px;border-bottom:1px solid var(--light-gray);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .section-hdr h2{font-size:14px;font-weight:700;color:var(--near-black)}
+  .section-hdr .meta{font-size:11px;color:var(--dark-gray)}
+
+  .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .filters input,.filters select{font-family:inherit;font-size:12px;padding:7px 10px;border:1px solid var(--light-gray);border-radius:8px;background:#fff;outline:none;color:var(--near-black)}
+  .filters input:focus,.filters select:focus{border-color:var(--lila)}
+  .filters input[type=search]{min-width:220px}
+  .btn{font-family:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+  .btn.primary{background:var(--purple-dark);color:#fff}
+  .btn.primary:hover{background:var(--purple-mid)}
+  .btn.ghost{background:#fff;color:var(--purple-dark);border-color:var(--light-gray)}
+  .btn.ghost:hover{border-color:var(--lila);color:var(--lila)}
+  .btn.sm{padding:4px 10px;font-size:11px}
+
+  table.worklist{width:100%;border-collapse:collapse;font-size:12.5px}
+  .worklist thead th{background:#FAFAF9;padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--light-gray);white-space:nowrap;position:sticky;top:0;z-index:10;box-shadow:0 1px 0 var(--light-gray)}
+  .worklist thead th.sortable{cursor:pointer;user-select:none}
+  .worklist thead th.sortable:hover{color:var(--purple-dark)}
+  .worklist tbody td{padding:10px 12px;border-bottom:1px solid #F5F3F7;vertical-align:middle}
+  .worklist tbody tr:hover td{background:#FAF7FB}
+  .worklist .rank{font-weight:700;color:var(--dark-gray);width:28px}
+  .worklist .broker-cell{min-width:200px}
+  .worklist .broker-cell .name{font-weight:600;color:var(--near-black)}
+  .worklist .broker-cell .company{font-size:11px;color:var(--dark-gray);margin-top:1px}
+  .worklist .money{font-weight:700;color:var(--purple-dark);white-space:nowrap}
+  .worklist .money.sm{font-weight:600;color:var(--near-black);font-size:12px}
+  .worklist td.actions{white-space:nowrap}
+
+  .pill{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 9px;font-size:10.5px;font-weight:700;white-space:nowrap;line-height:1.5}
+  .pill.red{background:#FEE2E2;color:var(--red)}
+  .pill.amber{background:#FEF3C7;color:var(--amber)}
+  .pill.green{background:#D1FAE5;color:var(--green)}
+  .pill.gray{background:var(--light-gray);color:var(--dark-gray)}
+  .pill.blue{background:#DBEAFE;color:var(--blue)}
+  .pill.teal{background:#CCF5F0;color:#008073}
+  .pill.peach{background:#FFE4D1;color:#B14E00}
+  .pill.purple{background:#F3E5F5;color:var(--purple-dark)}
+  .pill.lavender{background:var(--lavender);color:var(--purple-dark)}
+
+  .risk-ALTO{background:#FEE2E2;color:var(--red)}
+  .risk-MEDIO{background:#FEF3C7;color:var(--amber)}
+  .risk-BAJO{background:#D1FAE5;color:var(--green)}
+  .seg-Inmobiliaria{background:#F3E5F5;color:var(--purple-dark)}
+  .seg-Independiente{background:var(--lavender);color:var(--purple-dark)}
+
+  .lc-Onboarding{background:#DBEAFE;color:var(--blue)}
+  .lc-Growing{background:#CCF5F0;color:#008073}
+  .lc-Mature-Healthy{background:#D1FAE5;color:var(--green)}
+  .lc-Active-Low{background:var(--light-gray);color:var(--dark-gray)}
+  .lc-Declining{background:#FEF3C7;color:var(--amber)}
+  .lc-At-Risk{background:#FEE2E2;color:var(--red)}
+  .lc-Churned{background:#E5E5E5;color:var(--near-black)}
+  .lc-Dormant{background:var(--light-gray);color:var(--dark-gray)}
+
+  .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .sd-Planned{background:var(--mid-gray)}
+  .sd-Contacted{background:var(--sky)}
+  .sd-InProgress{background:var(--peach)}
+  .sd-Won{background:var(--teal)}
+  .sd-Lost{background:var(--red)}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(18,5,26,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-bg.open{display:flex}
+  .modal{background:#fff;border-radius:16px;width:min(920px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 30px 80px rgba(18,5,26,.35)}
+  .modal-hdr{padding:20px 24px;background:linear-gradient(135deg,var(--purple-dark),var(--lila));color:#fff;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;position:sticky;top:0;z-index:5}
+  .modal-hdr .t{font-family:'Merriweather',serif;font-size:18px;font-weight:700}
+  .modal-hdr .s{font-size:12px;opacity:.85;margin-top:4px}
+  .modal-hdr .x{background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:8px;width:30px;height:30px;font-size:16px;cursor:pointer}
+  .modal-hdr .x:hover{background:rgba(255,255,255,.3)}
+  .modal-body{padding:20px 24px}
+
+  .account-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+  @media(max-width:700px){.account-grid{grid-template-columns:repeat(2,1fr)}}
+  .fact{background:#FAFAF9;border-radius:8px;padding:9px 11px;border:1px solid var(--light-gray)}
+  .fact .k{font-size:9.5px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+  .fact .v{font-size:13px;font-weight:600;color:var(--near-black)}
+  .fact.accent{background:linear-gradient(135deg,rgba(103,30,117,.08),rgba(177,78,181,.04));border-color:rgba(177,78,181,.2)}
+  .fact.accent .v{color:var(--purple-dark)}
+
+  .sec-h4{font-size:11px;font-weight:700;color:var(--purple-dark);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 8px;border-top:1px solid var(--light-gray);padding-top:10px;display:flex;align-items:center;gap:8px}
+
+  .nba{background:linear-gradient(135deg,rgba(103,30,117,.08),rgba(177,78,181,.04));border:1px solid rgba(177,78,181,.2);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+  .nba .tt{font-size:10px;font-weight:700;color:var(--lila);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+  .nba .msg{font-size:13px;color:var(--near-black);line-height:1.5}
+  .nba .sc{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+
+  .timeline{margin-top:10px}
+  .tl-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #F5F3F7}
+  .tl-item:last-child{border-bottom:none}
+  .tl-icon{width:28px;height:28px;border-radius:50%;background:var(--light-gray);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+  .tl-icon.call{background:#CCF5F0;color:#008073}
+  .tl-icon.email{background:#DBEAFE;color:var(--blue)}
+  .tl-icon.wa{background:#D1FAE5;color:var(--green)}
+  .tl-icon.meeting{background:#FFE4D1;color:#B14E00}
+  .tl-icon.note{background:var(--light-gray);color:var(--dark-gray)}
+  .tl-body{flex:1;font-size:12px}
+  .tl-body .tl-head{display:flex;justify-content:space-between;gap:8px}
+  .tl-body .tl-head .ts{color:var(--dark-gray);font-size:11px}
+  .tl-body .tl-text{color:var(--near-black);margin-top:3px}
+  .tl-body .tl-out{display:inline-block;margin-top:4px;font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--light-gray);color:var(--dark-gray)}
+
+  .log-form{background:#FAFAF9;border:1px solid var(--light-gray);border-radius:10px;padding:12px;margin-top:12px}
+  .log-form .row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .log-form select,.log-form input,.log-form textarea{font-family:inherit;font-size:12px;padding:7px 10px;border:1px solid var(--light-gray);border-radius:6px;background:#fff;outline:none;color:var(--near-black)}
+  .log-form textarea{width:100%;min-height:50px;resize:vertical}
+  .log-form .row>*{flex:1;min-width:120px}
+
+  .sparkline{display:block}
+  .chart-card{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(18,5,26,.06);border:1px solid rgba(103,30,117,.06);margin-bottom:12px}
+  .chart-card h3{font-size:12px;font-weight:700;color:var(--near-black);margin-bottom:12px}
+  .chart-card svg{display:block;width:100%;overflow:visible}
+
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+  @media(max-width:900px){.charts-grid{grid-template-columns:1fr}}
+
+  .empty{padding:40px 20px;text-align:center;color:var(--dark-gray);font-size:13px}
+
+  .summary-note{background:#F3E5F5;border-left:3px solid var(--lila);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--purple-dark)}
+  .summary-note strong{color:var(--purple-dark)}
+
+  .cell-select{padding:4px 8px;font-size:11px;border-radius:6px;border:1px solid var(--light-gray);background:#fff;font-family:inherit;color:var(--near-black)}
+
+  .tooltip{position:relative;cursor:help}
+  .tooltip::after{content:attr(data-tip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--near-black);color:#fff;font-size:10.5px;padding:5px 8px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:10}
+  .tooltip:hover::after{opacity:1}
+
+  .broker-subtable{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+  .broker-subtable th{text-align:left;font-size:10px;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em;padding:6px;border-bottom:1px solid var(--light-gray)}
+  .broker-subtable td{padding:6px;border-bottom:1px solid #F5F3F7}
+
+  .meta-bar{background:#fff;border-bottom:1px solid var(--light-gray);padding:8px 32px;font-size:11px;color:var(--dark-gray);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .meta-bar .fresh{color:var(--green);font-weight:600}
+  .meta-bar .stale{color:var(--amber);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="https://asesor.moradaunoapp.com/favicon.ico" alt="MoradaUno"
+         onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:var(--purple-dark);font-weight:800;font-family:Merriweather,serif;font-size:18px\'>M</span>'">
+  </div>
+  <div>
+    <h1>CS Partner · Estrategia de Cartera</h1>
+    <p>Motor operativo de Customer Success · 18 May → 1 Oct 2026</p>
+  </div>
+</header>
+
+<div class="meta-bar">
+  <div>
+    Datos actualizados: <span id="m-generated">—</span> ·
+    Rango: <span id="m-range">—</span> ·
+    <span id="m-deals">0</span> deals procesados
+  </div>
+  <div>
+    <span id="m-freshness" class="fresh">●</span>
+    <button class="btn sm ghost" onclick="location.reload()">↻ Reload</button>
+  </div>
+</div>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="worklist">Worklist · Brokers <span class="count" id="tc-worklist">0</span></button>
+  <button class="tab-btn" data-tab="pipeline">Pipeline</button>
+  <button class="tab-btn" data-tab="inmobiliarias">Worklist · Inmobiliarias <span class="count" id="tc-inmo">0</span></button>
+  <button class="tab-btn" data-tab="analytics">Analytics</button>
+  <button class="tab-btn" data-tab="metodologia">📖 Metodología</button>
+</nav>
+
+<main>
+  <!-- WORKLIST -->
+  <section class="tab-pane active" id="tab-worklist">
+    <div class="kpi-row">
+      <div class="kpi accent">
+        <div class="label">Revenue L12M en riesgo</div>
+        <div class="value" id="k-risk">$0</div>
+        <div class="sub" id="k-risk-count">0 cuentas ALTO</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Churned (+90d sin uso)</div>
+        <div class="value" id="k-churn" style="color:var(--red)">0</div>
+        <div class="sub">recuperación urgente</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Uso disminuyendo</div>
+        <div class="value" id="k-decrease" style="color:var(--amber)">0</div>
+        <div class="sub">trend ≤ −50% en 90d</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Renovación baja (&lt;30%)</div>
+        <div class="value" id="k-norenew" style="color:var(--amber)">0</div>
+        <div class="sub">tasa copita &lt; 30% con 3+ past-grace</div>
+      </div>
+      <div class="kpi">
+        <div class="label">🔥 Cerrando renta ahora</div>
+        <div class="value" id="k-inprogress" style="color:#008073">0</div>
+        <div class="sub" id="k-inprogress-val">$0 en pipeline</div>
+      </div>
+    </div>
+
+    <div class="summary-note">
+      <strong>Worklist operativa:</strong> 2 años de historia real (3,000+ deals del MCP). Prioriza por señales operacionales de lifecycle, no solo revenue.
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">
+        <h2>Cola de prioridades</h2>
+        <div class="filters">
+          <input type="search" id="f-search" placeholder="Buscar broker o empresa…"/>
+          <select id="f-owner"><option value="">Todos los CSM</option><option>CSM 1</option><option>CSM 2</option><option>Sin asignar</option></select>
+          <select id="f-segment"><option value="">Todos segmentos</option><option>Inmobiliaria</option><option>Independiente</option></select>
+          <select id="f-risk"><option value="">Todo riesgo</option><option>ALTO</option><option>MEDIO</option><option>BAJO</option></select>
+          <select id="f-intervention"><option value="">Toda intervención</option><option value="yes">Requiere intervención</option><option value="no">Sana (sin intervención)</option></select>
+          <select id="f-lifecycle"><option value="">Todo lifecycle</option><option>Onboarding</option><option>Growing</option><option>Mature-Healthy</option><option>Active-Low</option><option>Declining</option><option>At-Risk</option><option>Churned</option></select>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--dark-gray);background:#fff;border:1px solid var(--light-gray);border-radius:8px;padding:6px 10px"><input type="checkbox" id="f-inprogress" style="margin:0"/> 🔥 Cerrando ahora</label>
+          <select id="f-signal"><option value="">Toda señal</option><option value="churn">Churn (inactividad)</option><option value="decrease">Caída de uso</option><option value="lowrenew">Renovación baja</option></select>
+          <select id="f-status"><option value="">Todo estado</option><option>Planned</option><option>Contacted</option><option>InProgress</option><option>Won</option><option>Lost</option></select>
+          <button class="btn ghost" id="btn-reset">Limpiar</button>
+          <button class="btn ghost" id="btn-export">CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;max-height:72vh;overflow-y:auto">
+        <table class="worklist" id="tbl-work">
+          <thead><tr>
+            <th>#</th>
+            <th>Cuenta</th>
+            <th>Intervención</th>
+            <th>Segmento</th>
+            <th>Riesgo</th>
+            <th>Lifecycle</th>
+            <th>Señal</th>
+            <th class="sortable" data-sort="in_progress_count">🔥 Cerrando</th>
+            <th class="sortable" data-sort="tenure_months">Tiempo en M1</th>
+            <th class="sortable" data-sort="days_since_last">Últ. act.</th>
+            <th class="sortable" data-sort="trend_pct">Trend</th>
+            <th class="sortable" data-sort="renewal_rate">Renov.</th>
+            <th class="sortable" data-sort="revenue_l12m">Revenue L12M</th>
+            <th>Estado</th>
+            <th>CSM</th>
+          </tr></thead>
+          <tbody id="tbody-work"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIPELINE -->
+  <section class="tab-pane" id="tab-pipeline">
+    <div class="kpi-row">
+      <div class="kpi"><div class="label">Planned</div><div class="value" id="pl-Planned">0</div><div class="sub" id="plm-Planned">$0</div></div>
+      <div class="kpi"><div class="label">Contacted</div><div class="value" id="pl-Contacted">0</div><div class="sub" id="plm-Contacted">$0</div></div>
+      <div class="kpi"><div class="label">In Progress</div><div class="value" id="pl-InProgress">0</div><div class="sub" id="plm-InProgress">$0</div></div>
+      <div class="kpi"><div class="label">Won</div><div class="value" id="pl-Won" style="color:var(--green)">0</div><div class="sub" id="plm-Won">$0</div></div>
+      <div class="kpi"><div class="label">Lost</div><div class="value" id="pl-Lost" style="color:var(--red)">0</div><div class="sub" id="plm-Lost">$0</div></div>
+    </div>
+    <div id="kanban" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px"></div>
+  </section>
+
+  <!-- INMOBILIARIAS -->
+  <section class="tab-pane" id="tab-inmobiliarias">
+    <div class="kpi-row">
+      <div class="kpi accent">
+        <div class="label">Total Inmobiliarias</div>
+        <div class="value" id="ki-total">0</div>
+        <div class="sub" id="ki-split">0 ALTO · 0 MEDIO</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Revenue · Top 10</div>
+        <div class="value" id="ki-top10">$0</div>
+        <div class="sub" id="ki-top10pct">0% del total</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Penetración promedio</div>
+        <div class="value" id="ki-pen">0%</div>
+        <div class="sub">brokers activos / total</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Brokers totales</div>
+        <div class="value" id="ki-brokers">0</div>
+        <div class="sub" id="ki-brokers-act">0 activos</div>
+      </div>
+    </div>
+
+    <div class="summary-note">
+      <strong>Vista Inmobiliaria:</strong> agrupa brokers por empresa. Mide penetración (cuántos brokers están activos), lifecycle distribution, y revenue consolidado por inmobiliaria.
+    </div>
+
+    <div class="section">
+      <div class="section-hdr">
+        <h2>Cola de prioridades · Inmobiliarias</h2>
+        <div class="filters">
+          <input type="search" id="f-search-inmo" placeholder="Buscar inmobiliaria…"/>
+          <select id="f-inmo-risk"><option value="">Todo riesgo</option><option>ALTO</option><option>MEDIO</option><option>BAJO</option></select>
+          <select id="f-inmo-intervention"><option value="">Toda intervención</option><option value="yes">Requiere intervención</option><option value="no">Sana (sin intervención)</option></select>
+          <select id="f-inmo-sort"><option value="revenue_l12m">Por Revenue L12M</option><option value="total_revenue">Por Revenue 2Y</option><option value="brokers_total">Por # brokers</option><option value="penetration">Por penetración</option><option value="deals_l12m">Por Deals L12M</option></select>
+        </div>
+      </div>
+      <div style="overflow-x:auto;max-height:72vh;overflow-y:auto">
+        <table class="worklist">
+          <thead><tr><th>#</th><th>Inmobiliaria</th><th>Intervención</th><th>Riesgo</th><th>Brokers</th><th>Penetración</th><th>Tiempo en M1</th><th>Últ. act.</th><th>Deals L12M</th><th>Trend</th><th>Renov.</th><th>Revenue L12M</th></tr></thead>
+          <tbody id="tbody-inmo"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALYTICS -->
+  <section class="tab-pane" id="tab-analytics">
+    <div class="kpi-row">
+      <div class="kpi accent"><div class="label">Impacto realizado</div><div class="value" id="a-real">$0</div><div class="sub" id="a-realpct">0% forecast</div></div>
+      <div class="kpi"><div class="label">Cuentas ganadas</div><div class="value" id="a-won" style="color:var(--green)">0</div><div class="sub" id="a-wonrate">0% conv.</div></div>
+      <div class="kpi"><div class="label">Actividades</div><div class="value" id="a-acts">0</div><div class="sub" id="a-touchrate">0 /cuenta</div></div>
+      <div class="kpi"><div class="label">Churn prevenido</div><div class="value" id="a-churn" style="color:var(--green)">$0</div><div class="sub">LTV rescatado</div></div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card"><h3>Distribución por Lifecycle stage</h3><div id="chart-lc"></div></div>
+      <div class="chart-card"><h3>Actividad por quarter (últimos 8Q) · Deals + Revenue</h3><div id="chart-q"></div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>Distribución de rentas (tickets)</h3><div id="chart-rent"></div></div>
+      <div class="chart-card"><h3>Uso por producto</h3><div id="chart-prod"></div></div>
+    </div>
+  </section>
+
+  <!-- METODOLOGÍA -->
+  <section class="tab-pane" id="tab-metodologia">
+    <div class="summary-note">
+      <strong>Cómo se calcula todo en este dashboard.</strong> Esta página documenta las fórmulas, supuestos y ventanas de tiempo que alimentan cada métrica. Si algo no coincide con la realidad operativa, aquí está la explicación y dónde ajustarlo.
+    </div>
+
+    <!-- 1. Fuente de datos -->
+    <div class="section">
+      <div class="section-hdr"><h2>1. Fuente de datos</h2><div class="meta">MCP MoradaUno en vivo</div></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <p>Toda la data proviene del MCP de MoradaUno (tools <code>admin_deals</code>, <code>get_brokers</code>, <code>get_deal_detail</code>). El pipeline vive en <code>cs-data/</code>:</p>
+        <ul style="margin:10px 0 10px 20px">
+          <li><code>raw_deals.jsonl</code> — cache incremental de todos los deals pulleados (crece con cada corrida).</li>
+          <li><code>deals_2y.jsonl</code> — ventana operativa de los últimos 2 años (podado automáticamente).</li>
+          <li><code>broker_registry.json</code> — fuente canónica de <code>broker.created</code> y datos de organización, poblado vía <code>get_brokers filter=&lt;nombre&gt;</code>.</li>
+          <li><code>deal_rates.json</code> — rates reales (<code>cost_percent</code>) de deals enriquecidos vía <code>get_deal_detail</code>.</li>
+          <li><code>pricing.json</code> — rates baseline por <code>producto|sub-producto</code> cuando no hay enrichment real.</li>
+        </ul>
+        <p><strong>Refresh diario</strong> (<code>cs-dashboard-daily-refresh</code>, 7:37 AM local): jala deals nuevos, hace per-broker backfill de top 40 brokers ALTO/MEDIO, enriquece 20 brokers al registry, obtiene <code>cost_percent</code> real de 30 deals. Los rates convergen a 100% en ~2-3 semanas.</p>
+      </div>
+    </div>
+
+    <!-- 2. Ventanas de tiempo -->
+    <div class="section">
+      <div class="section-hdr"><h2>2. Ventanas de tiempo</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <table style="width:100%;border-collapse:collapse;margin-top:8px">
+          <thead><tr style="background:#FAFAF9">
+            <th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--light-gray)">Ventana</th>
+            <th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--light-gray)">Uso</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7"><strong>L12M</strong> (últimos 12 meses)</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">Ventana operativa principal. Todas las métricas de revenue y deals en el dashboard.</td></tr>
+            <tr><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7"><strong>L90D</strong> (últimos 90 días)</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">Numerador del <code>trend_pct</code>. "Activo ahora" = 1+ deal en L90D.</td></tr>
+            <tr><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7"><strong>L90D–180D</strong> (90-180 días atrás)</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">Denominador del <code>trend_pct</code>. Comparativo contra periodo previo.</td></tr>
+            <tr><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7"><strong>2Y</strong> (últimos 2 años)</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">Dataset completo. Se muestra solo como referencia en el modal.</td></tr>
+            <tr><td style="padding:8px 12px"><strong>8Q</strong> (últimos 8 quarters)</td><td style="padding:8px 12px">Gráfica dual-axis de actividad histórica. <strong>Solo cuenta nuevas rentas</strong> (Closed + Open); excluye Renewals y Cancelados.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. Revenue -->
+    <div class="section">
+      <div class="section-hdr"><h2>3. Revenue (Pago Total a MoradaUno)</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <div style="background:linear-gradient(135deg,rgba(103,30,117,.06),rgba(177,78,181,.02));border:1px solid rgba(177,78,181,.2);border-radius:10px;padding:14px 16px;margin-bottom:14px">
+          <div style="font-family:'Merriweather',serif;font-size:15px;color:var(--purple-dark);margin-bottom:8px"><strong>Fórmula principal</strong></div>
+          <div style="font-size:15px"><code>Pago Total = renta × base_rate × (1 + IVA)</code></div>
+          <div style="font-size:13px;margin-top:6px"><strong>IVA = 16%</strong></div>
+          <div style="font-size:12px;color:var(--dark-gray);margin-top:6px">El "Pago Total" es lo que el cliente efectivamente paga a MoradaUno (con IVA). El <code>base_rate</code> es el porcentaje sobre la renta mensual negociado por producto/sub-producto. El net revenue (sin IVA) = <code>renta × base_rate</code>.</div>
+        </div>
+        <p><strong>Ejemplo verificado</strong>: Deal 102928 (Esbeidi Romero, Protección de Renta / M3). Renta = $21,500. base_rate = 30%. → <code>21,500 × 0.30 × 1.16 = $7,482</code>. ✓ Coincide con la data del sistema.</p>
+        <p><strong>Fuente de <code>base_rate</code></strong>:</p>
+        <ol style="margin:10px 0 10px 20px">
+          <li><span class="pill green">✓ actual</span> — rate real del deal, obtenido vía <code>get_deal_detail</code> (campo <code>agreement.cost_percent</code>). El sistema lo almacena a veces como base (ej. 0.30) y a veces con IVA (ej. 0.348) — el processor detecta automáticamente y normaliza.</li>
+          <li><span class="pill amber">fallback</span> — si no hay rate real, se usa el baseline por <code>producto|sub-producto</code> en <code>pricing.json</code> y se aplica IVA encima.</li>
+        </ol>
+        <p><strong>Rates AUTORIZADOS por MoradaUno</strong> (base, sin IVA):</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;margin-top:8px">
+          <div style="background:#FAFAF9;border-radius:6px;padding:10px 12px;font-size:12px">
+            <strong>Protección de Renta (Guarantee)</strong> + IVA 16%<br>
+            <table style="width:100%;margin-top:6px;font-size:11.5px"><tbody>
+              <tr><td>M3</td><td><strong>30%</strong></td><td style="color:var(--dark-gray)">con IVA: 34.8%</td></tr>
+              <tr><td>M6</td><td><strong>40%</strong></td><td style="color:var(--dark-gray)">con IVA: 46.4%</td></tr>
+              <tr><td>M12</td><td><strong>60%</strong></td><td style="color:var(--dark-gray)">con IVA: 69.6%</td></tr>
+              <tr><td>M Legal</td><td><strong>25%</strong></td><td style="color:var(--dark-gray)">con IVA: 29.0%</td></tr>
+              <tr><td>M3 Light</td><td>25%</td><td style="color:var(--dark-gray)">29.0%</td></tr>
+            </tbody></table>
+          </div>
+          <div style="background:#FAFAF9;border-radius:6px;padding:10px 12px;font-size:12px">
+            <strong>Investigación (Screening)</strong> + IVA 16%<br>
+            <span style="color:var(--dark-gray);font-size:11px">Rates estimados (confirmar con equipo):</span><br>
+            Normal ≈ 7.7% · Con RPP ≈ 8.5%<br>
+            + Contracts ≈ 12-15%<br>
+            + JA ≈ 10-16%
+          </div>
+          <div style="background:#FAFAF9;border-radius:6px;padding:10px 12px;font-size:12px">
+            <strong>Legal</strong> + IVA 16%<br>
+            <span style="color:var(--dark-gray);font-size:11px">Rates estimados (confirmar):</span><br>
+            Justicia Alternativa ≈ 5%<br>
+            Promissory note ≈ 3%<br>
+            Contracts ≈ 2-3%
+          </div>
+        </div>
+        <p style="margin-top:12px"><strong>Quality flag del broker</strong>: <span class="pill green">✓ actual</span> (todos los deals del broker tienen rate real) · <span class="pill amber">parcial</span> (algunos enriquecidos) · <span class="pill amber">estimado</span> (puro baseline). El refresh diario mueve brokers de "estimado" a "parcial" a "actual" progresivamente.</p>
+        <p><strong>Revenue L12M</strong> = suma de <code>revenue_por_deal</code> para deals no-Cancelled creados en los últimos 365 días.</p>
+        <p><strong>Revenue / mes</strong> = <code>Revenue L12M / 12</code>. Tasa de revenue mensual.</p>
+        <p><strong>Cancelados se excluyen</strong> del revenue (aunque Screening genere fee, la convención actual los omite).</p>
+      </div>
+    </div>
+
+    <!-- 4. Renewal rate -->
+    <div class="section">
+      <div class="section-hdr"><h2>4. Tasa de renovación · Copita vs Cierre</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <p><strong>Modelo operativo MoradaUno</strong>:</p>
+        <ul style="margin:8px 0 12px 20px">
+          <li>Solo los contratos de <strong>Protección de Renta (Guarantee)</strong> tienen ciclo de renovación.</li>
+          <li>Cuando se cierra un contrato, el contrato de M1 expira <strong>12 meses después</strong> (<code>end_date</code>).</li>
+          <li>La <strong>ventana de renovación abre 60 días antes</strong> del <code>end_date</code>.</li>
+          <li>Una renovación se reconoce cuando un deal <strong>hijo</strong> tiene <code>parent_id</code> apuntando al contrato anterior. El hijo puede ser de 3 tipos:
+            <ul style="margin:4px 0 4px 16px">
+              <li><code>deal_type='Renewal'</code> — renovación explícita (~650 en los datos)</li>
+              <li><code>deal_type='Closed'</code> con <code>parent_id</code> no cero — renovación registrada como contrato nuevo (~540). Por ejemplo el lease del inquilino Nasser: el año 1 fue Closed #13496, el año 2 fue Closed #37307 con <code>parent_id=13496</code>.</li>
+              <li><code>deal_type='Cancelled'</code> con <code>parent_id</code> — copita iniciada pero cancelada (~30). Cuenta para retención pero NO para cierre.</li>
+            </ul>
+          </li>
+          <li><strong>Match GLOBAL (cross-broker)</strong>: un contrato cuenta como renovado aunque otro broker de la inmobiliaria (o cualquiera) haya hecho la renovación. Lo importante es si el tenant retuvo la cobertura con MoradaUno, no quién recibe la comisión.</li>
+          <li><strong>Fallback (tenant + address)</strong>: cuando un Renewal llega a <code>pipefy_phase_name='Completed'</code> MoradaUno limpia su <code>parent_id=0</code>. Para esos huérfanos buscamos el padre por match de tenant + llave de calle+número, con ventana de 3-18 meses entre end_dates.</li>
+        </ul>
+
+        <p style="margin-top:12px;font-family:'Merriweather',serif;font-size:14px;color:var(--purple-dark)"><strong>Dos tasas complementarias — dos preguntas distintas</strong></p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin:10px 0 14px">
+          <div style="background:#FAFAF9;border:1px solid var(--light-gray);border-radius:10px;padding:14px">
+            <div style="font-weight:700;font-size:14px;color:var(--purple-dark)">🟡 Tasa de copita · RETENCIÓN</div>
+            <div style="font-size:12px;color:var(--dark-gray);margin:4px 0 8px">¿El cliente regresó? — de los contratos que ya expiraron (past-grace), cuántos iniciaron renovación.</div>
+            <div style="font-size:12px"><code>copitas_past_grace / total_past_grace</code></div>
+            <div style="font-size:11px;color:var(--dark-gray);margin-top:8px">Detección: existe <code>deal_type='Renewal'</code> con <code>parent_id</code> apuntando al contrato padre. Match <strong>GLOBAL cross-broker</strong> — cuenta aunque otro broker de la inmobiliaria haga la renovación.</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(103,30,117,.06),rgba(177,78,181,.02));border:1px solid rgba(177,78,181,.25);border-radius:10px;padding:14px">
+            <div style="font-weight:700;font-size:14px;color:var(--purple-dark)">🟢 Tasa de cierre · FUNNEL</div>
+            <div style="font-size:12px;color:var(--dark-gray);margin:4px 0 8px">¿Cerramos las renovaciones iniciadas? — de los deals Renewal propios del broker, cuántos llegaron a Completed.</div>
+            <div style="font-size:12px"><code>renewals_completed / renewals_total</code> (propios del broker)</div>
+            <div style="font-size:11px;color:var(--dark-gray);margin-top:8px">Detección: <code>deal_type='Renewal'</code> con <code>pipefy_phase_name='Completed'</code>. Medido por broker sobre SUS propios deals (no cross-broker), porque es métrica de ejecución operativa personal.</div>
+          </div>
+        </div>
+
+        <div style="background:#FEF3C7;border:1px solid var(--amber);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:12px">
+          <strong>⚠ Nota técnica sobre data</strong>: cuando una renovación llega a Completed, MoradaUno limpia el <code>parent_id</code> del deal Renewal a 0. Por eso no podemos vincular Renewals Completed a sus padres específicos vía <code>parent_id</code>, y por eso la tasa de cierre se mide al nivel del broker (sobre sus propios deals) en lugar de por contrato padre. Las dos tasas miden cosas diferentes pero complementarias — úsalas juntas.
+        </div>
+
+        <p><strong>Cómo interpretar las dos tasas juntas</strong>:</p>
+        <ul style="margin:8px 0 12px 20px">
+          <li><strong>Copita alta + Cierre bajo</strong> → los clientes quieren quedarse pero M1 pierde renovaciones en el pipeline. Problema operativo: revisar docs, firma, contratos.</li>
+          <li><strong>Copita baja</strong> → los clientes no regresan. Problema de producto o experiencia.</li>
+          <li><strong>Copita alta + Cierre alto</strong> → flujo sano.</li>
+          <li><strong>Ambas bajas</strong> → churn consumado + ejecución pobre.</li>
+        </ul>
+
+        <p><strong>Ejemplo — Sandra Berdichevsky</strong>:</p>
+        <ul style="margin:8px 0 12px 20px">
+          <li>7 contratos past-grace, 7 con renovación iniciada, 0 perdidos → <strong>tasa copita = 100%</strong> · retención excelente.</li>
+          <li>11 deals Renewal propios, 0 Completed, 11 en proceso → <strong>tasa cierre = 0%</strong> · las renovaciones no están llegando a la meta. Revisar pipeline.</li>
+        </ul>
+
+        <p><strong>Estados del contrato (denominador de copita)</strong>:</p>
+        <table style="width:100%;border-collapse:collapse;margin-top:8px">
+          <thead><tr style="background:#FAFAF9">
+            <th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--light-gray)">Estado</th>
+            <th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--light-gray)">Criterio (vs hoy)</th>
+            <th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--light-gray)">¿Cuenta en copita?</th>
+            <th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--light-gray)">Acción CS</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7"><span class="pill amber">⏰ Próximo</span></td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">end_date en 60–180 días</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">No (aún no inicia)</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">Planeación</td></tr>
+            <tr><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7"><span class="pill" style="background:#CCF5F0;color:#008073">🔓 Ventana abierta</span></td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">end_date en próximos 0–60 días</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">No (todavía en ventana)</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">Contactar HOY</td></tr>
+            <tr><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7"><span class="pill red">⚠ Grace</span></td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">vencido 0–30d</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">No (aún rescatable)</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">Rescate urgente</td></tr>
+            <tr><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7"><span class="pill green">✓ Renovado</span></td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">past-grace, Renewal existe</td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7"><strong>Sí (numerador copita)</strong></td><td style="padding:8px 12px;border-bottom:1px solid #F5F3F7">Retenido ✓</td></tr>
+            <tr><td style="padding:8px 12px"><span class="pill red">❌ Perdido</span></td><td style="padding:8px 12px">past-grace, sin Renewal</td><td style="padding:8px 12px"><strong>Sí (denom, no numerador)</strong></td><td style="padding:8px 12px">Churn consumado</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:12px"><strong>Sin datos</strong>: si un broker tiene 0 contratos past-grace, la tasa de copita se muestra como "—". Para la tasa de cierre, si tiene &lt;3 deals Renewal propios se marca "muestra chica".</p>
+        <p><strong>Gap reconocido</strong>: el <code>parent_id</code> puede apuntar a un contrato pre-2024 (fuera de nuestra ventana de 2 años), lo que infla "perdidos" artificialmente. El daily task backfill per-broker trae historia completa progresivamente.</p>
+      </div>
+    </div>
+
+    <!-- 5. Lifecycle stages -->
+    <div class="section">
+      <div class="section-hdr"><h2>5. Lifecycle stages</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <p>Clasificación automática basada en <code>tenure_months</code>, <code>days_since_last</code>, <code>deals_90d</code>, <code>trend_pct</code>:</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:10px">
+          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid var(--blue)"><span class="pill lc-Onboarding">Onboarding</span><div style="font-size:12px;margin-top:4px">Tenure &lt; 3 meses. Recién llegado.</div></div>
+          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid #008073"><span class="pill lc-Growing">Growing</span><div style="font-size:12px;margin-top:4px">Tenure 3-12 meses con 2+ deals en L90D.</div></div>
+          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid var(--green)"><span class="pill lc-Mature-Healthy">Mature-Healthy</span><div style="font-size:12px;margin-top:4px">Tenure 12+ meses, trend ≥ 0, 2+ deals L90D.</div></div>
+          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid var(--dark-gray)"><span class="pill lc-Active-Low">Active-Low</span><div style="font-size:12px;margin-top:4px">Cliente activo pero baja productividad (&lt;0.5 rentas/mes).</div></div>
+          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid var(--amber)"><span class="pill lc-Declining">Declining</span><div style="font-size:12px;margin-top:4px">Tenure 6+ meses con trend &lt; -20%.</div></div>
+          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid var(--red)"><span class="pill lc-At-Risk">At-Risk</span><div style="font-size:12px;margin-top:4px">Sin actividad 60-90 días.</div></div>
+          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid var(--near-black)"><span class="pill lc-Churned">Churned</span><div style="font-size:12px;margin-top:4px">Sin actividad +190 días.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Risk signals -->
+    <div class="section">
+      <div class="section-hdr"><h2>6. Señales de riesgo (semáforo ALTO/MEDIO/BAJO)</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <p>El campo <code>risk</code> es el peor nivel detectado entre varias señales independientes. Cada señal se calcula por separado:</p>
+        <table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px">
+          <thead><tr style="background:#FAFAF9">
+            <th style="text-align:left;padding:8px 10px;border-bottom:1px solid var(--light-gray)">Señal</th>
+            <th style="text-align:left;padding:8px 10px;border-bottom:1px solid var(--light-gray)">Nivel ALTO</th>
+            <th style="text-align:left;padding:8px 10px;border-bottom:1px solid var(--light-gray)">Nivel MEDIO</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:8px 10px;border-bottom:1px solid #F5F3F7"><strong>Churn por inactividad</strong></td><td style="padding:8px 10px;border-bottom:1px solid #F5F3F7">days_since_last &gt; 180 (con 2+ deals históricos)</td><td style="padding:8px 10px;border-bottom:1px solid #F5F3F7">days_since_last &gt; 60</td></tr>
+            <tr><td style="padding:8px 10px;border-bottom:1px solid #F5F3F7"><strong>Caída de uso severa</strong></td><td style="padding:8px 10px;border-bottom:1px solid #F5F3F7">trend_pct ≤ -50% (180d vs 180d previos)</td><td style="padding:8px 10px;border-bottom:1px solid #F5F3F7">trend_pct ≤ -20%</td></tr>
+            <tr><td style="padding:8px 10px"><strong>Renovación baja</strong></td><td style="padding:8px 10px">tasa copita &lt; 30% con 3+ contratos past-grace</td><td style="padding:8px 10px">tasa copita &lt; 50%</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:12px"><code>primary_signal</code> = la señal más severa detectada. Se muestra en el Worklist con color rojo/amber/verde.</p>
+      </div>
+    </div>
+
+    <!-- 7. Trend -->
+    <div class="section">
+      <div class="section-hdr"><h2>7. Trend 90d</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <div style="background:linear-gradient(135deg,rgba(103,30,117,.06),rgba(177,78,181,.02));border:1px solid rgba(177,78,181,.2);border-radius:10px;padding:14px 16px;margin-bottom:14px">
+          <div style="font-family:'Merriweather',serif;font-size:15px;color:var(--purple-dark);margin-bottom:8px"><strong>Fórmula</strong></div>
+          <div style="font-size:14px"><code>trend_pct = (deals_L90D − deals_prev90D) / deals_prev90D × 100</code></div>
+          <div style="font-size:12px;color:var(--dark-gray);margin-top:6px">Deals últimos 90d vs 90d previos. Positivo = aceleración. Negativo = desaceleración.</div>
+        </div>
+        <p><strong>Interpretación visual</strong>:</p>
+        <ul style="margin:8px 0 8px 20px">
+          <li><span style="color:var(--green);font-weight:700">▲▲ +50%</span> crecimiento fuerte</li>
+          <li><span style="color:var(--green)">▲ +0 a +50%</span> estable o creciendo</li>
+          <li><span style="color:var(--dark-gray)">▼ 0 a -20%</span> ligera desaceleración</li>
+          <li><span style="color:var(--amber);font-weight:700">▼ -20 a -50%</span> advertencia</li>
+          <li><span style="color:var(--red);font-weight:700">▼▼ -50% o menos</span> caída severa</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 7b. Nuevas rentas -->
+    <div class="section">
+      <div class="section-hdr"><h2>7b. Nuevas rentas (gráfica de quarters)</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <p>La gráfica <strong>"Nuevas rentas por quarter"</strong> en el modal del broker cuenta únicamente <strong>deals de NUEVA cobertura</strong>:</p>
+        <ul style="margin:8px 0 8px 20px">
+          <li><strong>Incluye</strong>: <code>deal_type = Closed</code> (renta firmada) y <code>deal_type = Open</code> (en proceso de firma)</li>
+          <li><strong>Excluye</strong>: <code>Renewal</code> (renovaciones — tenant existente) y <code>Cancelled</code></li>
+        </ul>
+        <p>Razón: el chart muestra la capacidad de <strong>generar nuevas rentas</strong> del broker. Las renovaciones se analizan aparte en la sección de retención (§4) y no inflan la productividad nueva.</p>
+        <p>Stack por <strong>sub-producto</strong> de Guarantee (M3, M6, M12, M Legal, M3 Light, GDL). Screening y Legal se muestran al nivel de producto.</p>
+      </div>
+    </div>
+
+    <!-- 8. Deals en proceso -->
+    <div class="section">
+      <div class="section-hdr"><h2>8. 🔥 Deals cerrando renta ahora</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <p>Un deal cuenta como "cerrando ahora" si cumple TODO:</p>
+        <ul style="margin:8px 0 8px 20px">
+          <li><code>deal_type == "Open"</code></li>
+          <li><code>deal_status</code> NO contiene: "cancel", "dead", "closed", "firma" completa, ni "signed"</li>
+        </ul>
+        <p>Son deals en workflow activo (perfil de inquilino, aprobación, contratos en revisión, firma pendiente). Representan pipeline inmediato de revenue.</p>
+        <p>El modal Cuenta 360 muestra la lista completa con <code>#ID</code>, status exacto, tenant, producto, fecha de vencimiento estimada y valor de renta.</p>
+      </div>
+    </div>
+
+    <!-- 9. Tiempo en M1 -->
+    <div class="section">
+      <div class="section-hdr"><h2>9. Tiempo en M1 (cliente desde)</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <p>Dos fuentes según disponibilidad:</p>
+        <ol style="margin:8px 0 8px 20px">
+          <li><span class="pill green">✓ registry</span> — <code>broker.created</code> del API de MoradaUno (fecha canónica de alta). Fuente de verdad.</li>
+          <li><span class="pill amber">muestra</span> — primera fecha de deal observada en el sample. Aproximación para brokers aún no enriquecidos en el registry.</li>
+        </ol>
+        <p><strong>tenure_months</strong> = meses entre <code>first_active</code> (canónico o muestra) y hoy.</p>
+        <p>El daily task enriquece 20 brokers/día vía <code>get_brokers filter=&lt;nombre&gt;</code>, moviéndolos de "muestra" a "registry" progresivamente.</p>
+      </div>
+    </div>
+
+    <!-- 10. Vista Inmobiliaria -->
+    <div class="section">
+      <div class="section-hdr"><h2>10. Vista Inmobiliaria (rollup)</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <p>Agrupa brokers por <code>organization.name</code> (campo del registry). Todas las métricas se agregan sumando los brokers:</p>
+        <ul style="margin:8px 0 8px 20px">
+          <li><strong>Revenue L12M</strong> = Σ revenue_l12m de sus brokers</li>
+          <li><strong>Penetración</strong> = brokers activos en L90D / brokers totales</li>
+          <li><strong>Risk</strong> = ALTO si +33% de brokers son ALTO; MEDIO si +50% son MEDIO o ALTO; BAJO de lo contrario</li>
+          <li><strong>Renewal rate</strong> = mismo cálculo aplicado a los contratos consolidados</li>
+          <li><strong>Trend</strong> = deals_90d vs deals_90_180 sumados</li>
+          <li><strong>Lifecycle distribution</strong> = conteo de brokers por stage</li>
+        </ul>
+        <p>El modal muestra además el top 5 de brokers por revenue dentro de la inmobiliaria.</p>
+      </div>
+    </div>
+
+    <!-- 11. Limitaciones -->
+    <div class="section" style="border-left:4px solid var(--amber)">
+      <div class="section-hdr"><h2>⚠️ Limitaciones conocidas</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <ol style="margin:8px 0 8px 20px">
+          <li><strong>Data sampleada</strong>: el dataset inicial se pobló con ~3,700 deals en muestras espaciadas de 2 años. Brokers no prioritarios pueden tener historia incompleta. El daily task backfill per-broker corrige esto progresivamente (40 brokers/día).</li>
+          <li><strong>Revenue estimado para brokers nuevos</strong>: <code>cost_percent</code> varía por inmobiliaria. Sin enrichment real, se usa baseline por producto. Sobre/sub-estima hasta ~15%. Se marca con pill <span class="pill amber">estimado</span>.</li>
+          <li><strong>Renewals pre-2024</strong>: renovaciones cuyo <code>parent_id</code> apunta a contratos antes de nuestra ventana de 2 años inflan "perdidos" en la tasa global. El rate de un broker específico se estabiliza cuando su historia se completa.</li>
+          <li><strong>Registry gap</strong>: ~1,168 brokers viejos aún no están en el registry canónico. Su tenure se estima desde el deal más viejo observado (aproximación baja).</li>
+          <li><strong>Trend en brokers nuevos</strong>: si deals_90_180 = 0 y deals_90d &gt; 0, trend se reporta como +100% (bootstrap positivo).</li>
+        </ol>
+        <p style="margin-top:12px">Conforme el daily task acumula corridas, estos gaps se cierran. La convergencia total estimada: ~2-3 semanas.</p>
+      </div>
+    </div>
+
+    <!-- 12. Ejemplo end-to-end -->
+    <div class="section">
+      <div class="section-hdr"><h2>12. Ejemplo end-to-end</h2></div>
+      <div style="padding:16px 20px;line-height:1.7;font-size:13px">
+        <p>Tomemos un broker hipotético <strong>Juan Pérez</strong> en Inmobiliaria X:</p>
+        <ul style="margin:8px 0 8px 20px">
+          <li><code>broker.created</code> = 2023-05-10 → tenure = <strong>36 meses</strong></li>
+          <li>10 deals en L12M, de los cuales 2 cancelados → 8 cuentan para revenue</li>
+          <li>Productos: 7 Guarantee/M3 (renta promedio $20,000) + 1 Screening/Normal</li>
+          <li>Revenue L12M = 7 × ($20,000 × 0.32) + 1 × ($20,000 × 0.077) = $44,800 + $1,540 = <strong>$46,340</strong></li>
+          <li>Revenue/mes = $46,340 / 12 = <strong>$3,862</strong></li>
+          <li>3 contratos past-grace: 2 cerrados, 1 copita sin cerrar, 0 perdidos → <strong>tasa copita = 100%</strong>, <strong>tasa cierre = 67%</strong> (muestra chica)</li>
+          <li>1 contrato en ventana abierta (vence en 15 días) → acción inmediata para CS</li>
+          <li>deals_90d = 3, deals_90_180 = 5 → trend = -40% → <strong>MEDIO riesgo por caída</strong></li>
+          <li>Lifecycle: tenure 36mo + trend -40% → <strong>Declining</strong></li>
+          <li><strong>primary_signal</strong>: "Uso cayó -40%" (señal MEDIO más severa)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="t" id="m-title">—</div>
+        <div class="s" id="m-sub">—</div>
+      </div>
+      <button class="x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+  </div>
+</div>
+
+<script id="acctdata" type="application/json">/*__DATA__*/</script>
+
+<script>
+const $ = s=>document.querySelector(s);
+const $$ = s=>document.querySelectorAll(s);
+const fmt$ = n=>n==null?'$0':'$'+Math.round(n).toLocaleString('es-MX');
+const fmtK = n=>{if(!n)return'$0';if(Math.abs(n)>=1e6)return'$'+(n/1e6).toFixed(2)+'M';if(Math.abs(n)>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+Math.round(n)};
+// Fecha en formato "18 Nov 2021" (mes abreviado en español)
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const fmtDate = s=>{ if(!s) return ''; const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return s; return `${parseInt(m[3],10)} ${MESES[parseInt(m[2],10)-1]} ${m[1]}`; };
+
+const DATA = JSON.parse($('#acctdata').textContent);
+const BROKERS = DATA.brokers;
+const INMOS = DATA.inmobiliarias;
+const META = DATA.meta;
+
+const LS_KEY = 'm1cs_state_v3';
+let STATE = {};
+try{STATE = JSON.parse(localStorage.getItem(LS_KEY))||{}}catch(e){STATE={}}
+function saveState(){localStorage.setItem(LS_KEY,JSON.stringify(STATE))}
+function getA(id){
+  if(!STATE[id]) STATE[id] = {status:'Planned',owner:'',activities:[],next_action:null,notes:'',realized_impact:0};
+  return STATE[id];
+}
+
+function bootstrapOwners(){
+  const sorted = [...BROKERS].filter(b=>b.risk!=='BAJO').sort((a,b)=>{
+    const rk={ALTO:0,MEDIO:1,BAJO:2};
+    return rk[a.risk]-rk[b.risk] || b.total_revenue - a.total_revenue;
+  });
+  let c1=0, c2=0;
+  sorted.forEach(r=>{
+    const a = getA(r.id);
+    if(a.owner) return;
+    if(r.segment==='Inmobiliaria' && c1 < 760){ a.owner='CSM 1'; c1 += 6 }
+    else if(r.segment==='Independiente' && c2 < 760){ a.owner='CSM 2'; c2 += 3 }
+    else if(c1 <= c2){ a.owner='CSM 1'; c1 += 6 } else { a.owner='CSM 2'; c2 += 3 }
+  });
+  saveState();
+}
+bootstrapOwners();
+
+// ─── Meta bar ───
+function renderMeta(){
+  $('#m-generated').textContent = META.generated_at || '—';
+  $('#m-range').textContent = META.date_range ? `${META.date_range.from} → ${META.date_range.to}` : '—';
+  $('#m-deals').textContent = (META.total_deals_processed||0).toLocaleString('es-MX');
+  // Freshness check: if generated_at > 36 hours old, mark stale
+  const fresh = $('#m-freshness');
+  if(META.generated_at){
+    const hoursSince = (Date.now() - new Date(META.generated_at.replace(' ','T')).getTime()) / 3600000;
+    if(hoursSince > 36){ fresh.className='stale'; fresh.title = `Stale (${hoursSince.toFixed(0)}h desde última actualización)`; }
+    else { fresh.className='fresh'; fresh.title = `Fresh (${hoursSince.toFixed(0)}h)`; }
+  }
+  const revL12M = BROKERS.reduce((s,b)=>s+(b.revenue_l12m||0),0);
+  const riskL12M = BROKERS.filter(b=>b.risk==='ALTO').reduce((s,b)=>s+(b.revenue_l12m||0),0);
+  $('#tc-inmo').textContent = INMOS.length;
+}
+
+// ─── Helpers ───
+function signalBadge(r){
+  if(!r.primary_signal || r.primary_signal==='Healthy') return '<span class="pill green">Healthy</span>';
+  const s = r.primary_signal;
+  let cls='amber', icon='⚠️';
+  if(s.includes('Churned')){cls='red';icon='⏸';}
+  else if(s.includes('Sin actividad')){cls='red';icon='⏸';}
+  else if(s.includes('cayó')){cls='red';icon='↓';}
+  else if(s.includes('Sin renovar')){cls='red';icon='🔁';}
+  else if(s.includes('vencen')){cls='amber';icon='⏰';}
+  else if(s.includes('hace')){cls='amber';icon='⏱';}
+  else if(s.includes('sin renovación')){cls='amber';icon='🔁';}
+  const tip = (r.signals||[]).join(' · ');
+  return `<span class="pill ${cls} tooltip" data-tip="${escAttr(tip||s)}">${icon} ${esc(s)}</span>`;
+}
+function activityCell(r){
+  const d = r.days_since_last;
+  if(d === 0) return `<span style="color:var(--green);font-weight:600">Hoy</span>`;
+  if(d <= 7) return `<span style="color:var(--green)">${d}d</span>`;
+  if(d <= 30) return `${d}d`;
+  if(d <= 60) return `<span style="color:var(--amber)">${d}d</span>`;
+  if(d <= 90) return `<span style="color:var(--amber);font-weight:600">${d}d</span>`;
+  return `<span style="color:var(--red);font-weight:700">⏸ ${d}d</span>`;
+}
+function trendCell(v){
+  if(v === null || v === undefined) return '<span style="color:var(--dark-gray);font-size:11px">—</span>';
+  if(v >= 50) return `<span style="color:var(--green);font-weight:700">▲▲ +${v}%</span>`;
+  if(v >= 0) return `<span style="color:var(--green)">▲ +${v}%</span>`;
+  if(v > -20) return `<span style="color:var(--dark-gray)">▼ ${v}%</span>`;
+  if(v > -50) return `<span style="color:var(--amber);font-weight:700">▼ ${v}%</span>`;
+  return `<span style="color:var(--red);font-weight:700">▼▼ ${v}%</span>`;
+}
+function renewalCell(r){
+  // Worklist column: siempre muestra tasa COPITA como % — de contratos past-grace
+  const copitas = r.contracts_expired_copitas ?? r.contracts_expired_renewed ?? 0;
+  const denom = r.contracts_expired ?? 0;
+  if(denom === 0){
+    return `<small style="color:var(--dark-gray)">—</small>`;
+  }
+  const rate = r.renewal_rate_copita ?? r.renewal_rate ?? 0;
+  const color = rate >= 50 ? 'var(--green)' : rate >= 25 ? 'var(--amber)' : 'var(--red)';
+  const note = denom < 3 ? ' <span style="color:var(--amber)" title="Muestra chica">·</span>' : '';
+  return `<span style="color:${color};font-weight:600">${rate}%</span>${note}<br><small style="color:var(--dark-gray)">${copitas}/${denom}</small>`;
+}
+function lifecyclePill(lc){ return `<span class="pill lc-${lc}">${lc}</span>` }
+function riskPill(r){ return `<span class="pill risk-${r}">${r}</span>` }
+
+// ─── WORKLIST ───
+let SORT = {key:'revenue_l12m', dir:-1};
+// Regla de intervención: el broker requiere atención de CS si tiene riesgo ALTO/MEDIO
+// o ya tiene actividades CS registradas (caso abierto). Tener deals cerrando ahora es
+// una señal positiva — NO se considera intervención (el broker está cerrando por sí mismo).
+function needsIntervention(r, a){
+  if(r.risk !== 'BAJO') return true;
+  if((a||getA(r.id)).activities.length > 0) return true;
+  return false;
+}
+
+function renderWorklist(){
+  const search = $('#f-search').value.trim().toLowerCase();
+  const fo=$('#f-owner').value, fs=$('#f-segment').value, fr=$('#f-risk').value, flc=$('#f-lifecycle').value, fsig=$('#f-signal').value, fst=$('#f-status').value;
+  const fInProgress = $('#f-inprogress').checked;
+  const fInter = $('#f-intervention').value;
+  let data = BROKERS.map(r=>{ const a=getA(r.id); return {...r, _a:a, _needs: needsIntervention(r,a)}; });
+  data = data.filter(r=>{
+    if(search && !((r.broker+' '+(r.company||'')).toLowerCase().includes(search))) return false;
+    if(fo){ if(fo==='Sin asignar'){ if(r._a.owner) return false } else if(r._a.owner!==fo) return false }
+    if(fs && r.segment!==fs) return false;
+    if(fr && r.risk!==fr) return false;
+    if(flc && r.lifecycle!==flc) return false;
+    if(fst && r._a.status!==fst) return false;
+    if(fInter==='yes' && !r._needs) return false;
+    if(fInter==='no' && r._needs) return false;
+    if(fsig){
+      const allsig = ((r.signals||[]).join(' ')+' '+(r.primary_signal||'')).toLowerCase();
+      if(fsig==='churn' && !(allsig.includes('sin actividad') || allsig.includes('churned'))) return false;
+      if(fsig==='decrease' && !allsig.includes('cayó')) return false;
+      if(fsig==='lowrenew' && !allsig.includes('renovación baja')) return false;
+    }
+    if(fInProgress && !(r.in_progress_count>0)) return false;
+    return true;
+  });
+  data.sort((a,b)=>{
+    const va=a[SORT.key]??0, vb=b[SORT.key]??0;
+    return (va-vb)*SORT.dir;
+  });
+  const tbody = $('#tbody-work');
+  const MAX_ROWS = 300;
+  const viewData = data.slice(0, MAX_ROWS);
+  tbody.innerHTML = viewData.map((r,i)=>{
+    const a = r._a;
+    return `<tr>
+      <td class="rank">${i+1}</td>
+      <td class="broker-cell" onclick="openBroker('${escAttr(r.id)}')" style="cursor:pointer"><div class="name">${esc(r.broker)}</div><div class="company">${esc(r.company||'Independiente')}${r.agent?' · '+esc(r.agent):''}</div></td>
+      <td>${r._needs?'<span class="pill" style="background:#FEE2E2;color:var(--red);font-weight:600">Sí</span>':'<span class="pill" style="background:#D1FAE5;color:var(--green);font-weight:600">No</span>'}</td>
+      <td><span class="pill seg-${r.segment}">${r.segment}</span></td>
+      <td>${riskPill(r.risk)}</td>
+      <td>${lifecyclePill(r.lifecycle)}</td>
+      <td>${signalBadge(r)}</td>
+      <td>${r.in_progress_count>0?`<span class="pill teal tooltip" data-tip="${r.in_progress_count} deal(s) · ${fmtK(r.in_progress_value)}">🔥 ${r.in_progress_count}</span>`:'<small style="color:var(--dark-gray)">—</small>'}</td>
+      <td>${r.tenure_months}mo ${r.tenure_source==='sampled'?'<span style="color:var(--amber);font-size:10px" title="Basado en muestra de deals, no registry">~</span>':''}</td>
+      <td>${activityCell(r)}</td>
+      <td>${trendCell(r.trend_pct)}</td>
+      <td>${renewalCell(r)}</td>
+      <td class="money">${fmtK(r.revenue_l12m||0)}</td>
+      <td><select class="cell-select sel-status" data-id="${escAttr(r.id)}">${['Planned','Contacted','InProgress','Won','Lost'].map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
+      <td><select class="cell-select sel-owner" data-id="${escAttr(r.id)}">${['','CSM 1','CSM 2'].map(o=>`<option ${a.owner===o?'selected':''} value="${o}">${o||'—'}</option>`).join('')}</select></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="15" class="empty">Sin cuentas que coincidan.</td></tr>`;
+  if(data.length > MAX_ROWS){
+    tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="15" class="empty">Mostrando primeras ${MAX_ROWS} de ${data.length} cuentas. Usa filtros para reducir.</td></tr>`);
+  }
+
+  $$('.sel-status').forEach(el=>el.onchange=e=>{
+    const id=e.target.dataset.id; getA(id).status=e.target.value;
+    if(e.target.value==='Won' && !getA(id).realized_impact){
+      const r = BROKERS.find(x=>x.id===id);
+      getA(id).realized_impact = Math.round(r.avg_deal_revenue*2);
+    }
+    saveState(); renderAll();
+  });
+  $$('.sel-owner').forEach(el=>el.onchange=e=>{
+    getA(e.target.dataset.id).owner=e.target.value;
+    saveState();
+  });
+
+  $('#tc-worklist').textContent = data.length;
+}
+
+function renderKPIs(){
+  const atRisk = BROKERS.filter(r=>r.risk==='ALTO');
+  const churn = BROKERS.filter(r=>r.days_since_last>90 && r.deals_total>=2).length;
+  const decr = BROKERS.filter(r=>r.trend_pct!==null && r.trend_pct<=-50).length;
+  // Brokers con tasa de copita < 30% y 3+ contratos past-grace (mismo criterio que señal ALTO)
+  const noren = BROKERS.filter(r=>r.renewal_rate_copita!==null && r.renewal_rate_copita<30 && r.contracts_expired>=3).length;
+  const revAtRisk = atRisk.reduce((s,r)=>s+(r.revenue_l12m||0),0);
+  $('#k-risk').textContent = fmtK(revAtRisk);
+  $('#k-risk-count').textContent = `${atRisk.length} cuentas ALTO`;
+  $('#k-churn').textContent = churn;
+  $('#k-decrease').textContent = decr;
+  $('#k-norenew').textContent = noren;
+  const ipCount = BROKERS.filter(r=>r.in_progress_count>0).length;
+  const ipVal = BROKERS.reduce((s,r)=>s+(r.in_progress_value||0),0);
+  $('#k-inprogress').textContent = ipCount;
+  $('#k-inprogress-val').textContent = fmtK(ipVal)+' en pipeline';
+}
+
+// ─── PIPELINE Kanban ───
+const STATUSES = ['Planned','Contacted','InProgress','Won','Lost'];
+function renderPipeline(){
+  const cont = $('#kanban'); cont.innerHTML='';
+  STATUSES.forEach(st=>{
+    const items = BROKERS.filter(r=>r.risk!=='BAJO').filter(r=>getA(r.id).status===st).sort((a,b)=>(b.revenue_l12m||0)-(a.revenue_l12m||0));
+    const sum = items.reduce((s,r)=>s+(r.revenue_l12m||0),0);
+    $('#pl-'+st).textContent = items.length;
+    $('#plm-'+st).textContent = fmtK(sum);
+    const col = document.createElement('div');
+    col.style.cssText='background:#fff;border-radius:12px;border:1px solid var(--light-gray);display:flex;flex-direction:column;min-height:400px;max-height:75vh';
+    col.innerHTML = `<div style="padding:12px 14px;border-bottom:1px solid var(--light-gray);display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:12px">${st==='InProgress'?'In Progress':st}<span style="background:var(--light-gray);color:var(--dark-gray);border-radius:10px;padding:1px 8px;font-size:10px">${items.length}</span></div>
+      <div style="padding:10px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px">
+      ${items.slice(0,40).map(r=>`
+        <div style="background:#FAFAF9;border-left:3px solid ${st==='Won'?'var(--teal)':st==='Lost'?'var(--red)':st==='InProgress'?'var(--peach)':st==='Contacted'?'var(--sky)':'var(--mid-gray)'};border-radius:6px;padding:8px 10px;cursor:pointer;font-size:12px" onclick="openBroker('${escAttr(r.id)}')">
+          <div style="font-weight:600;line-height:1.25">${esc(r.broker)}</div>
+          <div style="font-size:10.5px;color:var(--dark-gray);margin-top:2px">${esc(r.company||'Independiente')}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:6px;flex-wrap:wrap">
+            <span class="pill risk-${r.risk}">${r.risk}</span>
+            <span style="font-size:11px;font-weight:700;color:var(--purple-dark)">${fmtK(r.revenue_l12m||0)}</span>
+          </div>
+        </div>
+      `).join('') || '<div class="empty" style="padding:20px">—</div>'}
+      ${items.length>40?`<div style="text-align:center;padding:6px;font-size:11px;color:var(--dark-gray)">+${items.length-40} más…</div>`:''}
+      </div>`;
+    cont.appendChild(col);
+  });
+}
+
+// ─── INMOBILIARIAS ───
+// Intervención a nivel inmo: requiere atención si la inmo está en riesgo ALTO/MEDIO
+// o tiene brokers individuales en ALTO/MEDIO. Deals cerrando ≠ intervención (señal positiva).
+function inmoNeedsIntervention(i){
+  if(i.risk !== 'BAJO') return true;
+  if((i.risk_dist && (i.risk_dist.ALTO>0 || i.risk_dist.MEDIO>0))) return true;
+  return false;
+}
+
+function renderInmos(){
+  const q = $('#f-search-inmo').value.trim().toLowerCase();
+  const fr = $('#f-inmo-risk').value, sortKey = $('#f-inmo-sort').value;
+  const fInter = $('#f-inmo-intervention').value;
+  let data = INMOS.map(i=>({...i, _needs: inmoNeedsIntervention(i)}));
+  data = data.filter(i=>{
+    if(q && !i.company.toLowerCase().includes(q)) return false;
+    if(fr && i.risk!==fr) return false;
+    if(fInter==='yes' && !i._needs) return false;
+    if(fInter==='no' && i._needs) return false;
+    return true;
+  });
+  data.sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0));
+
+  // KPIs
+  const top10 = data.slice(0,10).reduce((s,i)=>s+(i.revenue_l12m||0),0);
+  const totalRev = data.reduce((s,i)=>s+(i.revenue_l12m||0),0);
+  const avgPen = data.length ? Math.round(data.reduce((s,i)=>s+i.penetration,0)/data.length) : 0;
+  const totBrokers = data.reduce((s,i)=>s+i.brokers_total,0);
+  const totActive = data.reduce((s,i)=>s+i.brokers_active_90d,0);
+  const alto = data.filter(i=>i.risk==='ALTO').length;
+  const medio = data.filter(i=>i.risk==='MEDIO').length;
+  $('#ki-total').textContent = data.length;
+  $('#ki-split').textContent = `${alto} ALTO · ${medio} MEDIO`;
+  $('#ki-top10').textContent = fmtK(top10);
+  $('#ki-top10pct').textContent = totalRev>0?`${Math.round(top10/totalRev*100)}% del total`:'—';
+  $('#ki-pen').textContent = `${avgPen}%`;
+  $('#ki-brokers').textContent = totBrokers;
+  $('#ki-brokers-act').textContent = `${totActive} activos 90d`;
+
+  const MAX = 200;
+  $('#tbody-inmo').innerHTML = data.slice(0,MAX).map((i,idx)=>`
+    <tr onclick="openInmo('${escAttr(i.id)}')" style="cursor:pointer">
+      <td class="rank">${idx+1}</td>
+      <td class="broker-cell"><div class="name">${esc(i.company)}</div><div class="company">${i.brokers_total} brokers · ${i.brokers_active_90d} activos · Lifecycles: ${Object.entries(i.lifecycle_dist).map(([k,v])=>`${k}:${v}`).slice(0,3).join(' ')}</div></td>
+      <td>${i._needs?'<span class="pill" style="background:#FEE2E2;color:var(--red);font-weight:600">Sí</span>':'<span class="pill" style="background:#D1FAE5;color:var(--green);font-weight:600">No</span>'}</td>
+      <td>${riskPill(i.risk)} <small style="color:var(--dark-gray)">${i.risk_dist.ALTO}/${i.risk_dist.MEDIO}/${i.risk_dist.BAJO}</small></td>
+      <td>${i.brokers_total}</td>
+      <td><span style="color:${i.penetration>=50?'var(--green)':i.penetration>=25?'var(--amber)':'var(--red)'};font-weight:600">${i.penetration}%</span></td>
+      <td>${i.tenure_months}mo</td>
+      <td>${activityCell({days_since_last:i.days_since_last})}</td>
+      <td>${i.deals_l12m||0}<br><small style="color:var(--dark-gray)">2Y: ${i.deals_total}</small></td>
+      <td>${trendCell(i.trend_pct)}</td>
+      <td>${renewalCell({renewal_count:i.renewal_count,contracts_expired:i.contracts_expired,renewal_rate:i.renewal_rate,renewal_rate_copita:i.renewal_rate_copita,contracts_expired_copitas:i.contracts_expired_copitas})}</td>
+      <td class="money">${fmtK(i.revenue_l12m||0)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="12" class="empty">—</td></tr>';
+  if(data.length>MAX) $('#tbody-inmo').insertAdjacentHTML('beforeend',`<tr><td colspan="12" class="empty">Mostrando ${MAX} de ${data.length}</td></tr>`);
+  $('#tc-inmo').textContent = data.length;
+}
+
+// ─── MODAL: Broker 360 ───
+function nextBestAction(r, a){
+  if(a.status==='Won') return {type:'done',msg:'🎉 Cuenta activada. Programa seguimiento a 90 días.'};
+  if(a.status==='Lost') return {type:'done',msg:'⚠️ Cuenta perdida. Considera reactivación futura.'};
+  const sig = r.primary_signal||'';
+  if(a.status==='Planned'){
+    if(sig.includes('Churned') || sig.includes('Sin actividad')) return {type:'urgent',msg:`🚨 RESCATE URGENTE. ${r.days_since_last} días sin actividad. Último deal: ${fmtDate(r.last_deal)}. Llamada HOY. Revenue L12M en juego: ${fmtK(r.revenue_l12m||0)}.`};
+    if(sig.includes('cayó')) return {type:'urgent',msg:`📉 Uso cayó ${r.trend_pct}% (últimos 90d: ${r.deals_90d} deals vs ${r.deals_90_180} previos). Agenda meeting antes de 7 días.`};
+    if(sig.includes('Sin renovar')) return {type:'urgent',msg:`🔁 ${r.tenure_months}mo sin renovar. ${r.contracts_expired} contrato(s) vencidos. Investiga motivos.`};
+    if(sig.includes('vencen')) return {type:'standard',msg:`⏰ ${r.contracts_expiring_90d} contrato(s) vencen en 90d. Asegura renovación.`};
+    return {type:'standard',msg:`📞 Agenda kickoff. Revenue actual: ${fmtK(r.total_revenue)}.`};
+  }
+  return {type:'standard',msg:'Mantén cadencia semanal.'};
+}
+
+function openBroker(id){
+  const r = BROKERS.find(x=>x.id===id); if(!r) return;
+  const a = getA(id);
+  $('#m-title').textContent = r.broker;
+  $('#m-sub').textContent = (r.company||'Independiente') + (r.agent?` · ${r.agent}`:'') + (r.phone?` · ${r.phone}`:'');
+
+  $('#m-body').innerHTML = `
+    <div class="account-grid">
+      <div class="fact"><div class="k">Segmento</div><div class="v">${r.segment}</div></div>
+      <div class="fact"><div class="k">Riesgo</div><div class="v" style="color:${r.risk==='ALTO'?'var(--red)':r.risk==='MEDIO'?'var(--amber)':'var(--green)'}">${r.risk}</div></div>
+      <div class="fact"><div class="k">Lifecycle stage</div><div class="v">${r.lifecycle}</div></div>
+      <div class="fact accent"><div class="k">Revenue L12M</div><div class="v">${fmt$(r.revenue_l12m||0)}</div></div>
+    </div>
+
+    ${r.in_progress_count>0?`
+    <div style="background:linear-gradient(135deg,rgba(0,199,177,.15),rgba(0,199,177,.05));border:1.5px solid var(--teal);border-radius:10px;padding:12px 14px;margin:12px 0">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#008073;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">🔥 Cerrando renta ahora</div>
+          <div style="font-size:14px;font-weight:700;color:var(--near-black)">${r.in_progress_count} deal${r.in_progress_count>1?'s':''} en proceso · ${fmtK(r.in_progress_value)} valor combinado</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;background:#fff;border-radius:6px;padding:8px 10px;font-size:12px">
+        ${(r.in_progress_details||[]).map(d=>`
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:5px 0;border-bottom:1px solid #F5F3F7">
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600">#${d.id} · ${esc(d.status)}</div>
+              <div style="font-size:10.5px;color:var(--dark-gray);margin-top:2px">${esc(d.tenant||'Sin tenant')} · ${esc(d.product)} · creado ${fmtDate(d.created)}${d.end_date?` · vence ${fmtDate(d.end_date)}`:''}</div>
+            </div>
+            <div style="font-weight:700;color:var(--purple-dark);white-space:nowrap">${fmt$(d.value)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`:''}
+
+    <h4 class="sec-h4">⏱ Tiempo en M1 · Actividad</h4>
+    <div class="account-grid">
+      <div class="fact"><div class="k">Cliente desde ${r.tenure_source==='registry'?'<span class="pill green" style="font-size:8.5px;padding:1px 6px;margin-left:3px">✓ registry</span>':'<span class="pill amber" style="font-size:8.5px;padding:1px 6px;margin-left:3px">muestra</span>'}</div><div class="v">${fmtDate(r.first_active)}</div></div>
+      <div class="fact"><div class="k">Último deal</div><div class="v">${fmtDate(r.last_deal)}</div></div>
+      <div class="fact"><div class="k">Tiempo en M1</div><div class="v">${r.tenure_months} meses</div></div>
+      <div class="fact"><div class="k">Activo ahora</div><div class="v" style="color:${r.active_now?'var(--green)':'var(--red)'}">${r.active_now?'Sí':'No'}</div></div>
+      <div class="fact"><div class="k">Últ. actividad</div><div class="v" style="color:${r.days_since_last>90?'var(--red)':r.days_since_last>60?'var(--amber)':'var(--green)'}">Hace ${r.days_since_last}d</div></div>
+      <div class="fact"><div class="k">Deals totales ${r.tenure_source==='sampled'?'<span class="pill amber" style="font-size:8.5px;padding:1px 6px;margin-left:3px" title="Sólo deals en muestra">en muestra</span>':''}</div><div class="v">${r.deals_total}</div></div>
+      <div class="fact"><div class="k">Frecuencia uso</div><div class="v">${r.deals_per_month} deals/mes</div></div>
+      <div class="fact"><div class="k">Trend 90d</div><div class="v" style="color:${(r.trend_pct||0)<-50?'var(--red)':(r.trend_pct||0)<0?'var(--amber)':'var(--green)'}">${r.trend_pct===null?'—':(r.trend_pct>=0?'▲ +':'▼ ')+r.trend_pct+'%'}</div></div>
+    </div>
+
+    ${r.tenure_source==='sampled'?`<div style="font-size:11px;color:var(--amber);background:#FEF3C7;border-radius:6px;padding:8px 12px;margin:8px 0">⚠️ Esta cuenta no está en el broker registry (probablemente pre-Marzo 2025). El "Cliente desde" y métricas se estiman desde los deals observados en la muestra de 2 años. El refresh diario enriquece progresivamente el registry vía lookups — la fecha real se poblará en los próximos días.</div>`:''}
+
+    <h4 class="sec-h4">💰 Revenue L12M · MoradaUno (Pago Total) ${r.revenue_quality_l12m==='actual'?'<span class="pill green" style="font-size:8.5px">✓ actual</span>':r.revenue_quality_l12m==='partial'?'<span class="pill amber" style="font-size:8.5px">parcial</span>':'<span class="pill amber" style="font-size:8.5px">estimado</span>'}</h4>
+    <div class="account-grid">
+      <div class="fact accent"><div class="k">Revenue L12M</div><div class="v">${fmt$(r.revenue_l12m||0)}</div></div>
+      <div class="fact accent"><div class="k">Revenue / mes</div><div class="v">${fmt$(r.revenue_per_month)}</div></div>
+      <div class="fact"><div class="k">Deals L12M</div><div class="v">${r.deals_l12m||0}</div></div>
+      <div class="fact"><div class="k">Revenue / deal</div><div class="v">${fmt$(r.avg_deal_revenue_l12m||0)}</div></div>
+      <div class="fact"><div class="k">Ticket promedio renta</div><div class="v">${fmt$(r.avg_ticket)}</div></div>
+      <div class="fact"><div class="k">Revenue 2Y (referencia)</div><div class="v" style="color:var(--dark-gray);font-size:12px">${fmt$(r.total_revenue)}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--dark-gray);margin-top:6px;padding:8px 10px;background:#FAFAF9;border-radius:6px">
+      <strong>Ventana:</strong> Últimos 12 meses. <strong>Fórmula:</strong> Pago Total = renta × base_rate × 1.16 (IVA).
+      ${r.revenue_quality_l12m==='actual'?`<span style="color:var(--green)"> ✓ Rates reales de ${r.l12m_enriched} deal(s) L12M enriquecidos.</span>`:r.revenue_quality_l12m==='partial'?`<span style="color:var(--amber)"> ${r.l12m_enriched} de ${r.deals_l12m} deals L12M con rate real; resto estimado.</span>`:` <span style="color:var(--amber)">Rates base: M3 30%, M6 40%, M12 60%, M Legal 25% (+ IVA 16%). Daily refresh enriquece con rates reales vía <code>get_deal_detail</code>.</span>`}
+    </div>
+
+    <h4 class="sec-h4">📊 Nuevas rentas por quarter (últimos 8Q) · Deals (stacked por producto) + Revenue</h4>
+    <div style="background:#FAFAF9;border:1px solid var(--light-gray);border-radius:8px;padding:12px">
+      <div id="broker-qchart"></div>
+      <div style="font-size:10.5px;color:var(--dark-gray);margin-top:8px;text-align:center">Revenue trend Q vs Q-1: ${trendCell(r.rev_trend_pct)}</div>
+    </div>
+
+    <h4 class="sec-h4">🔁 Retención · ¿Los contratos expirados se renovaron?</h4>
+    ${(()=>{
+      const qs = r.renewal_available_quarters || [];
+      const totalAvail = qs.reduce((s,q)=>s+q.total,0);
+      const totalCopita = qs.reduce((s,q)=>s+q.copita,0);
+      const totalSalio = qs.reduce((s,q)=>s+q.inquilino_salio,0);
+      const totalGrace = qs.reduce((s,q)=>s+q.grace,0);
+      const pctCopita = totalAvail > 0 ? Math.round(totalCopita/totalAvail*100) : null;
+      const pctSalio = totalAvail > 0 ? Math.round(totalSalio/totalAvail*100) : 0;
+      const pctGrace = totalAvail > 0 ? Math.round(totalGrace/totalAvail*100) : 0;
+      const fnl = r.renewal_funnel_quarters || [];
+      const totalCop = fnl.reduce((s,q)=>s+q.copitas,0);
+      const totalCerr = fnl.reduce((s,q)=>s+q.cerrados,0);
+      const cierrePct = totalCop > 0 ? Math.round(totalCerr/totalCop*100) : null;
+      return `
+      <div class="account-grid">
+        <div class="fact ${pctCopita===null?'':pctCopita>=50?'accent':''}">
+          <div class="k">Renovaron ${pctCopita===null?'<span class="pill gray" style="font-size:8.5px">sin datos</span>':totalAvail<3?'<span class="pill amber" style="font-size:8.5px">muestra chica</span>':''}</div>
+          <div class="v" style="color:${pctCopita===null?'var(--dark-gray)':pctCopita>=50?'var(--green)':pctCopita>=25?'var(--amber)':'var(--red)'}">
+            ${pctCopita===null?'—':pctCopita+'%'}
+          </div>
+          <div class="sub" style="font-size:10px;color:var(--dark-gray);margin-top:2px">${totalCopita} de ${totalAvail} iniciaron copita</div>
+        </div>
+        <div class="fact" style="${totalSalio>0?'border-color:var(--red)':''}">
+          <div class="k">Inquilino salió</div>
+          <div class="v" style="color:${totalSalio>0?'var(--red)':'var(--dark-gray)'}">${totalSalio}</div>
+          <div class="sub" style="font-size:10px;color:var(--dark-gray);margin-top:2px">past-grace sin renovar · ${pctSalio}%</div>
+        </div>
+        <div class="fact" style="${totalGrace>0?'border-color:var(--amber);background:#FEF3C7':''}">
+          <div class="k">En grace</div>
+          <div class="v" style="color:${totalGrace>0?'var(--amber)':'var(--dark-gray)'}">${totalGrace}</div>
+          <div class="sub" style="font-size:10px;color:var(--dark-gray);margin-top:2px">rescate pendiente · ${pctGrace}%</div>
+        </div>
+        <div class="fact ${cierrePct===null?'':cierrePct>=50?'accent':''}">
+          <div class="k">Cierre de copitas ${cierrePct===null?'<span class="pill gray" style="font-size:8.5px">sin datos</span>':totalCop<3?'<span class="pill amber" style="font-size:8.5px">muestra chica</span>':''}</div>
+          <div class="v" style="color:${cierrePct===null?'var(--dark-gray)':cierrePct>=50?'var(--green)':cierrePct>=25?'var(--amber)':'var(--red)'}">
+            ${cierrePct===null?'—':cierrePct+'%'}
+          </div>
+          <div class="sub" style="font-size:10px;color:var(--dark-gray);margin-top:2px">${totalCerr} de ${totalCop} cerraron</div>
+        </div>
+      </div>`;
+    })()}
+
+    <h4 class="sec-h4" style="margin-top:14px">📊 Contratos disponibles para renovar por Q · Stack = copita + inquilino salió + grace</h4>
+    <div style="background:#FAFAF9;border:1px solid var(--light-gray);border-radius:8px;padding:12px">
+      <div id="broker-renewchart"></div>
+      <div style="display:flex;gap:12px;justify-content:center;font-size:11px;margin-top:8px">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#671E75;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Copita (iniciaron renovación)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#DC2626;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Inquilino salió</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#F59E0B;border-radius:2px;vertical-align:middle;margin-right:4px"></span>En grace (rescatable)</span>
+      </div>
+    </div>
+
+    <h4 class="sec-h4" style="margin-top:14px">🎯 Funnel de cierre por Q · Copitas iniciadas vs cerradas</h4>
+    <div style="background:#FAFAF9;border:1px solid var(--light-gray);border-radius:8px;padding:12px">
+      <div id="broker-funnelchart"></div>
+      <div style="display:flex;gap:12px;justify-content:center;font-size:11px;margin-top:8px">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#B14EB5;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Copitas creadas</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#008073;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Cerradas (Completed)</span>
+        <span><span style="display:inline-block;width:14px;height:2px;background:#4A1054;vertical-align:middle;margin-right:4px"></span>% cierre</span>
+      </div>
+    </div>
+    <div style="font-size:10.5px;color:var(--dark-gray);margin-top:8px;padding:8px 10px;background:#FAFAF9;border-radius:6px;line-height:1.6">
+      <strong>Gráfica 1</strong> (end_date por Q): contratos Guarantee cuya ventana de renovación ya abrió. <code>total = copita + inquilino_salió + grace</code>. Match <em>global cross-broker</em> por <code>parent_id</code>: una copita cuenta aunque otro broker haya hecho la renovación. · <strong>Gráfica 2</strong> (Renewal.created por Q): deals Renewal propios del broker. <code>% cierre = Completed / total copitas del Q</code>. Un % bajo indica leak operacional: los clientes regresan pero las renovaciones no se cierran.
+    </div>
+
+    ${(r.signals||[]).length>0?`<div class="nba" style="margin-top:12px"><div class="tt">Señales de riesgo detectadas</div><div class="msg" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${r.signals.map(s=>`<span class="pill red">${esc(s)}</span>`).join('')}</div></div>`:''}
+
+    <h4 class="sec-h4">📝 Trabajo de CS</h4>
+    <div class="log-form">
+      <div class="row">
+        <select id="f-st-acct">${STATUSES.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}</select>
+        <select id="f-ow-acct">${['','CSM 1','CSM 2'].map(o=>`<option value="${o}" ${a.owner===o?'selected':''}>${o||'Sin asignar'}</option>`).join('')}</select>
+        <input id="f-na-date" type="date" value="${a.next_action?.date||''}"/>
+        <input id="f-na-desc" placeholder="Próxima acción…" value="${a.next_action?esc(a.next_action.description):''}"/>
+      </div>
+      <textarea id="f-notes" placeholder="Notas internas…">${esc(a.notes)}</textarea>
+      <div class="row" style="margin-top:6px;margin-bottom:0">
+        <input id="f-impact-val" type="number" placeholder="Impacto realizado ($)" value="${a.realized_impact||''}"/>
+        <button class="btn primary" onclick="saveAcct('${escAttr(id)}')">Guardar</button>
+      </div>
+    </div>
+
+    <div class="log-form">
+      <div class="row">
+        <select id="act-type"><option value="call">📞 Llamada</option><option value="wa">💬 WhatsApp</option><option value="email">✉ Email</option><option value="meeting">🎯 Meeting</option><option value="note">📝 Nota</option></select>
+        <select id="act-csm">${['CSM 1','CSM 2'].map(o=>`<option ${a.owner===o?'selected':''}>${o}</option>`).join('')}</select>
+        <select id="act-outcome">
+          <option value="">— Resultado —</option><option>Sin respuesta</option><option>Contactado</option><option>Agendado</option><option>Interesado</option><option>Objeción</option><option>Activación</option><option>Renovación firmada</option><option>Rechazó</option>
+        </select>
+      </div>
+      <textarea id="act-text" placeholder="¿Qué pasó?"></textarea>
+      <div class="row" style="margin-top:6px;margin-bottom:0;justify-content:flex-end">
+        <button class="btn primary" style="flex:0" onclick="addAct('${escAttr(id)}')">+ Agregar actividad</button>
+      </div>
+    </div>
+
+    <h4 class="sec-h4">📋 Timeline · ${a.activities.length} actividad(es)</h4>
+    <div class="timeline">${a.activities.length?a.activities.slice().reverse().map(act=>`
+      <div class="tl-item">
+        <div class="tl-icon ${act.type}">${actIcon(act.type)}</div>
+        <div class="tl-body">
+          <div class="tl-head"><strong>${act.csm||'CSM'} · ${actLabel(act.type)}</strong><span class="ts">${act.date}</span></div>
+          <div class="tl-text">${esc(act.text)||'<em style="color:var(--dark-gray)">Sin descripción</em>'}</div>
+          ${act.outcome?`<span class="tl-out">${esc(act.outcome)}</span>`:''}
+        </div>
+      </div>`).join(''):'<div class="empty">Aún no hay actividades registradas.</div>'}</div>
+  `;
+  $('#modal').classList.add('open');
+  drawDualAxisQuarters('#broker-qchart', r.quarters);
+  drawRenewalAvailableQuarters('#broker-renewchart', r.renewal_available_quarters);
+  drawRenewalFunnelQuarters('#broker-funnelchart', r.renewal_funnel_quarters);
+}
+
+// ─── MODAL: Inmobiliaria 360 ───
+function openInmo(id){
+  const inmo = INMOS.find(x=>x.id===id); if(!inmo) return;
+  $('#m-title').textContent = inmo.company;
+  $('#m-sub').textContent = `${inmo.brokers_total} brokers · Cliente desde ${fmtDate(inmo.first_deal)} · Tiempo en M1 ${inmo.tenure_months}mo`;
+
+  const lcBadges = Object.entries(inmo.lifecycle_dist).map(([k,v])=>`<span class="pill lc-${k}">${k}: ${v}</span>`).join(' ');
+  const brokerRows = (inmo.top_brokers||[]).map(b=>`
+    <tr><td>${esc(b.broker)}</td><td>${riskPill(b.risk)}</td><td>${b.deals} deals</td><td class="money">${fmtK(b.revenue)}</td></tr>
+  `).join('');
+
+  const productRows = (inmo.product_mix||[]).map(p=>`
+    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #F5F3F7;font-size:12px">
+      <span>${esc(p.product)}</span><span><strong>${p.count}</strong> deals</span>
+    </div>`).join('');
+
+  $('#m-body').innerHTML = `
+    <div class="account-grid">
+      <div class="fact"><div class="k">Riesgo</div><div class="v" style="color:${inmo.risk==='ALTO'?'var(--red)':inmo.risk==='MEDIO'?'var(--amber)':'var(--green)'}">${inmo.risk}</div></div>
+      <div class="fact"><div class="k">Brokers totales</div><div class="v">${inmo.brokers_total}</div></div>
+      <div class="fact"><div class="k">Penetración</div><div class="v" style="color:${inmo.penetration>=50?'var(--green)':inmo.penetration>=25?'var(--amber)':'var(--red)'}">${inmo.penetration}%</div></div>
+      <div class="fact accent"><div class="k">Revenue total</div><div class="v">${fmt$(inmo.total_revenue)}</div></div>
+    </div>
+
+    <h4 class="sec-h4">👥 Brokers en la inmobiliaria</h4>
+    <div class="account-grid">
+      <div class="fact"><div class="k">Activos 90d</div><div class="v" style="color:var(--green)">${inmo.brokers_active_90d}</div></div>
+      <div class="fact"><div class="k">Churned</div><div class="v" style="color:var(--red)">${inmo.brokers_churned}</div></div>
+      <div class="fact"><div class="k">Risk split</div><div class="v" style="font-size:12px">${inmo.risk_dist.ALTO} A · ${inmo.risk_dist.MEDIO} M · ${inmo.risk_dist.BAJO} B</div></div>
+      <div class="fact"><div class="k">Lifecycles</div><div class="v" style="font-size:10px;line-height:1.4">${lcBadges}</div></div>
+    </div>
+
+    <h4 class="sec-h4">⏱ Actividad</h4>
+    <div class="account-grid">
+      <div class="fact"><div class="k">Últ. actividad</div><div class="v" style="color:${inmo.days_since_last>90?'var(--red)':'var(--green)'}">Hace ${inmo.days_since_last}d</div></div>
+      <div class="fact"><div class="k">Deals totales</div><div class="v">${inmo.deals_total}</div></div>
+      <div class="fact"><div class="k">Deals 90d / prior 90d</div><div class="v">${inmo.deals_90d} / ${inmo.deals_90_180}</div></div>
+      <div class="fact"><div class="k">Trend 90d</div><div class="v">${trendCell(inmo.trend_pct)}</div></div>
+    </div>
+
+    <h4 class="sec-h4">📊 Nuevas rentas por quarter (últimos 8Q) · Deals (stacked por producto) + Revenue</h4>
+    <div style="background:#FAFAF9;border:1px solid var(--light-gray);border-radius:8px;padding:12px">
+      <div id="inmo-qchart"></div>
+    </div>
+
+    <h4 class="sec-h4">🔁 Retención</h4>
+    <div class="account-grid">
+      <div class="fact"><div class="k">Tasa copita</div><div class="v" style="color:${(inmo.renewal_rate_copita??0)>=50?'var(--green)':(inmo.renewal_rate_copita??0)>=25?'var(--amber)':'var(--red)'}">${inmo.renewal_rate_copita==null?'—':inmo.renewal_rate_copita+'%'}</div><div class="sub" style="font-size:10px;color:var(--dark-gray);margin-top:2px">renov. iniciada</div></div>
+      <div class="fact"><div class="k">Tasa cierre</div><div class="v" style="color:${(inmo.renewal_rate_cierre??0)>=50?'var(--green)':(inmo.renewal_rate_cierre??0)>=25?'var(--amber)':'var(--red)'}">${inmo.renewal_rate_cierre==null?'—':inmo.renewal_rate_cierre+'%'}</div><div class="sub" style="font-size:10px;color:var(--dark-gray);margin-top:2px">renov. cerrada</div></div>
+      <div class="fact"><div class="k">Expirados</div><div class="v">${inmo.contracts_expired||0}</div></div>
+      <div class="fact"><div class="k">En grace</div><div class="v" style="color:${(inmo.contracts_grace_period||0)>0?'var(--red)':'var(--dark-gray)'}">${inmo.contracts_grace_period||0}</div></div>
+    </div>
+
+    <h4 class="sec-h4">💰 Revenue · Ticket</h4>
+    <div class="account-grid">
+      <div class="fact"><div class="k">Ticket promedio</div><div class="v">${fmt$(inmo.avg_ticket)}</div></div>
+      <div class="fact"><div class="k">Rev / broker</div><div class="v">${fmtK(inmo.total_revenue/Math.max(1,inmo.brokers_total))}</div></div>
+    </div>
+
+    <h4 class="sec-h4">🛍 Productos usados</h4>
+    <div style="background:#FAFAF9;border:1px solid var(--light-gray);border-radius:8px;padding:10px 14px">${productRows || '—'}</div>
+
+    <h4 class="sec-h4">⭐ Top 5 brokers (por revenue)</h4>
+    <table class="broker-subtable">
+      <thead><tr><th>Broker</th><th>Riesgo</th><th>Deals</th><th>Revenue</th></tr></thead>
+      <tbody>${brokerRows}</tbody>
+    </table>
+  `;
+  $('#modal').classList.add('open');
+  drawDualAxisQuarters('#inmo-qchart', inmo.quarters);
+}
+
+function closeModal(){ $('#modal').classList.remove('open'); }
+function actIcon(t){return{call:'📞',email:'✉',wa:'💬',meeting:'🎯',note:'📝'}[t]||'•'}
+function actLabel(t){return{call:'Llamada',email:'Email',wa:'WhatsApp',meeting:'Reunión',note:'Nota'}[t]||t}
+
+function addAct(id){
+  const type=$('#act-type').value, csm=$('#act-csm').value, outcome=$('#act-outcome').value, text=$('#act-text').value.trim();
+  if(!text && !outcome){ alert('Agrega descripción o resultado.'); return }
+  const a = getA(id);
+  a.activities.push({date:new Date().toISOString().slice(0,16).replace('T',' '),type,csm,outcome,text});
+  if(outcome==='Activación'||outcome==='Renovación firmada'){
+    a.status='Won';
+    const r = BROKERS.find(x=>x.id===id);
+    if(!a.realized_impact) a.realized_impact = Math.round((r.avg_deal_revenue||0)*2);
+  } else if(['Contactado','Agendado','Interesado'].includes(outcome)){
+    if(a.status==='Planned') a.status='Contacted';
+    else if(a.status==='Contacted') a.status='InProgress';
+  } else if(outcome==='Rechazó'){
+    a.status='Lost';
+  }
+  saveState(); openBroker(id); renderAll();
+}
+function quickLog(id,type){
+  const a = getA(id);
+  a.activities.push({date:new Date().toISOString().slice(0,16).replace('T',' '),type,csm:a.owner||'CSM 1',outcome:'Contactado',text:'Quick log'});
+  if(a.status==='Planned') a.status='Contacted';
+  saveState(); openBroker(id); renderAll();
+}
+function saveAcct(id){
+  const a = getA(id);
+  a.status = $('#f-st-acct').value;
+  a.owner = $('#f-ow-acct').value;
+  const d = $('#f-na-date').value, ds = $('#f-na-desc').value.trim();
+  a.next_action = (d||ds) ? {date:d||'', description:ds||''} : null;
+  a.notes = $('#f-notes').value.trim();
+  a.realized_impact = parseFloat($('#f-impact-val').value)||0;
+  saveState(); openBroker(id); renderAll();
+}
+
+// ─── ANALYTICS ───
+function renderAnalytics(){
+  const realized = BROKERS.reduce((s,r)=>s+(getA(r.id).realized_impact||0),0);
+  const won = BROKERS.filter(r=>getA(r.id).status==='Won').length;
+  const lost = BROKERS.filter(r=>getA(r.id).status==='Lost').length;
+  const closed = won+lost;
+  let acts=0, touched=0;
+  BROKERS.forEach(r=>{const a=getA(r.id); acts+=a.activities.length; if(a.activities.length>0) touched++;});
+  const churnPrev = BROKERS.filter(r=>r.risk==='ALTO' && getA(r.id).status==='Won').reduce((s,r)=>s+r.total_revenue*0.5,0);
+  $('#a-real').textContent = fmtK(realized);
+  $('#a-realpct').textContent = META.revenue_at_risk?`${(realized/META.revenue_at_risk*100).toFixed(1)}% del at-risk`:'—';
+  $('#a-won').textContent = won;
+  $('#a-wonrate').textContent = closed?`${((won/closed)*100).toFixed(0)}% conv.`:'—';
+  $('#a-acts').textContent = acts;
+  $('#a-touchrate').textContent = touched?`${(acts/touched).toFixed(1)} /cuenta`:'—';
+  $('#a-churn').textContent = fmtK(churnPrev);
+
+  // Lifecycle distribution chart
+  const lcCounts = {};
+  BROKERS.forEach(r=>lcCounts[r.lifecycle]=(lcCounts[r.lifecycle]||0)+1);
+  const lcOrder = ['Onboarding','Growing','Mature-Healthy','Active-Low','Declining','At-Risk','Churned'];
+  drawBars('#chart-lc', lcOrder.map(k=>({name:k,value:lcCounts[k]||0})), '#B14EB5');
+
+  // Company-wide quarterly activity (dual-axis, stacked)
+  const qAgg = {};
+  BROKERS.forEach(b=>(b.quarters||[]).forEach(q=>{
+    if(!qAgg[q.q]) qAgg[q.q] = {q:q.q, deals:0, revenue:0, by_product:{}};
+    qAgg[q.q].deals += q.deals;
+    qAgg[q.q].revenue += q.revenue;
+    Object.entries(q.by_product||{}).forEach(([p,c])=>{ qAgg[q.q].by_product[p] = (qAgg[q.q].by_product[p]||0) + c });
+  }));
+  const qCompany = Object.values(qAgg).sort((a,b)=>a.q.localeCompare(b.q)).slice(-8);
+  drawDualAxisQuarters('#chart-q', qCompany);
+
+  // Ticket distribution — histogram
+  const bins = [0,5000,10000,15000,20000,30000,50000,100000,1e9];
+  const labels = ['<5K','5-10K','10-15K','15-20K','20-30K','30-50K','50-100K','100K+'];
+  const buckets = new Array(labels.length).fill(0);
+  BROKERS.forEach(b=>{
+    const t = b.avg_ticket;
+    for(let i=0;i<bins.length-1;i++){ if(t>=bins[i] && t<bins[i+1]){ buckets[i]++; break; }}
+  });
+  drawBars('#chart-rent', labels.map((l,i)=>({name:l,value:buckets[i]})), '#00C7B1');
+
+  // Product usage — aggregated
+  const prodCounts = {};
+  BROKERS.forEach(b=>(b.product_mix||[]).forEach(p=>{prodCounts[p.product]=(prodCounts[p.product]||0)+p.count}));
+  drawBars('#chart-prod', Object.entries(prodCounts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>({name:k,value:v})), '#671E75');
+}
+
+// Dual-axis quarterly chart: stacked deals (by sub-product) on left axis, revenue bars on right axis
+// For Guarantee: breakdown by sub-product (M3/M6/M12/M Legal). Others grouped by product.
+const PRODUCT_COLORS = {
+  // Guarantee sub-products (purple family, ordered dark → light)
+  'M Legal':           '#4A1054',
+  'M12':               '#671E75',
+  'M12 + JA':          '#671E75',
+  'M Legal + JA':      '#4A1054',
+  'M Legal + Mediacion':'#4A1054',
+  'M6':                '#772583',
+  'M3':                '#B14EB5',
+  'M3 + JA':           '#B14EB5',
+  'M3 + Mediacion':    '#B14EB5',
+  'M3 Light':          '#E2ACD7',
+  'GDL':               '#74D1EA',
+  'Guarantee (other)': '#BCBEC0',
+  'Undefined':         '#BCBEC0',
+  // Other products
+  'Screening': '#FFBE97',
+  'Legal':     '#00C7B1',
+  'Unknown':   '#BCBEC0'
+};
+function drawDualAxisQuarters(sel, quarters){
+  if(!quarters || !quarters.length){ document.querySelector(sel).innerHTML=''; return; }
+  // Compute legend row count in advance (for dynamic bottom padding)
+  const prodSet = new Set();
+  quarters.forEach(q => Object.keys(q.by_product||{}).forEach(p => prodSet.add(p)));
+  const legendCount = prodSet.size + 1;  // +1 for Revenue
+  const W = 560;
+  // Estimate legend rows (each item ~80-100px wide, fits ~5 per row at W=560)
+  const estRows = Math.max(1, Math.ceil(legendCount / 5));
+  const H = 230 + estRows * 14;
+  const pad = {t:28, r:55, b:30 + estRows * 14, l:50};
+  const slot = (W-pad.l-pad.r) / quarters.length;
+  const barW = slot * 0.34;
+  const gap = slot * 0.06;
+  const maxDeals = Math.max(...quarters.map(q=>q.deals||0), 1);
+  const maxRev = Math.max(...quarters.map(q=>q.revenue||0), 1);
+  const yDeals = v => pad.t + (1 - v/maxDeals) * (H-pad.t-pad.b);
+  const yRev   = v => pad.t + (1 - v/maxRev)   * (H-pad.t-pad.b);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="overflow:visible">`;
+  // Grid
+  for(let i=0;i<=4;i++){
+    const yy = pad.t + i*(H-pad.t-pad.b)/4;
+    svg += `<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#E6E7E8" stroke-width="1"/>`;
+    // Left axis (deals)
+    svg += `<text x="${pad.l-6}" y="${yy+3}" text-anchor="end" font-size="9" fill="#6B6B78">${Math.round(maxDeals*(4-i)/4)}</text>`;
+    // Right axis (revenue)
+    svg += `<text x="${W-pad.r+6}" y="${yy+3}" text-anchor="start" font-size="9" fill="#6B6B78">${fmtK(maxRev*(4-i)/4)}</text>`;
+  }
+  // Axis titles
+  svg += `<text x="${pad.l-6}" y="${pad.t-8}" text-anchor="end" font-size="9" fill="var(--purple-dark)" font-weight="700">Deals</text>`;
+  svg += `<text x="${W-pad.r+6}" y="${pad.t-8}" text-anchor="start" font-size="9" fill="var(--teal)" font-weight="700">Revenue</text>`;
+
+  // Bars
+  quarters.forEach((q,i) => {
+    const xBase = pad.l + i*slot + slot*0.08;
+    // --- Deals bar (stacked by product) on left axis ---
+    const byProd = q.by_product || {};
+    const products = Object.entries(byProd).sort((a,b)=>b[1]-a[1]);
+    let stackY = yDeals(0);
+    products.forEach(([prod, cnt]) => {
+      const segH = (cnt/maxDeals) * (H-pad.t-pad.b);
+      stackY -= segH;
+      const color = PRODUCT_COLORS[prod] || '#6B6B78';
+      svg += `<rect x="${xBase}" y="${stackY}" width="${barW}" height="${segH}" fill="${color}"><title>${prod}: ${cnt}</title></rect>`;
+    });
+    // Value on top of deals bar
+    const dealsTopY = yDeals(q.deals);
+    svg += `<text x="${xBase + barW/2}" y="${dealsTopY - 4}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--purple-dark)">${q.deals||0}</text>`;
+
+    // --- Revenue bar on right axis ---
+    const xRev = xBase + barW + gap;
+    const revH = (q.revenue/maxRev) * (H-pad.t-pad.b);
+    const revY = yRev(q.revenue);
+    svg += `<rect x="${xRev}" y="${revY}" width="${barW}" height="${revH}" fill="var(--teal)" rx="2"><title>${fmt$(q.revenue)}</title></rect>`;
+    svg += `<text x="${xRev + barW/2}" y="${revY - 4}" text-anchor="middle" font-size="10" font-weight="700" fill="#008073">${fmtK(q.revenue)}</text>`;
+
+    // X-axis label
+    const qLabel = q.q.slice(0,4) + ' ' + q.q.slice(4);
+    svg += `<text x="${xBase + barW + gap/2}" y="${H-pad.b+14}" text-anchor="middle" font-size="10" fill="#6B6B78">${qLabel}</text>`;
+  });
+
+  // Legend (sub-products, ordered by total volume)
+  const prodTotals = {};
+  quarters.forEach(q => Object.entries(q.by_product||{}).forEach(([p,c]) => { prodTotals[p] = (prodTotals[p]||0) + c }));
+  const legendProducts = Object.entries(prodTotals).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  legendProducts.push('__REV__');
+  // Multi-row legend if needed
+  const legY0 = H - 4;
+  let legX = pad.l;
+  let legRow = 0;
+  legendProducts.forEach(p => {
+    const label = p==='__REV__' ? 'Revenue' : p;
+    const width = 14 + Math.max(30, label.length * 6);
+    if(legX + width > W - 4){ legRow++; legX = pad.l; }
+    const yy = legY0 - legRow*14;
+    const color = p==='__REV__' ? 'var(--teal)' : (PRODUCT_COLORS[p] || '#6B6B78');
+    svg += `<rect x="${legX}" y="${yy-8}" width="10" height="10" fill="${color}" rx="1"/>`;
+    svg += `<text x="${legX+14}" y="${yy}" font-size="9.5" fill="#6B6B78">${label}</text>`;
+    legX += width + 4;
+  });
+
+  svg += '</svg>';
+  document.querySelector(sel).innerHTML = svg;
+}
+
+function drawRenewalAvailableQuarters(sel, quarters){
+  // Stacked bar: copita (purple) + inquilino_salio (red) + grace (amber)
+  const el = document.querySelector(sel); if(!el) return;
+  if(!quarters || !quarters.length){ el.innerHTML='<div style="text-align:center;color:#6B6B78;font-size:12px;padding:20px">Sin contratos disponibles para renovar aún</div>'; return; }
+  const W = 560, H = 220;
+  const pad = {t:24, r:16, b:30, l:36};
+  const slot = (W-pad.l-pad.r) / quarters.length;
+  const barW = Math.min(slot*0.55, 60);
+  const maxTot = Math.max(...quarters.map(q=>q.total||0), 1);
+  const yScale = v => pad.t + (1 - v/maxTot) * (H-pad.t-pad.b);
+  const COLORS = {copita:'#671E75', inquilino_salio:'#DC2626', grace:'#F59E0B'};
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="overflow:visible">`;
+  // Grid + y-axis ticks
+  for(let i=0;i<=4;i++){
+    const yy = pad.t + i*(H-pad.t-pad.b)/4;
+    svg += `<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#E6E7E8" stroke-width="1"/>`;
+    svg += `<text x="${pad.l-6}" y="${yy+3}" text-anchor="end" font-size="9" fill="#6B6B78">${Math.round(maxTot*(4-i)/4)}</text>`;
+  }
+  svg += `<text x="${pad.l-6}" y="${pad.t-8}" text-anchor="end" font-size="9" fill="var(--purple-dark)" font-weight="700">Contratos</text>`;
+  // Bars
+  quarters.forEach((q, i) => {
+    const xBase = pad.l + i*slot + (slot-barW)/2;
+    let stackY = yScale(0);
+    ['copita','inquilino_salio','grace'].forEach(k => {
+      const v = q[k] || 0;
+      if(v > 0){
+        const segH = (v/maxTot) * (H-pad.t-pad.b);
+        stackY -= segH;
+        svg += `<rect x="${xBase}" y="${stackY}" width="${barW}" height="${segH}" fill="${COLORS[k]}"><title>${k}: ${v}</title></rect>`;
+        // Inline segment value if tall enough
+        if(segH >= 14){
+          svg += `<text x="${xBase + barW/2}" y="${stackY + segH/2 + 3}" text-anchor="middle" font-size="10" font-weight="700" fill="#FFF">${v}</text>`;
+        }
+      }
+    });
+    // Total on top
+    const topY = yScale(q.total);
+    svg += `<text x="${xBase + barW/2}" y="${topY - 4}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--purple-dark)">${q.total}</text>`;
+    // X label
+    const qLabel = q.q.slice(0,4) + ' ' + q.q.slice(4);
+    svg += `<text x="${xBase + barW/2}" y="${H-pad.b+14}" text-anchor="middle" font-size="10" fill="#6B6B78">${qLabel}</text>`;
+  });
+  svg += '</svg>';
+  el.innerHTML = svg;
+}
+
+function drawRenewalFunnelQuarters(sel, quarters){
+  // Side-by-side bars: copitas (purple) vs cerrados (teal), + line for cierre %
+  const el = document.querySelector(sel); if(!el) return;
+  if(!quarters || !quarters.length){ el.innerHTML='<div style="text-align:center;color:#6B6B78;font-size:12px;padding:20px">Sin deals Renewal todavía</div>'; return; }
+  const W = 560, H = 230;
+  const pad = {t:28, r:50, b:30, l:36};
+  const slot = (W-pad.l-pad.r) / quarters.length;
+  const barW = slot*0.28;
+  const gap = slot*0.04;
+  const maxCount = Math.max(...quarters.map(q=>q.copitas||0), 1);
+  const yCnt = v => pad.t + (1 - v/maxCount) * (H-pad.t-pad.b);
+  const yPct = v => pad.t + (1 - v/100) * (H-pad.t-pad.b);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="overflow:visible">`;
+  for(let i=0;i<=4;i++){
+    const yy = pad.t + i*(H-pad.t-pad.b)/4;
+    svg += `<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#E6E7E8" stroke-width="1"/>`;
+    svg += `<text x="${pad.l-6}" y="${yy+3}" text-anchor="end" font-size="9" fill="#6B6B78">${Math.round(maxCount*(4-i)/4)}</text>`;
+    svg += `<text x="${W-pad.r+6}" y="${yy+3}" text-anchor="start" font-size="9" fill="#6B6B78">${Math.round(100*(4-i)/4)}%</text>`;
+  }
+  svg += `<text x="${pad.l-6}" y="${pad.t-8}" text-anchor="end" font-size="9" fill="var(--purple-dark)" font-weight="700">Deals</text>`;
+  svg += `<text x="${W-pad.r+6}" y="${pad.t-8}" text-anchor="start" font-size="9" fill="#4A1054" font-weight="700">% cierre</text>`;
+  // Bars + line points
+  const pts = [];
+  quarters.forEach((q, i) => {
+    const xBase = pad.l + i*slot + slot*0.1;
+    // Copitas bar
+    const c1H = (q.copitas/maxCount) * (H-pad.t-pad.b);
+    const c1Y = yCnt(q.copitas);
+    svg += `<rect x="${xBase}" y="${c1Y}" width="${barW}" height="${c1H}" fill="#B14EB5" rx="2"><title>Copitas: ${q.copitas}</title></rect>`;
+    svg += `<text x="${xBase + barW/2}" y="${c1Y - 4}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--purple-dark)">${q.copitas}</text>`;
+    // Cerrados bar
+    const x2 = xBase + barW + gap;
+    const c2H = (q.cerrados/maxCount) * (H-pad.t-pad.b);
+    const c2Y = yCnt(q.cerrados);
+    svg += `<rect x="${x2}" y="${c2Y}" width="${barW}" height="${c2H}" fill="#008073" rx="2"><title>Cerrados: ${q.cerrados}</title></rect>`;
+    svg += `<text x="${x2 + barW/2}" y="${c2Y - 4}" text-anchor="middle" font-size="10" font-weight="700" fill="#008073">${q.cerrados}</text>`;
+    // Line point (% cierre) — center over the pair
+    const cx = xBase + barW + gap/2;
+    const cy = yPct(q.cierre_pct || 0);
+    pts.push({cx, cy, pct: q.cierre_pct || 0});
+    // X label
+    const qLabel = q.q.slice(0,4) + ' ' + q.q.slice(4);
+    svg += `<text x="${xBase + barW + gap/2}" y="${H-pad.b+14}" text-anchor="middle" font-size="10" fill="#6B6B78">${qLabel}</text>`;
+  });
+  // Draw line connecting % cierre points
+  if(pts.length > 1){
+    const path = pts.map((p,i)=>`${i===0?'M':'L'}${p.cx} ${p.cy}`).join(' ');
+    svg += `<path d="${path}" fill="none" stroke="#4A1054" stroke-width="2"/>`;
+  }
+  pts.forEach(p => {
+    svg += `<circle cx="${p.cx}" cy="${p.cy}" r="4" fill="#4A1054" stroke="#FFF" stroke-width="1.5"><title>${p.pct}%</title></circle>`;
+    svg += `<text x="${p.cx}" y="${p.cy - 8}" text-anchor="middle" font-size="9" font-weight="700" fill="#4A1054">${p.pct}%</text>`;
+  });
+  svg += '</svg>';
+  el.innerHTML = svg;
+}
+
+function drawBars(sel, items, color){
+  if(!items.length){ document.querySelector(sel).innerHTML=''; return; }
+  const W=500, H=200, pad={t:10,r:10,b:50,l:40};
+  const slot = (W-pad.l-pad.r)/items.length;
+  const bw = slot*0.7;
+  const maxV = Math.max(...items.map(i=>i.value),1);
+  let svg = `<svg viewBox="0 0 ${W} ${H}">`;
+  for(let i=0;i<=3;i++){
+    const yy = pad.t + i*(H-pad.t-pad.b)/3;
+    svg+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#E6E7E8"/>`;
+    svg+=`<text x="${pad.l-4}" y="${yy+3}" text-anchor="end" font-size="9" fill="#6B6B78">${Math.round(maxV*(3-i)/3).toLocaleString()}</text>`;
+  }
+  items.forEach((it,i)=>{
+    const x = pad.l + i*slot + (slot-bw)/2;
+    const h = (it.value/maxV)*(H-pad.t-pad.b);
+    svg+=`<rect x="${x}" y="${H-pad.b-h}" width="${bw}" height="${h}" rx="3" fill="${color}"/>`;
+    svg+=`<text x="${x+bw/2}" y="${H-pad.b-h-4}" text-anchor="middle" font-size="10" fill="#12051A" font-weight="700">${it.value}</text>`;
+    const label = it.name.length>10?it.name.slice(0,10)+'…':it.name;
+    svg+=`<text x="${x+bw/2}" y="${H-25}" text-anchor="middle" font-size="9" fill="#6B6B78" transform="rotate(-30 ${x+bw/2} ${H-25})">${label}</text>`;
+  });
+  svg+='</svg>';
+  document.querySelector(sel).innerHTML = svg;
+}
+
+function drawLineChart(sel, labels, series){
+  if(!labels.length){ document.querySelector(sel).innerHTML=''; return; }
+  const W=500,H=220, pad={t:10,r:10,b:25,l:50};
+  const maxY = Math.max(...series.flatMap(s=>s.data),1)*1.1;
+  const x = i=> pad.l + (i*(W-pad.l-pad.r))/Math.max(1,labels.length-1);
+  const y = v=> H-pad.b - (v/maxY)*(H-pad.t-pad.b);
+  let svg = `<svg viewBox="0 0 ${W} ${H}">`;
+  for(let i=0;i<=4;i++){
+    const yv = maxY*i/4, yy=y(yv);
+    svg+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#E6E7E8"/>`;
+    svg+=`<text x="${pad.l-6}" y="${yy+3}" text-anchor="end" font-size="9" fill="#6B6B78">${fmtK(yv)}</text>`;
+  }
+  labels.forEach((l,i)=>{
+    svg+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#6B6B78">${l}</text>`;
+  });
+  series.forEach(s=>{
+    const path = s.data.map((v,i)=>(i?'L':'M')+x(i)+','+y(v)).join(' ');
+    if(s.fill){
+      svg+=`<path d="${path} L${x(s.data.length-1)},${y(0)} L${x(0)},${y(0)} Z" fill="${s.color}" opacity=".2"/>`;
+    }
+    svg+=`<path d="${path}" fill="none" stroke="${s.color}" stroke-width="2.2" stroke-linecap="round"/>`;
+    s.data.forEach((v,i)=>{svg+=`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${s.color}"/>`});
+  });
+  svg+='</svg>';
+  document.querySelector(sel).innerHTML = svg;
+}
+
+// ─── Utils ───
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function escAttr(s){return esc(s).replace(/'/g,'&#39;')}
+
+// ─── Bind ───
+$$('.tab-btn').forEach(b=>b.onclick=()=>{
+  $$('.tab-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  $$('.tab-pane').forEach(p=>p.classList.remove('active'));
+  $('#tab-'+b.dataset.tab).classList.add('active');
+  if(b.dataset.tab==='analytics') renderAnalytics();
+  if(b.dataset.tab==='pipeline') renderPipeline();
+  if(b.dataset.tab==='inmobiliarias') renderInmos();
+});
+['f-search','f-owner','f-segment','f-risk','f-intervention','f-lifecycle','f-signal','f-status'].forEach(id=>$('#'+id).oninput=renderWorklist);
+$('#f-inprogress').onchange = renderWorklist;
+$('#btn-reset').onclick=()=>{['f-search','f-owner','f-segment','f-risk','f-intervention','f-lifecycle','f-signal','f-status'].forEach(id=>$('#'+id).value=''); $('#f-inprogress').checked=false; renderWorklist()};
+$('#btn-export').onclick=()=>{
+  const rows = [['Broker','Empresa','Segmento','Riesgo','Lifecycle','Señal','CSM','Estado','Tiempo en M1','Últ. act.','Trend %','Deals','Renov.','Renewal%','Revenue LTV','Notas']];
+  BROKERS.forEach(r=>{const a=getA(r.id); rows.push([r.broker,r.company,r.segment,r.risk,r.lifecycle,r.primary_signal,a.owner,a.status,r.tenure_months,r.days_since_last,r.trend_pct,r.deals_total,r.renewal_count,r.renewal_rate,r.total_revenue,a.notes||''])});
+  const csv = rows.map(r=>r.map(c=>'"'+String(c===null||c===undefined?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'cs-worklist.csv'; a.click();
+};
+$('#f-search-inmo').oninput = renderInmos;
+$('#f-inmo-risk').onchange = renderInmos;
+$('#f-inmo-intervention').onchange = renderInmos;
+$('#f-inmo-sort').onchange = renderInmos;
+
+$$('.worklist thead th.sortable').forEach(th=>th.onclick=()=>{
+  const k = th.dataset.sort;
+  if(SORT.key===k) SORT.dir*=-1; else {SORT.key=k; SORT.dir=-1}
+  renderWorklist();
+});
+
+$('#modal').onclick = e => { if(e.target.id==='modal') closeModal() };
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+function renderAll(){ renderMeta(); renderKPIs(); renderWorklist(); renderPipeline(); renderInmos(); renderAnalytics(); }
+renderAll();
+</script>
+</body>
+</html>
