@@ -568,6 +568,8 @@ def process():
         agent = ds_sorted[-1].get('broker_agent_name') or ''
         phone = reg.get('phone') or ds_sorted[-1].get('broker_phone') or ''
         email = reg.get('email') or ''
+        city = reg.get('city') or ''
+        state = reg.get('state') or ''
         broker_id = reg.get('id') or 0
         org_id = reg.get('org_id') or 0
         org_perfil = reg.get('org_perfil') or ''
@@ -587,6 +589,8 @@ def process():
             'phone': phone,
             'email': email,
             'agent': agent,
+            'city': city,
+            'state': state,
             'segment': segment,
             'renewal_participation': renewal_participation,
             'renewal_path': renewal_path,
