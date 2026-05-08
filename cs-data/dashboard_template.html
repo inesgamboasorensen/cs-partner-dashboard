@@ -2011,6 +2011,8 @@ function openInmo(id){
   ].filter(Boolean);
   $('#m-sub').textContent = subBits.join(' · ');
 
+  const lcBadges = Object.entries(inmo.lifecycle_dist||{}).map(([k,v])=>`<span class="pill lc-${k}">${k}: ${v}</span>`).join(' ');
+
   // Full broker list (NOT just top 5) — sorted by activity to surface dormant brokers
   const allBrokers = BROKERS.filter(b=>b.company===inmo.company)
     .slice()
