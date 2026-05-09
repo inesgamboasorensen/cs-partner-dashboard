@@ -15,6 +15,10 @@
     --teal:#00C7B1; --blue:#06038D; --peach:#FFBE97; --sky:#74D1EA;
     --bg:#F5F4F0; --surface:#FAFAF7; --card:#fff; --red:#DC2626; --amber:#B45309; --green:#047857;
     --line:#E8E5DE; --shadow-sm:0 1px 2px rgba(15,11,20,.04); --shadow-md:0 4px 14px rgba(15,11,20,.06);
+    /* Accent — dark forest green used for chrome (CTAs, active tab, KPIs, borders, charts).
+       Text stays --near-black so readability never depends on the accent hue. */
+    --accent:#14532D; --accent-hover:#1F6B47; --accent-soft:#D1FAE5;
+    --shadow-accent:0 4px 18px rgba(20,83,45,.18);
   }
   body{font-family:'Figtree',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--near-black);min-height:100vh;font-size:13px;font-feature-settings:"ss01","cv11";letter-spacing:-.005em}
 
@@ -52,8 +56,8 @@
   /* ── Tabs · segmented pill nav ───────────────────────────────────────────────── */
   .tab-nav{background:var(--bg);border-bottom:1px solid var(--line);padding:14px 32px;display:flex;gap:6px;position:sticky;top:0;z-index:50;overflow-x:auto;align-items:center}
   .tab-btn{padding:8px 16px;font-size:12.5px;font-weight:600;color:var(--dark-gray);border:1px solid transparent;background:transparent;cursor:pointer;border-radius:999px;transition:all .15s;white-space:nowrap;font-family:inherit;letter-spacing:-.005em}
-  .tab-btn:hover{color:var(--near-black);background:#fff}
-  .tab-btn.active{color:#fff;background:var(--near-black);border-color:var(--near-black);box-shadow:var(--shadow-sm)}
+  .tab-btn:hover{color:var(--accent);background:#fff}
+  .tab-btn.active{color:#fff;background:var(--accent);border-color:var(--accent);box-shadow:var(--shadow-sm)}
   .tab-btn .count{display:inline-block;margin-left:6px;background:#F0EEE8;color:var(--dark-gray);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700}
   .tab-btn.active .count{background:rgba(255,255,255,.18);color:#fff}
   .tab-pane{display:none}
@@ -68,7 +72,7 @@
   .kpi .label{font-size:10.5px;font-weight:600;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
   .kpi .value{font-size:26px;font-weight:700;color:var(--near-black);letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
   .kpi .sub{font-size:11.5px;color:var(--dark-gray);margin-top:6px}
-  .kpi.accent{background:linear-gradient(135deg,var(--near-black) 0%,#1F1426 100%);color:#fff;border-color:var(--near-black);box-shadow:0 4px 18px rgba(15,11,20,.18)}
+  .kpi.accent{background:linear-gradient(135deg,var(--accent) 0%,#0F3D22 100%);color:#fff;border-color:var(--accent);box-shadow:var(--shadow-accent)}
   .kpi.accent .label{color:rgba(255,255,255,.55);font-weight:600}
   .kpi.accent .value{color:#fff}
   .kpi.accent .sub{color:rgba(255,255,255,.65)}
@@ -81,14 +85,14 @@
 
   .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   .filters input,.filters select{font-family:inherit;font-size:12.5px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);outline:none;color:var(--near-black);transition:border-color .15s,background .15s}
-  .filters input:focus,.filters select:focus{border-color:var(--near-black);background:#fff}
+  .filters input:focus,.filters select:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(20,83,45,.10)}
   .filters input[type=search]{min-width:240px;background:var(--surface) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B6B78' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='m21 21-4.3-4.3'/></svg>") no-repeat 11px 50%;padding-left:32px}
   .btn{font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:10px;cursor:pointer;border:1px solid transparent;white-space:nowrap;transition:background .15s,border-color .15s,box-shadow .15s,transform .1s;letter-spacing:-.005em}
   .btn:active{transform:translateY(1px)}
-  .btn.primary{background:var(--near-black);color:#fff;box-shadow:var(--shadow-sm)}
-  .btn.primary:hover{background:#241823}
+  .btn.primary{background:var(--accent);color:#fff;box-shadow:var(--shadow-sm)}
+  .btn.primary:hover{background:var(--accent-hover)}
   .btn.ghost{background:#fff;color:var(--near-black);border-color:var(--line)}
-  .btn.ghost:hover{border-color:var(--near-black);background:var(--surface)}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
   .btn.sm{padding:5px 11px;font-size:11.5px;border-radius:8px}
 
   table.worklist{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -106,7 +110,7 @@
   .worklist .money.sm{font-weight:600;color:var(--near-black);font-size:12.5px;font-variant-numeric:tabular-nums}
   .worklist td.actions{white-space:nowrap}
   .worklist .cell-select{padding:5px 9px;font-size:11.5px;max-width:150px;border:1px solid var(--line);border-radius:8px;background:#fff;font-family:inherit;color:var(--near-black);transition:border-color .15s}
-  .worklist .cell-select:hover,.worklist .cell-select:focus{border-color:var(--near-black);outline:none}
+  .worklist .cell-select:hover,.worklist .cell-select:focus{border-color:var(--accent);outline:none}
 
   .pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 10px;font-size:10.5px;font-weight:600;white-space:nowrap;line-height:1.5;letter-spacing:.005em}
   .pill.red{background:#FEE2E2;color:var(--red)}
@@ -142,7 +146,7 @@
   .cov-card .cov-pct .pct-mark{font-size:18px;font-weight:400;color:var(--dark-gray);margin-left:2px}
   .cov-card .cov-sub{font-size:11.5px;color:var(--dark-gray);margin-top:8px;line-height:1.4}
   .cov-card .cov-bar{height:3px;background:var(--line);margin-top:12px;overflow:hidden;border-radius:2px}
-  .cov-card .cov-bar i{display:block;height:100%;background:var(--near-black);transition:width .2s;border-radius:2px}
+  .cov-card .cov-bar i{display:block;height:100%;background:var(--accent);transition:width .2s;border-radius:2px}
   .cov-card .cov-count{font-size:10px;font-weight:600;color:var(--mid-gray);letter-spacing:.06em;margin-top:8px;text-transform:uppercase;font-variant-numeric:tabular-nums}
   .cov-card.cov-NONE .cov-pct{color:var(--red)}
   .cov-card.cov-NONE .cov-bar i{background:var(--red)}
@@ -203,8 +207,8 @@
   .fact:hover{border-color:#D6D2C9}
   .fact .k{font-size:10px;font-weight:600;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
   .fact .v{font-size:14px;font-weight:700;color:var(--near-black);letter-spacing:-.005em;font-variant-numeric:tabular-nums}
-  .fact.accent{background:var(--card);border-color:var(--near-black);border-left-width:3px}
-  .fact.accent .v{color:var(--near-black)}
+  .fact.accent{background:var(--card);border-color:var(--accent);border-left-width:3px}
+  .fact.accent .v{color:var(--accent)}
 
   .sec-h4{font-size:11px;font-weight:700;color:var(--purple-dark);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 8px;border-top:1px solid var(--light-gray);padding-top:10px;display:flex;align-items:center;gap:8px}
 
@@ -241,7 +245,7 @@
   .log-form{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px}
   .log-form .row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
   .log-form select,.log-form input,.log-form textarea{font-family:inherit;font-size:12.5px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;outline:none;color:var(--near-black);transition:border-color .15s}
-  .log-form select:focus,.log-form input:focus,.log-form textarea:focus{border-color:var(--near-black)}
+  .log-form select:focus,.log-form input:focus,.log-form textarea:focus{border-color:var(--accent)}
   .log-form textarea{width:100%;min-height:60px;resize:vertical;line-height:1.5}
   .log-form .row>*{flex:1;min-width:120px}
 
@@ -255,11 +259,11 @@
 
   .empty{padding:48px 20px;text-align:center;color:var(--mid-gray);font-size:13px}
 
-  .summary-note{background:var(--surface);border-left:3px solid var(--near-black);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:var(--near-black);line-height:1.55}
-  .summary-note strong{color:var(--near-black)}
+  .summary-note{background:var(--surface);border-left:3px solid var(--accent);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:var(--near-black);line-height:1.55}
+  .summary-note strong{color:var(--accent)}
 
   .cell-select{padding:5px 9px;font-size:11.5px;border-radius:8px;border:1px solid var(--line);background:#fff;font-family:inherit;color:var(--near-black);transition:border-color .15s}
-  .cell-select:focus,.cell-select:hover{outline:none;border-color:var(--near-black)}
+  .cell-select:focus,.cell-select:hover{outline:none;border-color:var(--accent)}
 
   .tooltip{position:relative;cursor:help}
   .tooltip::after{content:attr(data-tip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--near-black);color:#fff;font-size:10.5px;padding:5px 8px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:10}
@@ -323,11 +327,11 @@
 </header>
 
 <nav class="tab-nav">
-  <button class="tab-btn active" data-tab="inmobiliarias">Worklist · Inmobiliarias <span class="count" id="tc-inmo">0</span></button>
-  <button class="tab-btn" data-tab="worklist">Worklist · Brokers <span class="count" id="tc-worklist">0</span></button>
-  <button class="tab-btn" data-tab="pipeline">Pipeline</button>
-  <button class="tab-btn" data-tab="leaderboard">Performance por dueño</button>
-  <button class="tab-btn" data-tab="analytics">Analytics</button>
+  <button class="tab-btn active" data-tab="inmobiliarias">Cartera · Inmobiliarias <span class="count" id="tc-inmo">0</span></button>
+  <button class="tab-btn" data-tab="worklist">Cartera · Brokers <span class="count" id="tc-worklist">0</span></button>
+  <button class="tab-btn" data-tab="pipeline">Embudo</button>
+  <button class="tab-btn" data-tab="leaderboard">Desempeño por dueño</button>
+  <button class="tab-btn" data-tab="analytics">Analítica</button>
   <button class="tab-btn" data-tab="metodologia">Metodología</button>
 </nav>
 
@@ -377,7 +381,7 @@
           <select id="f-pic"><option value="">PIC · todos</option><option value="yes">★ Sólo PIC</option><option value="no">No PIC</option></select>
           <select id="f-risk"><option value="">Todo riesgo</option><option>ALTO</option><option>MEDIO</option><option>BAJO</option></select>
           <select id="f-intervention"><option value="">Toda intervención</option><option value="yes">Requiere intervención</option><option value="no">Sana (sin intervención)</option></select>
-          <select id="f-lifecycle"><option value="">Todo lifecycle</option><option>Onboarding</option><option>Growing</option><option>Mature-Healthy</option><option>Active-Low</option><option>Declining</option><option>At-Risk</option><option>Churned</option></select>
+          <select id="f-lifecycle"><option value="">Todo ciclo de vida</option><option>Onboarding</option><option>Growing</option><option>Mature-Healthy</option><option>Active-Low</option><option>Declining</option><option>At-Risk</option><option>Churned</option></select>
           <select id="f-status"><option value="">Todo estado</option><option>Planeado</option><option>Contactado</option><option>En progreso</option><option>Ganado</option><option>Perdido</option></select>
           <select id="f-amonly"><option value="">Cobertura · todas</option><option value="cs">CS Partner</option><option value="amonly">Sólo AM (sin CS)</option></select>
           <button class="btn ghost" id="btn-reset">Limpiar</button>
@@ -396,7 +400,7 @@
             <th class="sortable" data-sort="avg_ticket">Ticket prom</th>
             <th>Interv.</th>
             <th>Riesgo</th>
-            <th class="sortable" data-sort="trend_pct">Trend</th>
+            <th class="sortable" data-sort="trend_pct">Tendencia</th>
             <th class="sortable" data-sort="renewal_rate">Renov.</th>
             <th>Estado</th>
             <th>Rol</th>
@@ -467,7 +471,7 @@
       </div>
       <div style="overflow-x:auto;max-height:72vh;overflow-y:auto">
         <table class="worklist">
-          <thead><tr><th>#</th><th>Inmobiliaria</th><th>PIC</th><th>Plaza</th><th>Vol histórico</th><th>Ticket prom</th><th>Intervención</th><th>Riesgo</th><th>Brokers</th><th>Penetración</th><th>Trend</th><th>Renov.</th><th>Cobertura</th></tr></thead>
+          <thead><tr><th>#</th><th>Inmobiliaria</th><th>PIC</th><th>Plaza</th><th>Vol histórico</th><th>Ticket prom</th><th>Intervención</th><th>Riesgo</th><th>Brokers</th><th>Penetración</th><th>Tendencia</th><th>Renov.</th><th>Cobertura</th></tr></thead>
           <tbody id="tbody-inmo"></tbody>
         </table>
       </div>
@@ -510,7 +514,7 @@
     </div>
 
     <div class="summary-note">
-      <strong>Performance por dueño:</strong> mide actividades registradas y eventos de valor ($) atribuidos a cada Account Manager y CS Partner. Combina nivel broker + inmobiliaria.
+      <strong>Desempeño por dueño:</strong> mide actividades registradas y eventos de valor ($) atribuidos a cada Account Manager y CS Partner. Combina nivel broker + inmobiliaria.
     </div>
 
     <div class="section">
@@ -563,7 +567,7 @@
 
     <div class="chart-card" style="margin-bottom:14px">
       <h3 style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
-        <span>Mapa de cobertura · Roles × Lifecycle</span>
+        <span>Mapa de cobertura · Roles × Ciclo de vida</span>
         <span style="font-size:11px;font-weight:500;color:var(--dark-gray)" id="cov-matrix-meta">—</span>
       </h3>
       <div style="display:flex;align-items:center;gap:14px;font-size:10px;color:var(--dark-gray);margin-bottom:10px;flex-wrap:wrap;letter-spacing:.04em">
@@ -590,7 +594,7 @@
 
     <div class="ed-divider"><span class="ed-label">Composición y salud</span><span class="ed-line"></span></div>
     <div class="charts-grid">
-      <div class="chart-card"><h3>Distribución por Lifecycle stage</h3><div id="chart-lc"></div></div>
+      <div class="chart-card"><h3>Distribución por etapa del ciclo de vida</h3><div id="chart-lc"></div></div>
       <div class="chart-card"><h3>Distribución de Riesgo</h3><div id="chart-risk"></div></div>
     </div>
 
@@ -647,7 +651,7 @@
 
     <!-- 2. Lifecycle stages -->
     <div class="section">
-      <div class="section-hdr"><h2>2 · Lifecycle stages</h2></div>
+      <div class="section-hdr"><h2>2 · Etapas del ciclo de vida</h2></div>
       <div style="padding:16px 20px;line-height:1.6;font-size:13px">
         <p>Clasificación automática por <code>tenure_months</code>, <code>days_since_last</code>, <code>deals_90d</code>, <code>trend_pct</code>:</p>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:8px">
@@ -1100,7 +1104,7 @@ function bootstrapOwners(){
   // Migración (v5 → v6): el modelo previo flipeaba rol automático en mes 4 y asignaba
   // CS Partners. Bajo el modelo de handoff manual, esos brokers ya están handed-off de facto.
   // Marcamos retroactivamente para preservar asignaciones y evitar que vuelvan a aparecer
-  // como "Listo para handoff".
+  // como "Listo para traspaso".
   BROKERS.forEach(r=>{
     const a = getA(r.id);
     if(!a._handoff_migrated_v1){
@@ -1173,9 +1177,9 @@ function handoffBroker(id){
   const notes  = notesEl  ? notesEl.value.trim() : '';
   const author = authorEl ? authorEl.value : '';
   if(!notes){
-    if(!confirm(`No agregaste notas de contexto para el handoff de "${r.broker}". ¿Continuar sin notas?`)) return;
+    if(!confirm(`No agregaste notas de contexto para el traspaso de "${r.broker}". ¿Continuar sin notas?`)) return;
   } else {
-    if(!confirm(`Marcar handoff de "${r.broker}" — congelará la contribución del AM y reasignará a CS Partner. Tu nota se guarda en el historial.`)) return;
+    if(!confirm(`Marcar traspaso de "${r.broker}" — congelará la contribución del AM y reasignará a CS Partner. Tu nota se guarda en el historial.`)) return;
   }
   a.am_snapshot = {...snapshotAMContribution(a,false), tenure_months_at_handoff: r.tenure_months ?? 0};
   a.handed_off = true;
@@ -1196,7 +1200,7 @@ function handoffBroker(id){
 function undoHandoffBroker(id){
   const a = getA(id);
   if(!a.handed_off) return;
-  if(!confirm('¿Revertir handoff? La cuenta volverá al pool de AMs y se borrará la snapshot.')) return;
+  if(!confirm('¿Revertir traspaso? La cuenta volverá al pool de AMs y se borrará la snapshot.')) return;
   a.handed_off = false; a.handoff_date = null; a.am_snapshot = null;
   saveState(); openBroker(id); renderAll();
 }
@@ -1209,9 +1213,9 @@ function handoffInmo(inmoId){
   const notes  = notesEl  ? notesEl.value.trim() : '';
   const author = authorEl ? authorEl.value : '';
   if(!notes){
-    if(!confirm(`No agregaste notas de contexto para el handoff de "${inmo.company}". ¿Continuar sin notas?`)) return;
+    if(!confirm(`No agregaste notas de contexto para el traspaso de "${inmo.company}". ¿Continuar sin notas?`)) return;
   } else {
-    if(!confirm(`Marcar handoff de "${inmo.company}" — congelará la contribución del AM, reasignará a CS Partner y todos sus brokers heredarán al mismo dueño. Tu nota se guarda en el historial.`)) return;
+    if(!confirm(`Marcar traspaso de "${inmo.company}" — congelará la contribución del AM, reasignará a CS Partner y todos sus brokers heredarán al mismo dueño. Tu nota se guarda en el historial.`)) return;
   }
   i.am_snapshot = {...snapshotAMContribution(i,true), tenure_months_at_handoff: inmo.tenure_months ?? 0};
   i.handed_off = true;
@@ -1234,7 +1238,7 @@ function handoffInmo(inmoId){
 function undoHandoffInmo(inmoId){
   const i = getI(inmoId);
   if(!i.handed_off) return;
-  if(!confirm('¿Revertir handoff? La inmo volverá al pool de AMs y se borrará la snapshot.')) return;
+  if(!confirm('¿Revertir traspaso? La inmo volverá al pool de AMs y se borrará la snapshot.')) return;
   i.handed_off = false; i.handoff_date = null; i.am_snapshot = null;
   saveState(); openInmo(inmoId); renderAll();
 }
@@ -1244,7 +1248,7 @@ function handoffPill(broker){
   if(a.handed_off){
     const sub = a.handoff_date && a.handoff_date !== '(legacy)' ? a.handoff_date : 'legacy';
     const snap = a.am_snapshot ? ` · AM ${esc(a.am_snapshot.am_owner||'—')}: ${fmtK(a.am_snapshot.value||0)}` : '';
-    return `<span class="pill green tooltip" data-tip="Handoff ${sub}${snap}" style="font-size:9.5px">✓ Handed off</span>`;
+    return `<span class="pill green tooltip" data-tip="Traspaso${sub}${snap}" style="font-size:9.5px">✓ Traspasado</span>`;
   }
   if(isReadyForHandoff(broker)){
     return `<span class="pill amber tooltip" data-tip="Tenure ${broker.tenure_months}mo ≥ ${ONBOARDING_MONTHS}. Click para hacer handoff." onclick="event.stopPropagation();handoffBroker('${escAttr(broker.id)}')" style="font-size:9.5px;cursor:pointer">Listo p/ handoff</span>`;
@@ -1256,7 +1260,7 @@ function handoffPillInmo(inmo){
   if(i.handed_off){
     const sub = i.handoff_date && i.handoff_date !== '(legacy)' ? i.handoff_date : 'legacy';
     const snap = i.am_snapshot ? ` · AM ${esc(i.am_snapshot.am_owner||'—')}: ${fmtK(i.am_snapshot.value||0)}` : '';
-    return `<span class="pill green tooltip" data-tip="Handoff ${sub}${snap}" style="font-size:9.5px">✓ Handed off</span>`;
+    return `<span class="pill green tooltip" data-tip="Traspaso${sub}${snap}" style="font-size:9.5px">✓ Traspasado</span>`;
   }
   if(isInmoReadyForHandoff(inmo)){
     return `<span class="pill amber tooltip" data-tip="Tenure ${inmo.tenure_months}mo ≥ ${ONBOARDING_MONTHS}. Click para hacer handoff." onclick="event.stopPropagation();handoffInmo('${escAttr(inmo.id)}')" style="font-size:9.5px;cursor:pointer">Listo p/ handoff</span>`;
@@ -1283,7 +1287,7 @@ function renderMeta(){
 
 // ─── Helpers ───
 function signalBadge(r){
-  if(!r.primary_signal || r.primary_signal==='Healthy') return '<span class="pill green">Healthy</span>';
+  if(!r.primary_signal || r.primary_signal==='Healthy') return '<span class="pill green">Saludable</span>';
   const s = r.primary_signal;
   let cls='amber', icon='⚠️';
   if(s.includes('Churned')){cls='red';icon='⏸';}
@@ -1654,7 +1658,7 @@ function renderOwnerHistory(stateObj){
   if(!hist.length){
     return `<div class="empty" style="padding:14px">Aún no hay historial de owners.</div>`;
   }
-  const sourceLabel = {bootstrap:'asignación inicial', handoff:'handoff a CS', manual:'cambio manual', legacy:'previo al tracking'};
+  const sourceLabel = {bootstrap:'asignación inicial', handoff:'traspaso a CS', manual:'cambio manual', legacy:'previo al tracking'};
   // Render most-recent first
   return `<div style="display:flex;flex-direction:column;gap:6px">${hist.slice().reverse().map((h,idx)=>{
     const isCurrent = idx===0 && !h.until;
@@ -1679,14 +1683,14 @@ function renderHandoffSectionBroker(r, a){
     return `<div class="ve-card" style="border-color:var(--green);background:linear-gradient(135deg,rgba(0,128,115,.08),rgba(0,199,177,.04))">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
         <div>
-          <div style="font-size:11px;font-weight:700;color:#008073;text-transform:uppercase;letter-spacing:.08em">✓ Handed off</div>
-          <div style="font-size:14px;font-weight:700;color:var(--near-black);margin-top:2px">Handoff: ${dateLbl} <small style="font-weight:400;color:var(--dark-gray)">· tenure al handoff ${tenureAt}</small></div>
+          <div style="font-size:11px;font-weight:700;color:#008073;text-transform:uppercase;letter-spacing:.08em">✓ Traspasado</div>
+          <div style="font-size:14px;font-weight:700;color:var(--near-black);margin-top:2px">Traspaso: ${dateLbl} <small style="font-weight:400;color:var(--dark-gray)">· tenure al traspaso ${tenureAt}</small></div>
           <div style="font-size:11px;color:var(--dark-gray);margin-top:4px">Cuenta congelada para AM. Eventos posteriores se atribuyen al CS Partner asignado.</div>
         </div>
         <button class="btn sm ghost" onclick="undoHandoffBroker('${escAttr(r.id)}')">Revertir</button>
       </div>
       ${snap.am_owner ? `<div style="margin-top:8px;padding:8px 10px;background:#fff;border:1px solid var(--light-gray);border-radius:6px;font-size:12px">
-        <div style="font-size:10.5px;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:4px">Snapshot AM al handoff</div>
+        <div style="font-size:10.5px;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:4px">Foto del AM al momento del traspaso</div>
         <div><strong>${esc(snap.am_owner)}</strong> · ${snap.events_count||0} evento(s) · ${snap.activities_count||0} actividad(es) · <strong style="color:var(--purple-dark)">${fmt$(snap.value||0)}</strong></div>
       </div>` : ''}
     </div>`;
@@ -1697,7 +1701,7 @@ function renderHandoffSectionBroker(r, a){
     return `<div class="ve-card" style="border-color:var(--amber);background:#FEF3C7">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
         <div style="flex:1;min-width:240px">
-          <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.08em">Listo para handoff</div>
+          <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.08em">Listo para traspaso</div>
           <div style="font-size:13px;font-weight:600;margin-top:2px">Tenure ${tenure}mo (≥ ${ONBOARDING_MONTHS}mo). Hora de pasar la cuenta del AM al CS Partner.</div>
           <div style="font-size:11px;color:var(--dark-gray);margin-top:4px">Al confirmar: se congela la contribución del AM (snapshot), se reasigna a un CS Partner, y se guarda tu nota en el historial.</div>
         </div>
@@ -1707,10 +1711,10 @@ function renderHandoffSectionBroker(r, a){
         <textarea id="hb-notes-${escAttr(r.id)}" placeholder="Ej. Está esperando demo de Legal el 14/may. No tocar tema comisiones por WhatsApp. Hace 2 semanas pidió descuento M3..." style="width:100%;min-height:60px;font-family:inherit;font-size:12.5px;padding:8px 10px;border:1px solid #FCD34D;border-radius:6px;background:#fff;outline:none;color:var(--near-black);resize:vertical"></textarea>
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
           <select id="hb-author-${escAttr(r.id)}" style="font-size:12px;padding:5px 8px;border:1px solid #FCD34D;border-radius:5px;background:#fff">
-            <option value="">— Quién hace el handoff —</option>
+            <option value="">— Quién hace el traspaso —</option>
             ${ALL_OWNERS.map(o=>`<option value="${esc(o)}">${esc(o)} · ${roleOfOwner(o)||'—'}</option>`).join('')}
           </select>
-          <button class="btn primary" onclick="handoffBroker('${escAttr(r.id)}')">Marcar handoff</button>
+          <button class="btn primary" onclick="handoffBroker('${escAttr(r.id)}')">Marcar traspaso</button>
         </div>
         ${lastLogHtml}
       </div>
@@ -1722,9 +1726,9 @@ function renderHandoffSectionBroker(r, a){
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
       <div>
         <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.08em">En periodo de onboarding</div>
-        <div style="font-size:13px;font-weight:600;margin-top:2px">Mes ${tenure} de ${ONBOARDING_MONTHS} · faltan ${remaining}mo para handoff</div>
+        <div style="font-size:13px;font-weight:600;margin-top:2px">Mes ${tenure} de ${ONBOARDING_MONTHS} · faltan ${remaining}mo para traspaso</div>
       </div>
-      <button class="btn sm ghost" onclick="handoffBroker('${escAttr(r.id)}')" title="Forzar handoff antes de tiempo">Handoff anticipado</button>
+      <button class="btn sm ghost" onclick="handoffBroker('${escAttr(r.id)}')" title="Forzar traspaso antes de tiempo">Traspaso anticipado</button>
     </div>
   </div>`;
 }
@@ -1737,14 +1741,14 @@ function renderHandoffSectionInmo(inmo, i){
     return `<div class="ve-card" style="border-color:var(--green);background:linear-gradient(135deg,rgba(0,128,115,.08),rgba(0,199,177,.04))">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
         <div>
-          <div style="font-size:11px;font-weight:700;color:#008073;text-transform:uppercase;letter-spacing:.08em">✓ Handed off</div>
-          <div style="font-size:14px;font-weight:700;color:var(--near-black);margin-top:2px">Handoff: ${dateLbl} <small style="font-weight:400;color:var(--dark-gray)">· tenure al handoff ${tenureAt}</small></div>
+          <div style="font-size:11px;font-weight:700;color:#008073;text-transform:uppercase;letter-spacing:.08em">✓ Traspasado</div>
+          <div style="font-size:14px;font-weight:700;color:var(--near-black);margin-top:2px">Traspaso: ${dateLbl} <small style="font-weight:400;color:var(--dark-gray)">· tenure al traspaso ${tenureAt}</small></div>
           <div style="font-size:11px;color:var(--dark-gray);margin-top:4px">Inmo congelada para AM. Eventos posteriores se atribuyen al CS Partner asignado.</div>
         </div>
         <button class="btn sm ghost" onclick="undoHandoffInmo('${escAttr(inmo.id)}')">Revertir</button>
       </div>
       ${snap.am_owner ? `<div style="margin-top:8px;padding:8px 10px;background:#fff;border:1px solid var(--light-gray);border-radius:6px;font-size:12px">
-        <div style="font-size:10.5px;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:4px">Snapshot AM al handoff</div>
+        <div style="font-size:10.5px;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:4px">Foto del AM al momento del traspaso</div>
         <div><strong>${esc(snap.am_owner)}</strong> · ${snap.events_count||0} evento(s) · ${snap.activities_count||0} actividad(es) · <strong style="color:var(--purple-dark)">${fmt$(snap.value||0)}</strong></div>
       </div>` : ''}
     </div>`;
@@ -1755,7 +1759,7 @@ function renderHandoffSectionInmo(inmo, i){
     return `<div class="ve-card" style="border-color:var(--amber);background:#FEF3C7">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
         <div style="flex:1;min-width:240px">
-          <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.08em">Listo para handoff</div>
+          <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.08em">Listo para traspaso</div>
           <div style="font-size:13px;font-weight:600;margin-top:2px">Primer deal hace ${tenure}mo (≥ ${ONBOARDING_MONTHS}mo). Hora de pasar la inmo del AM al CS Partner.</div>
           <div style="font-size:11px;color:var(--dark-gray);margin-top:4px">Al confirmar: se congela la contribución del AM (snapshot), se reasigna a un CS Partner y todos sus brokers heredan el nuevo dueño. Tu nota se guarda en el historial.</div>
         </div>
@@ -1765,10 +1769,10 @@ function renderHandoffSectionInmo(inmo, i){
         <textarea id="hi-notes-${escAttr(inmo.id)}" placeholder="Ej. La gerente Diana exige reportes en lunes. Adoptaron Screening, falta Guarantee. Tienen 3 brokers nuevos en mayo, hay que onboardearlos..." style="width:100%;min-height:60px;font-family:inherit;font-size:12.5px;padding:8px 10px;border:1px solid #FCD34D;border-radius:6px;background:#fff;outline:none;color:var(--near-black);resize:vertical"></textarea>
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
           <select id="hi-author-${escAttr(inmo.id)}" style="font-size:12px;padding:5px 8px;border:1px solid #FCD34D;border-radius:5px;background:#fff">
-            <option value="">— Quién hace el handoff —</option>
+            <option value="">— Quién hace el traspaso —</option>
             ${ALL_OWNERS.map(o=>`<option value="${esc(o)}">${esc(o)} · ${roleOfOwner(o)||'—'}</option>`).join('')}
           </select>
-          <button class="btn primary" onclick="handoffInmo('${escAttr(inmo.id)}')">Marcar handoff</button>
+          <button class="btn primary" onclick="handoffInmo('${escAttr(inmo.id)}')">Marcar traspaso</button>
         </div>
         ${lastLogHtml}
       </div>
@@ -1779,9 +1783,9 @@ function renderHandoffSectionInmo(inmo, i){
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
       <div>
         <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.08em">En periodo de onboarding</div>
-        <div style="font-size:13px;font-weight:600;margin-top:2px">Mes ${tenure} de ${ONBOARDING_MONTHS} · faltan ${remaining}mo para handoff</div>
+        <div style="font-size:13px;font-weight:600;margin-top:2px">Mes ${tenure} de ${ONBOARDING_MONTHS} · faltan ${remaining}mo para traspaso</div>
       </div>
-      <button class="btn sm ghost" onclick="handoffInmo('${escAttr(inmo.id)}')" title="Forzar handoff antes de tiempo">Handoff anticipado</button>
+      <button class="btn sm ghost" onclick="handoffInmo('${escAttr(inmo.id)}')" title="Forzar traspaso antes de tiempo">Traspaso anticipado</button>
     </div>
   </div>`;
 }
@@ -1820,7 +1824,7 @@ function openBroker(id){
       <div class="fact"><div class="k">Vol histórico</div><div class="v">${r.deals_total||0} <small style="font-weight:400;color:var(--dark-gray);font-size:11px">deals (2Y)</small></div></div>
       <div class="fact"><div class="k">Ticket promedio</div><div class="v">${fmt$(r.avg_ticket||0)}</div></div>
       <div class="fact"><div class="k">Riesgo</div><div class="v" style="color:${r.risk==='ALTO'?'var(--red)':r.risk==='MEDIO'?'var(--amber)':'var(--green)'}">${r.risk}</div></div>
-      <div class="fact"><div class="k">Lifecycle stage</div><div class="v">${r.lifecycle}</div></div>
+      <div class="fact"><div class="k">Etapa del ciclo de vida</div><div class="v">${r.lifecycle}</div></div>
       <div class="fact accent"><div class="k">Revenue L12M</div><div class="v">${fmt$(r.revenue_l12m||0)}</div></div>
     </div>
 
@@ -1830,7 +1834,7 @@ function openBroker(id){
     </div>
 
     <details class="sec">
-      <summary>Hand-off de AM a CS</summary>
+      <summary>Traspaso de AM a CS</summary>
       ${renderHandoffSectionBroker(r,a)}
     </details>
 
@@ -1855,7 +1859,7 @@ function openBroker(id){
         <div class="fact"><div class="k tooltip" data-tip="Días entre hoy y el último deal observado">Últ. actividad</div><div class="v" style="color:${r.days_since_last>90?'var(--red)':r.days_since_last>60?'var(--amber)':'var(--green)'}">Hace ${r.days_since_last}d</div></div>
         <div class="fact"><div class="k tooltip" data-tip="Total de deals observados en la ventana de 2 años (muestra del MCP)${r.tenure_source==='sampled'?' — sólo deals en muestra':''}">Deals totales · 2Y ${r.tenure_source==='sampled'?'<span class="pill amber" style="font-size:8.5px;padding:1px 6px;margin-left:3px">en muestra</span>':''}</div><div class="v">${r.deals_total} <small style="font-weight:400;color:var(--dark-gray);font-size:11px">en 2Y</small></div></div>
         <div class="fact"><div class="k tooltip" data-tip="Productividad = deals_total ÷ tenure_months. Indica ritmo promedio de cierre.">Frecuencia uso (Productividad)</div><div class="v">${r.deals_per_month} deals/mes</div></div>
-        <div class="fact"><div class="k tooltip" data-tip="trend = (deals últimos 90d − deals 90-180d) ÷ deals 90-180d. Detecta caídas o subidas recientes.">Trend 90d</div><div class="v" style="color:${(r.trend_pct||0)<-50?'var(--red)':(r.trend_pct||0)<0?'var(--amber)':'var(--green)'}">${r.trend_pct===null?'—':(r.trend_pct>=0?'▲ +':'▼ ')+r.trend_pct+'%'}</div></div>
+        <div class="fact"><div class="k tooltip" data-tip="trend = (deals últimos 90d − deals 90-180d) ÷ deals 90-180d. Detecta caídas o subidas recientes.">Tendencia 90d</div><div class="v" style="color:${(r.trend_pct||0)<-50?'var(--red)':(r.trend_pct||0)<0?'var(--amber)':'var(--green)'}">${r.trend_pct===null?'—':(r.trend_pct>=0?'▲ +':'▼ ')+r.trend_pct+'%'}</div></div>
       </div>
       ${r.tenure_source==='sampled'?`<div style="font-size:11px;color:var(--amber);background:#FEF3C7;border-radius:6px;padding:8px 12px;margin:8px 0">⚠️ Esta cuenta no está en el broker registry (probablemente pre-Marzo 2025). El "Cliente desde" y métricas se estiman desde los deals observados en la muestra de 2 años. El refresh diario enriquece progresivamente el registry vía lookups — la fecha real se poblará en los próximos días.</div>`:''}
     </details>
@@ -2112,7 +2116,7 @@ function openInmo(id){
     </div>
 
     <details class="sec">
-      <summary>Hand-off de AM a CS</summary>
+      <summary>Traspaso de AM a CS</summary>
       ${renderHandoffSectionInmo(inmo, iSt0)}
     </details>
 
@@ -2126,8 +2130,8 @@ function openInmo(id){
       <div class="account-grid">
         <div class="fact"><div class="k tooltip" data-tip="Brokers de la inmo con ≥ 1 deal en los últimos 90d">Activos 90d</div><div class="v" style="color:var(--green)">${inmo.brokers_active_90d}</div></div>
         <div class="fact"><div class="k tooltip" data-tip="Brokers con > 180d sin actividad">Churned</div><div class="v" style="color:var(--red)">${inmo.brokers_churned}</div></div>
-        <div class="fact"><div class="k tooltip" data-tip="Brokers en cada nivel de riesgo (ALTO/MEDIO/BAJO)">Risk split</div><div class="v" style="font-size:12px">${inmo.risk_dist.ALTO} A · ${inmo.risk_dist.MEDIO} M · ${inmo.risk_dist.BAJO} B</div></div>
-        <div class="fact"><div class="k tooltip" data-tip="Distribución por etapa de lifecycle">Lifecycles</div><div class="v" style="font-size:10px;line-height:1.4">${lcBadges}</div></div>
+        <div class="fact"><div class="k tooltip" data-tip="Brokers en cada nivel de riesgo (ALTO/MEDIO/BAJO)">Reparto de riesgo</div><div class="v" style="font-size:12px">${inmo.risk_dist.ALTO} A · ${inmo.risk_dist.MEDIO} M · ${inmo.risk_dist.BAJO} B</div></div>
+        <div class="fact"><div class="k tooltip" data-tip="Distribución por etapa del ciclo de vida">Ciclos de vida</div><div class="v" style="font-size:10px;line-height:1.4">${lcBadges}</div></div>
       </div>
     </details>
 
@@ -2139,7 +2143,7 @@ function openInmo(id){
         <div class="fact"><div class="k tooltip" data-tip="Días desde el deal más reciente">Últ. actividad</div><div class="v" style="color:${inmo.days_since_last>90?'var(--red)':'var(--green)'}">Hace ${inmo.days_since_last}d</div></div>
         <div class="fact"><div class="k tooltip" data-tip="Total de deals observados (2Y) de todos los brokers de la inmo">Deals totales · 2Y</div><div class="v">${inmo.deals_total} <small style="font-weight:400;color:var(--dark-gray);font-size:11px">en 2Y</small></div></div>
         <div class="fact"><div class="k tooltip" data-tip="Deals últimos 90d vs los 90d previos. Detecta tendencia agregada.">Deals 90d / prior</div><div class="v">${inmo.deals_90d} / ${inmo.deals_90_180}</div></div>
-        <div class="fact"><div class="k tooltip" data-tip="Variación porcentual de actividad agregada (90d vs 90-180d)">Trend 90d</div><div class="v">${trendCell(inmo.trend_pct)}</div></div>
+        <div class="fact"><div class="k tooltip" data-tip="Variación porcentual de actividad agregada (90d vs 90-180d)">Tendencia 90d</div><div class="v">${trendCell(inmo.trend_pct)}</div></div>
       </div>
     </details>
 
