@@ -34,11 +34,13 @@
   header > *{position:relative;z-index:1}
   /* Coordinate-style metadata in corners (the "35.6762° N" feel) */
   header .geo{display:none}
-  header .logo{width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border-radius:8px;background:var(--near-black);box-shadow:var(--shadow-sm)}
-  header .logo svg{width:34px;height:34px;display:block;filter:invert(1) brightness(2.5)}
-  header .brand{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
-  header h1{font-size:15px;font-weight:700;letter-spacing:-.015em;color:var(--near-black);font-family:'Figtree',sans-serif}
-  header .tag{font-size:10px;color:var(--dark-gray);font-weight:600;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  header .logo{width:38px;height:38px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:10px;background:linear-gradient(135deg,var(--accent-hover) 0%,#0E3D22 100%);box-shadow:0 2px 8px rgba(20,83,45,.25),inset 0 1px 0 rgba(255,255,255,.18);position:relative;overflow:hidden}
+  header .logo::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.18),transparent 55%);pointer-events:none}
+  header .logo svg{width:38px;height:38px;display:block;position:relative;z-index:1}
+  header .brand{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+  header h1{font-size:16px;font-weight:700;letter-spacing:-.02em;color:var(--near-black);font-family:'Figtree',sans-serif;display:flex;align-items:baseline;gap:9px}
+  header h1 .brand-sub{font-size:9.5px;font-weight:600;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.16em;border-left:1px solid var(--line);padding-left:9px}
+  header .tag{font-size:11px;color:var(--dark-gray);font-weight:500;letter-spacing:.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   header .hdr-meta{font-size:10.5px;color:var(--dark-gray);display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;font-variant-numeric:tabular-nums}
   header .hdr-meta .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2.5px rgba(4,120,87,.18);vertical-align:middle;margin-right:5px}
   header .hdr-meta .dot.stale{background:#D97706;box-shadow:0 0 0 2.5px rgba(217,119,6,.18)}
@@ -292,32 +294,27 @@
 <body>
 
 <header>
-  <svg class="geo" viewBox="0 0 280 60" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
-    <!-- Patrón geométrico danés: líneas finas + círculos concéntricos sutiles -->
-    <line x1="40" y1="-10" x2="100" y2="80"/>
-    <line x1="80" y1="-10" x2="140" y2="80"/>
-    <line x1="120" y1="-10" x2="180" y2="80"/>
-    <circle cx="240" cy="30" r="42"/>
-    <circle cx="240" cy="30" r="28"/>
-    <circle cx="240" cy="30" r="14"/>
-    <line x1="180" y1="0" x2="280" y2="0"/>
-    <line x1="200" y1="60" x2="280" y2="60"/>
-  </svg>
-  <div class="logo" aria-label="MoradaUno">
-    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
-      <defs><clipPath id="logo-clip"><rect width="32" height="32" rx="3"/></clipPath></defs>
-      <g clip-path="url(#logo-clip)">
-        <rect width="32" height="32" fill="#E6E7E8"/>
-        <polygon points="0,0 32,0 16,16" fill="#FFFFFF"/>
-        <polygon points="0,0 16,16 0,32" fill="#BCBEC0"/>
-        <polygon points="32,0 32,32 16,16" fill="#D8D9DA"/>
-        <polygon points="0,32 16,16 32,32" fill="#A8A9AC"/>
+  <div class="logo" aria-label="MoradaUno Cartera CS">
+    <svg viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+      <!-- Stylized doorway monogram — references "morada" (home / dwelling). The arched
+           rectangle reads as an "M" silhouette at small sizes. Thin hairline detail
+           inside for craft. -->
+      <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Outer arched doorway -->
+        <path d="M11 28 L11 17 Q11 9 19 9 Q27 9 27 17 L27 28 Z" stroke-width="2.1"/>
+        <!-- Inner hairline echo for depth -->
+        <path d="M15 28 L15 18 Q15 13 19 13 Q23 13 23 18 L23 28" stroke-width="1" stroke-opacity=".55"/>
+        <!-- Subtle baseline mark -->
+        <line x1="10" y1="29.5" x2="28" y2="29.5" stroke-width="1.4"/>
       </g>
+      <!-- Live status accent -->
+      <circle cx="31.5" cy="6.5" r="2.2" fill="#7DEED9"/>
+      <circle cx="31.5" cy="6.5" r="2.2" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width=".8"/>
     </svg>
   </div>
   <div class="brand">
-    <h1>Cartera de Asesores e Inmobiliarias</h1>
-    <span class="tag">Visión holística · MoradaUno</span>
+    <h1>MoradaUno <span class="brand-sub">Cartera&nbsp;CS</span></h1>
+    <span class="tag">Visión holística de asesores e inmobiliarias</span>
   </div>
   <div class="hdr-meta">
     <span><span id="m-freshness" class="dot"></span><span id="m-generated">—</span></span>
@@ -417,13 +414,19 @@
 
   <!-- PIPELINE / EMBUDO -->
   <section class="tab-pane" id="tab-pipeline">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+      <div role="tablist" aria-label="Tipo de cartera" style="display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px;box-shadow:var(--shadow-sm)">
+        <button class="pipe-pool active" data-pool="broker" onclick="setPipePool('broker')" style="padding:7px 18px;border:none;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff;font-family:inherit;transition:all .15s">Brokers</button>
+        <button class="pipe-pool" data-pool="inmo" onclick="setPipePool('inmo')" style="padding:7px 18px;border:none;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;background:transparent;color:var(--dark-gray);font-family:inherit;transition:all .15s">Inmobiliarias</button>
+      </div>
+      <span id="pipe-meta" style="font-size:11.5px;color:var(--dark-gray);font-variant-numeric:tabular-nums"></span>
+    </div>
     <div class="filters" style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:14px;box-shadow:var(--shadow-sm)">
       <input type="search" id="f-pipe-search" placeholder="Buscar broker o empresa…"/>
       <select id="f-pipe-owner"><option value="">Todos los dueños</option></select>
       <select id="f-pipe-role"><option value="">Todos los roles</option><option value="AM">Account Manager</option><option value="CS">CS Partner</option><option value="TRAINER">Trainer</option><option value="BDR">BDR</option></select>
       <select id="f-pipe-segment"><option value="">Todos segmentos</option><option>Inmobiliaria</option><option>Independiente</option></select>
       <button class="btn ghost" id="btn-pipe-reset">Limpiar</button>
-      <span id="pipe-meta" style="margin-left:auto;font-size:11.5px;color:var(--dark-gray);font-variant-numeric:tabular-nums"></span>
     </div>
     <div class="kpi-row">
       <div class="kpi"><div class="label">No Contactado</div><div class="value" id="pl-no-contactado" style="color:var(--dark-gray)">0</div><div class="sub" id="plm-no-contactado">— ticket prom · 0 deals L6M</div></div>
@@ -569,14 +572,57 @@
 
   <!-- ANALYTICS -->
   <section class="tab-pane" id="tab-analytics">
-    <div class="kpi-row">
-      <div class="kpi accent"><div class="label">Revenue L12M</div><div class="value" id="a-rev">$0</div><div class="sub" id="a-revavg">0 /broker</div></div>
-      <div class="kpi"><div class="label">Brokers activos L90D</div><div class="value" id="a-active" style="color:var(--green)">0</div><div class="sub" id="a-activepct">0% del total</div></div>
-      <div class="kpi"><div class="label">Cuentas sin dueño</div><div class="value" id="a-noown" style="color:var(--red)">0</div><div class="sub" id="a-noownrev">$0 expuestos</div></div>
-      <div class="kpi"><div class="label">Impacto realizado</div><div class="value" id="a-real" style="color:var(--green)">$0</div><div class="sub" id="a-realpct">por CS</div></div>
+
+    <!-- Hero strip — la foto de la cartera en 4 números -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:24px">
+      <div class="kpi accent">
+        <div class="label">Margen anual estimado</div>
+        <div class="value" id="a-margin">$0</div>
+        <div class="sub" id="a-margin-sub">— cartera completa</div>
+      </div>
+      <div class="kpi" style="border-left:3px solid #B91C1C">
+        <div class="label">🔥 En cuentas urgentes</div>
+        <div class="value" id="a-margin-urgent" style="color:#B91C1C">$0</div>
+        <div class="sub" id="a-urgent-count">0 cuentas marcadas</div>
+      </div>
+      <div class="kpi" style="border-left:3px solid var(--accent)">
+        <div class="label">Cobertura asignada</div>
+        <div class="value" id="a-coverage" style="color:var(--accent)">0%</div>
+        <div class="sub" id="a-coverage-sub">cuentas con dueño / total</div>
+      </div>
+      <div class="kpi" style="border-left:3px solid var(--amber)">
+        <div class="label">Brokers activos L90D</div>
+        <div class="value" id="a-active">0</div>
+        <div class="sub" id="a-activepct">0% del total</div>
+      </div>
+      <div class="kpi" style="border-left:3px solid var(--red)">
+        <div class="label">Cuentas sin dueño</div>
+        <div class="value" id="a-noown" style="color:var(--red)">0</div>
+        <div class="sub" id="a-noownrev">$0 expuestos</div>
+      </div>
+    </div>
+    <!-- Hidden legacy elements (kept so existing code that writes to them doesn't break) -->
+    <div style="display:none">
+      <span id="a-rev"></span><span id="a-revavg"></span><span id="a-real"></span><span id="a-realpct"></span>
     </div>
 
-    <div class="ed-divider"><span class="ed-label">Cobertura</span><span class="ed-line"></span></div>
+    <!-- ─── PRIORIDAD ─── -->
+    <div class="ed-divider"><span class="ed-label">Prioridad · dónde vale tu tiempo</span><span class="ed-line"></span></div>
+    <div class="charts-grid" style="grid-template-columns:1fr 1fr">
+      <div class="chart-card">
+        <h3>Margen por nivel de prioridad</h3>
+        <div style="font-size:11.5px;color:var(--dark-gray);margin:-8px 0 12px;line-height:1.5">Cuánto del margen anualizado vive en cada tier. Lo Urgente concentra atención por una razón.</div>
+        <div id="chart-priority-stack"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Top 10 cuentas por margen anual</h3>
+        <div style="font-size:11.5px;color:var(--dark-gray);margin:-8px 0 12px;line-height:1.5">Brokers + inmobiliarias mezclados. Toca el nombre para abrir el detalle.</div>
+        <div id="chart-top-margin"></div>
+      </div>
+    </div>
+
+    <!-- ─── COBERTURA ─── -->
+    <div class="ed-divider"><span class="ed-label">Cobertura · quién cuida qué</span><span class="ed-line"></span></div>
 
     <div class="chart-card" style="margin-bottom:14px">
       <h3 style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
@@ -592,7 +638,7 @@
         <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;background:#DC2626"></span> 0 · sin persona</span>
         <span style="margin-left:auto">— sin cuentas</span>
       </div>
-      <div style="display:flex;gap:0;margin-bottom:10px;border:1px solid var(--light-gray);border-radius:3px;width:fit-content;overflow:hidden">
+      <div style="display:flex;gap:0;margin-bottom:10px;border:1px solid var(--line);border-radius:8px;width:fit-content;overflow:hidden">
         <button class="btn cov-tab active" data-cov="brokers" onclick="setCovScope('brokers')">Brokers</button>
         <button class="btn cov-tab" data-cov="inmos" onclick="setCovScope('inmos')">Inmobiliarias</button>
         <button class="btn cov-tab" data-cov="combined" onclick="setCovScope('combined')">Combinado</button>
@@ -605,28 +651,36 @@
       <div class="chart-card"><h3>Brokers vs Inmobiliarias por rol</h3><div id="chart-cov-mix"></div></div>
     </div>
 
-    <div class="ed-divider"><span class="ed-label">Composición y salud</span><span class="ed-line"></span></div>
-    <div class="charts-grid">
-      <div class="chart-card"><h3>Distribución por etapa del ciclo de vida</h3><div id="chart-lc"></div></div>
-      <div class="chart-card"><h3>Distribución de Riesgo</h3><div id="chart-risk"></div></div>
+    <div class="chart-card">
+      <h3>Asignaciones por persona <small style="font-weight:400;color:var(--dark-gray);letter-spacing:0">— cuentas en cartera (brokers + inmobiliarias)</small></h3>
+      <div id="chart-assignments-by-owner"></div>
     </div>
 
-    <div class="ed-divider"><span class="ed-label">Actividad y crecimiento</span><span class="ed-line"></span></div>
+    <!-- ─── SALUD ─── -->
+    <div class="ed-divider"><span class="ed-label">Salud · señales de la cartera</span><span class="ed-line"></span></div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>Distribución de Riesgo</h3><div id="chart-risk"></div></div>
+      <div class="chart-card"><h3>Distribución por etapa del ciclo de vida</h3><div id="chart-lc"></div></div>
+    </div>
+
+    <!-- ─── VOLUMEN ─── -->
+    <div class="ed-divider"><span class="ed-label">Volumen · cómo se mueve la cartera</span><span class="ed-line"></span></div>
     <div class="charts-grid">
       <div class="chart-card"><h3>Actividad por quarter · últimos 8Q</h3><div id="chart-q"></div></div>
       <div class="chart-card"><h3>Distribución por tenure</h3><div id="chart-tenure"></div></div>
     </div>
 
-    <div class="ed-divider"><span class="ed-label">Producto y top accounts</span><span class="ed-line"></span></div>
+    <!-- ─── PRODUCTO ─── -->
+    <div class="ed-divider"><span class="ed-label">Producto · qué venden</span><span class="ed-line"></span></div>
     <div class="charts-grid">
       <div class="chart-card"><h3>Distribución de rentas (tickets)</h3><div id="chart-rent"></div></div>
       <div class="chart-card"><h3>Uso por producto</h3><div id="chart-prod"></div></div>
     </div>
-    <div class="chart-card"><h3>Top 10 Inmobiliarias por Revenue L12M</h3><div id="chart-top-inmos"></div></div>
     <div class="chart-card">
-      <h3>Asignaciones por persona <small style="font-weight:400;color:var(--dark-gray);letter-spacing:0">— cuentas en cartera (brokers + inmobiliarias)</small></h3>
-      <div id="chart-assignments-by-owner"></div>
+      <h3>Top 10 Inmobiliarias por Revenue L12M</h3>
+      <div id="chart-top-inmos"></div>
     </div>
+
   </section>
 
   <!-- METODOLOGÍA -->
@@ -1119,7 +1173,7 @@ function getA(id){
 // Inmobiliaria-level state (separate keyspace, prefix 'inmo:')
 function getI(inmoId){
   const key = 'inmo:'+inmoId;
-  if(!STATE[key]) STATE[key] = {owner:'',activities:[],value_events:[],notes:'',handed_off:false,handoff_date:null,am_snapshot:null,owner_history:[],pic_override:null,no_cs_required:false,intervention_detail:'',handoff_log:[],working_notes:''};
+  if(!STATE[key]) STATE[key] = {status:'No Contactado',owner:'',activities:[],value_events:[],notes:'',handed_off:false,handoff_date:null,am_snapshot:null,owner_history:[],pic_override:null,no_cs_required:false,intervention_detail:'',handoff_log:[],working_notes:''};
   if(!STATE[key].value_events) STATE[key].value_events=[];
   if(!STATE[key].activities) STATE[key].activities=[];
   if(STATE[key].handed_off===undefined) STATE[key].handed_off=false;
@@ -1130,6 +1184,9 @@ function getI(inmoId){
   if(STATE[key].intervention_detail===undefined) STATE[key].intervention_detail='';
   if(!STATE[key].handoff_log) STATE[key].handoff_log=[];
   if(STATE[key].working_notes===undefined) STATE[key].working_notes='';
+  if(STATE[key].status===undefined) STATE[key].status='No Contactado';
+  // Migrate legacy values (English 5-phase → new 4-phase)
+  if(STATUS_MIGRATE[STATE[key].status]) STATE[key].status = STATUS_MIGRATE[STATE[key].status];
   _backfillOwnerHistory(STATE[key]);
   return STATE[key];
 }
@@ -1844,49 +1901,85 @@ function renderKPIs(){
 
 // ─── PIPELINE Kanban ───
 const STATUSES = PIPELINE_PHASES;
+// Embudo pool — 'broker' (default) | 'inmo'. Persists in localStorage so switching
+// tabs keeps the choice.
+let pipePool = localStorage.getItem('m1cs_pipe_pool_v1') || 'broker';
+function setPipePool(p){
+  pipePool = p;
+  localStorage.setItem('m1cs_pipe_pool_v1', p);
+  document.querySelectorAll('.pipe-pool').forEach(b => {
+    const active = b.dataset.pool === p;
+    b.style.background = active ? 'var(--accent)' : 'transparent';
+    b.style.color      = active ? '#fff' : 'var(--dark-gray)';
+  });
+  // Re-label the search placeholder so it makes sense in either pool
+  const search = $('#f-pipe-search');
+  if(search) search.placeholder = (p === 'inmo' ? 'Buscar inmobiliaria…' : 'Buscar broker o empresa…');
+  // Show/hide broker-only filters
+  const segSel = $('#f-pipe-segment');
+  if(segSel) segSel.style.display = (p === 'inmo' ? 'none' : '');
+  renderPipeline();
+}
+
 function renderPipeline(){
   refreshPipeOwnerOptions();
+  // Init the toggle visual state on first render
+  document.querySelectorAll('.pipe-pool').forEach(b => {
+    const active = b.dataset.pool === pipePool;
+    b.style.background = active ? 'var(--accent)' : 'transparent';
+    b.style.color      = active ? '#fff' : 'var(--dark-gray)';
+  });
+  const search = $('#f-pipe-search');
+  if(search) search.placeholder = (pipePool === 'inmo' ? 'Buscar inmobiliaria…' : 'Buscar broker o empresa…');
+  const segSel = $('#f-pipe-segment');
+  if(segSel) segSel.style.display = (pipePool === 'inmo' ? 'none' : '');
   const cont = $('#kanban'); cont.innerHTML='';
   // Filters
   const q     = ($('#f-pipe-search')?.value || '').trim().toLowerCase();
   const fo    = $('#f-pipe-owner')?.value || '';
   const frole = $('#f-pipe-role')?.value || '';
   const fseg  = $('#f-pipe-segment')?.value || '';
-  // Slot ID-friendly slugs match the static KPI div ids (pl-no-contactado, etc.)
   const slugFor = s => statusSlug(s);
-  // Color per phase — restrained palette, accent only on Estable so the eye reads it as the goal
   const phaseColor = {
     'No Contactado': 'var(--mid-gray)',
     'Trabajando':    'var(--peach)',
     'Estable':       'var(--accent)',
     'Perdida':       'var(--red)',
   };
-  // Apply filters once, then bucket by phase
-  let pool = BROKERS.slice();
-  if(q)    pool = pool.filter(r => (r.broker+' '+(r.company||'')).toLowerCase().includes(q));
-  if(fseg) pool = pool.filter(r => r.segment === fseg);
+
+  const isInmo = pipePool === 'inmo';
+  const sourcePool = isInmo ? INMOS : BROKERS;
+  // Apply filters once
+  let pool = sourcePool.slice();
+  if(q){
+    pool = pool.filter(r => {
+      const name = isInmo ? r.company : `${r.broker} ${r.company||''}`;
+      return name.toLowerCase().includes(q);
+    });
+  }
+  if(!isInmo && fseg) pool = pool.filter(r => r.segment === fseg);
   if(fo || frole){
     pool = pool.filter(r => {
-      const a = getA(r.id);
-      const owner = a.owner || '';
-      const bucket = coverageBucket({owner, lifecycle:r.lifecycle, tenure_months:r.tenure_months});
+      const st = isInmo ? getI(r.id) : getA(r.id);
+      const owner = st.owner || '';
+      const lc = isInmo ? inmoLifecycle(r) : r.lifecycle;
+      const bucket = coverageBucket({owner, lifecycle:lc, tenure_months:r.tenure_months});
       if(fo === '__unassigned__'){ if(owner) return false; }
       else if(fo && owner !== fo) return false;
       if(frole && bucket !== frole) return false;
       return true;
     });
   }
-  $('#pipe-meta').textContent = `${pool.length} cuenta(s) en vista`;
+  $('#pipe-meta').textContent = `${pool.length} ${isInmo ? 'inmobiliaria(s)' : 'broker(s)'} en vista`;
 
   STATUSES.forEach(st => {
-    const items = pool.filter(r => getA(r.id).status === st)
-      .sort((a,b) => (b.deals_l6m||0) - (a.deals_l6m||0));
-    // KPI card metrics (May-2026 spec): avg ticket (MoradaUno revenue per deal) +
-    // total L6M volume — both more honest than revenue L12M for "what's happening NOW"
+    const items = pool.filter(r => (isInmo ? getI(r.id) : getA(r.id)).status === st)
+      .sort(comparePriority);
+    // KPI card metrics — average MoradaUno ticket + total L6M volume across this phase.
     const avgTicket = items.length
-      ? Math.round(items.reduce((s,r)=>s+(r.avg_deal_revenue||0),0) / items.length)
+      ? Math.round(items.reduce((s,r) => s + (isInmo ? (r.avg_deal_revenue||0) : (r.avg_deal_revenue||0)), 0) / items.length)
       : 0;
-    const volL6m = items.reduce((s,r)=>s+(r.deals_l6m||0),0);
+    const volL6m = items.reduce((s,r) => s + (r.deals_l6m||0), 0);
     const slug = slugFor(st);
     const kpiN = $('#pl-'+slug); if(kpiN) kpiN.textContent = items.length;
     const kpiSub = $('#plm-'+slug); if(kpiSub) kpiSub.textContent = `${fmtK(avgTicket)} ticket prom · ${volL6m} deals L6M`;
@@ -1900,15 +1993,22 @@ function renderPipeline(){
       </div>
       <div style="padding:10px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px">
       ${items.slice(0,50).map(r => {
-        const a = getA(r.id);
-        const ownerLine = a.owner ? `<div style="font-size:10.5px;color:var(--dark-gray);margin-top:4px">👤 ${esc(a.owner)}</div>` : '';
+        const stObj = isInmo ? getI(r.id) : getA(r.id);
+        const name = isInmo ? r.company : r.broker;
+        const sub  = isInmo ? `${r.brokers_total} brokers · ${r.brokers_active_90d} activos` : (r.company||'Independiente');
+        const onClick = isInmo ? `openInmo('${escAttr(r.id)}')` : `openBroker('${escAttr(r.id)}')`;
+        const ownerLine = stObj.owner ? `<div style="font-size:10.5px;color:var(--dark-gray);margin-top:4px">👤 ${esc(stObj.owner)}</div>` : '';
+        const tier = priorityTier(r, isInmo ? 'inmo' : 'broker');
         return `
-        <div style="background:var(--surface);border-left:3px solid ${phaseColor[st]||'var(--mid-gray)'};border-radius:8px;padding:10px 12px;cursor:pointer;font-size:12px;transition:background .12s" onclick="openBroker('${escAttr(r.id)}')" onmouseenter="this.style.background='#fff'" onmouseleave="this.style.background='var(--surface)'">
-          <div style="font-weight:600;line-height:1.3;color:var(--near-black)">${esc(r.broker)}</div>
-          <div style="font-size:10.5px;color:var(--dark-gray);margin-top:2px">${esc(r.company||'Independiente')}</div>
+        <div style="background:var(--surface);border-left:3px solid ${phaseColor[st]||'var(--mid-gray)'};border-radius:8px;padding:10px 12px;cursor:pointer;font-size:12px;transition:background .12s" onclick="${onClick}" onmouseenter="this.style.background='#fff'" onmouseleave="this.style.background='var(--surface)'">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
+            <div style="font-weight:600;line-height:1.3;color:var(--near-black);flex:1;min-width:0">${esc(name)}</div>
+            <span style="font-size:10.5px">${priorityBadge(tier, false)}</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--dark-gray);margin-top:2px">${esc(sub)}</div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:6px;flex-wrap:wrap">
             <span class="pill risk-${r.risk}">${r.risk}</span>
-            <span style="font-size:11px;font-weight:700;color:var(--near-black);font-variant-numeric:tabular-nums" title="Volumen L6M · Ticket promedio MoradaUno">${r.deals_l6m||0} deals · ${fmtK(r.avg_deal_revenue||0)}</span>
+            <span style="font-size:11px;font-weight:700;color:var(--near-black);font-variant-numeric:tabular-nums" title="Volumen L6M · Margen anual estimado">${r.deals_l6m||0} deals · ${fmtK(r.margin_run_rate_annual||0)}/año</span>
           </div>
           ${ownerLine}
         </div>`;
@@ -2519,7 +2619,9 @@ function openInmo(id){
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
       <button class="btn sm ${isPic?'primary':'ghost'}" onclick="togglePic('${escAttr(inmo.id)}','inmo')" style="${isPic?'background:#6D28D9':''}">${isPic?'★ PIC':'☆ Marcar PIC'}</button>
       <button class="btn sm ${amOnly?'primary':'ghost'}" onclick="toggleAmOnly('${escAttr(inmo.id)}','inmo')" style="${amOnly?'background:var(--blue)':''}">${amOnly?'✓ Sólo AM (sin CS)':'Sólo AM · sin CS Partner'}</button>
-      <span style="font-size:11px;color:var(--dark-gray);margin-left:auto">PIC: clasificación de cliente ideal · Sólo AM: cuenta no requiere CS Partner</span>
+      <label style="display:flex;align-items:center;gap:6px;margin-left:auto;font-size:11.5px;color:var(--dark-gray)">Fase en Embudo
+        <select id="inmo-status-${escAttr(inmo.id)}" onchange="setInmoStatus('${escAttr(inmo.id)}', this.value)" style="font-size:12px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--near-black);font-weight:600">${PIPELINE_PHASES.map(s=>`<option ${iSt0.status===s?'selected':''}>${s}</option>`).join('')}</select>
+      </label>
     </div>
 
     <div class="account-grid">
@@ -2753,6 +2855,12 @@ function removeVEInmo(inmoId, idx){
   i.value_events.splice(idx,1);
   saveState(); openInmo(inmoId);
 }
+function setInmoStatus(inmoId, status){
+  const i = getI(inmoId);
+  i.status = status;
+  saveState(); renderAll();
+}
+
 function saveInmoInterventionDetail(inmoId){
   const ta = $('#inmo-interv-detail');
   if(!ta) return;
@@ -2768,6 +2876,14 @@ function addInmoActFromForm(inmoId){
   if(!text && !outcome){ alert('Agrega descripción o resultado.'); return; }
   const i = getI(inmoId);
   i.activities.push({date:nowLocalIso(),type,csm,outcome,text});
+  // Auto-transition phase based on outcome (mirrors broker behavior in addAct)
+  if(outcome === 'Activación' || outcome === 'Renovación firmada'){
+    i.status = 'Estable';
+  } else if(['Contactado','Agendado','Interesado'].includes(outcome)){
+    if(i.status === 'No Contactado') i.status = 'Trabajando';
+  } else if(outcome === 'Rechazó'){
+    i.status = 'Perdida';
+  }
   saveState(); openInmo(inmoId);
 }
 function saveInmo(inmoId){
@@ -3013,10 +3129,19 @@ function renderLeaderboard(){
 }
 
 function renderAnalytics(){
-  // ─── KPI tiles ───
-  const totalRevL12M = BROKERS.reduce((s,r)=>s+(r.revenue_l12m||0),0);
+  recomputePriorityThresholds();
+  // ─── HERO METRICS ───
+  const totalMargenAnual = BROKERS.reduce((s,r)=>s+(r.margin_run_rate_annual||0),0);
+  const urgentBrokers = BROKERS.filter(r => priorityTier(r,'broker') === 'urgent');
+  const urgentInmos   = INMOS.filter(i => priorityTier(i,'inmo') === 'urgent');
+  const marginUrgent = urgentBrokers.reduce((s,r)=>s+(r.margin_run_rate_annual||0),0)
+                     + urgentInmos.reduce((s,i)=>s+(i.margin_run_rate_annual||0),0);
   const activeL90 = BROKERS.filter(r=>(r.deals_90d||0)>0).length;
-  const realized = BROKERS.reduce((s,r)=>s+(getA(r.id).realized_impact||0),0);
+  const assignedBrokers = BROKERS.filter(r=>!!getA(r.id).owner).length;
+  const assignedInmos = INMOS.filter(i=>!!getI(i.id).owner).length;
+  const coveragePct = (BROKERS.length + INMOS.length) > 0
+    ? Math.round((assignedBrokers + assignedInmos) / (BROKERS.length + INMOS.length) * 100)
+    : 0;
   // Cuentas sin dueño (bucket NONE) y revenue expuesto
   const noOwnBrokers = BROKERS.filter(r=>{
     const b = coverageBucket({owner:getA(r.id).owner, lifecycle:r.lifecycle, tenure_months:r.tenure_months});
@@ -3024,14 +3149,28 @@ function renderAnalytics(){
   });
   const noOwnRev = noOwnBrokers.reduce((s,r)=>s+(r.revenue_l12m||0),0);
 
-  $('#a-rev').textContent = fmtK(totalRevL12M);
-  $('#a-revavg').textContent = BROKERS.length ? `${fmtK(totalRevL12M/BROKERS.length)} promedio /broker` : '—';
+  $('#a-margin').textContent = fmtK(totalMargenAnual);
+  $('#a-margin-sub').textContent = `${BROKERS.length} brokers + ${INMOS.length} inmobiliarias`;
+  $('#a-margin-urgent').textContent = fmtK(marginUrgent);
+  $('#a-urgent-count').textContent = `${urgentBrokers.length} brokers + ${urgentInmos.length} inmos 🔥`;
+  $('#a-coverage').textContent = coveragePct + '%';
+  $('#a-coverage-sub').textContent = `${assignedBrokers + assignedInmos} de ${BROKERS.length + INMOS.length} con dueño`;
   $('#a-active').textContent = activeL90;
   $('#a-activepct').textContent = BROKERS.length ? `${Math.round(activeL90/BROKERS.length*100)}% del total` : '—';
   $('#a-noown').textContent = noOwnBrokers.length;
   $('#a-noownrev').textContent = `${fmtK(noOwnRev)} expuestos`;
-  $('#a-real').textContent = fmtK(realized);
-  $('#a-realpct').textContent = META.revenue_at_risk ? `${(realized/META.revenue_at_risk*100).toFixed(1)}% del at-risk` : 'por CS';
+  // Legacy hidden IDs (kept for any code that still writes to them)
+  const legacy = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  const totalRevL12M = BROKERS.reduce((s,r)=>s+(r.revenue_l12m||0),0);
+  const realized = BROKERS.reduce((s,r)=>s+(getA(r.id).realized_impact||0),0);
+  legacy('a-rev', fmtK(totalRevL12M));
+  legacy('a-revavg', BROKERS.length ? `${fmtK(totalRevL12M/BROKERS.length)} /broker` : '—');
+  legacy('a-real', fmtK(realized));
+  legacy('a-realpct', 'por CS');
+
+  // ─── PRIORIDAD CHARTS ───
+  renderPriorityStackChart();
+  renderTopMarginChart();
 
   // ─── 1. Cobertura ───
   // Mapa de cobertura · Roles × Lifecycle
@@ -3160,6 +3299,78 @@ function renderAnalytics(){
     const el = document.querySelector('#chart-assignments-by-owner');
     if(el) el.innerHTML = '<div class="empty" style="padding:24px 12px">Aún no hay asignaciones registradas. Asigna dueños en la Cartera de Brokers o Inmobiliarias para ver la distribución.</div>';
   }
+}
+
+// ─── Margen por tier de prioridad (stacked horizontal bar) ───
+function renderPriorityStackChart(){
+  recomputePriorityThresholds();
+  function bucketMargin(pool, kind){
+    const acc = {urgent:0, important:0, low:0};
+    pool.forEach(it => { acc[priorityTier(it, kind)] += (it.margin_run_rate_annual||0); });
+    return acc;
+  }
+  const brokerAcc = bucketMargin(BROKERS, 'broker');
+  const inmoAcc   = bucketMargin(INMOS, 'inmo');
+  const total = brokerAcc.urgent + brokerAcc.important + brokerAcc.low +
+                inmoAcc.urgent + inmoAcc.important + inmoAcc.low;
+  const el = document.querySelector('#chart-priority-stack');
+  if(!el) return;
+  if(total <= 0){ el.innerHTML = '<div class="empty" style="padding:30px 16px">Aún no hay margen estimado. Espera al refresh diario.</div>'; return; }
+  function row(label, urgent, important, low){
+    const sum = urgent + important + low;
+    if(sum <= 0) return '';
+    const pUrg = (urgent/sum)*100, pImp = (important/sum)*100, pLow = (low/sum)*100;
+    return `
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><strong style="font-size:12.5px;color:var(--near-black)">${esc(label)}</strong><span style="font-size:11.5px;color:var(--dark-gray);font-variant-numeric:tabular-nums">${fmtK(sum)} / año</span></div>
+        <div style="display:flex;height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--line)">
+          ${urgent>0?`<div style="width:${pUrg}%;background:#DC2626;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700" title="🔥 Urgente · ${fmtK(urgent)}">${pUrg>=10?Math.round(pUrg)+'%':''}</div>`:''}
+          ${important>0?`<div style="width:${pImp}%;background:#D97706;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700" title="⚡ Importante · ${fmtK(important)}">${pImp>=10?Math.round(pImp)+'%':''}</div>`:''}
+          ${low>0?`<div style="width:${pLow}%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700" title="💎 Saludable · ${fmtK(low)}">${pLow>=10?Math.round(pLow)+'%':''}</div>`:''}
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--dark-gray);margin-top:4px;font-variant-numeric:tabular-nums">
+          <span>🔥 ${fmtK(urgent)}</span><span>⚡ ${fmtK(important)}</span><span>💎 ${fmtK(low)}</span>
+        </div>
+      </div>`;
+  }
+  el.innerHTML = `
+    ${row('Brokers',       brokerAcc.urgent, brokerAcc.important, brokerAcc.low)}
+    ${row('Inmobiliarias', inmoAcc.urgent,   inmoAcc.important,   inmoAcc.low)}
+    <div style="font-size:11px;color:var(--dark-gray);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-top:6px;line-height:1.5">
+      <strong style="color:var(--near-black)">Lectura:</strong> los tiers son percentiles dentro de cada pool — el monto absoluto entre 🔥 brokers y 🔥 inmos no es comparable directamente (un inmo agrega varios brokers). Lo importante es la proporción dentro de cada fila.
+    </div>`;
+}
+
+// ─── Top 10 cuentas por margen anual (brokers + inmos juntos) ───
+function renderTopMarginChart(){
+  const all = [
+    ...BROKERS.map(b => ({type:'broker', id:b.id, name:b.broker, sub:b.company||'Independiente', m:b.margin_run_rate_annual||0})),
+    ...INMOS.map(i   => ({type:'inmo',   id:i.id, name:i.company, sub:`${i.brokers_total} brokers`, m:i.margin_run_rate_annual||0})),
+  ].filter(x => x.m > 0).sort((a,b)=>b.m-a.m).slice(0,10);
+  const el = document.querySelector('#chart-top-margin');
+  if(!el) return;
+  if(!all.length){ el.innerHTML = '<div class="empty" style="padding:30px 16px">Sin datos de margen disponibles.</div>'; return; }
+  const maxV = all[0].m;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${all.map((x,i) => {
+        const w = (x.m/maxV)*100;
+        const color = x.type === 'inmo' ? '#671E75' : 'var(--accent)';
+        const icon  = x.type === 'inmo' ? '🏢' : '👤';
+        const onClick = x.type === 'inmo' ? `openInmo('${escAttr(x.id)}')` : `openBroker('${escAttr(x.id)}')`;
+        return `
+          <div onclick="${onClick}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;background:var(--surface);transition:background .12s" onmouseenter="this.style.background='#fff'" onmouseleave="this.style.background='var(--surface)'">
+            <span style="width:18px;font-size:11.5px;color:var(--dark-gray);font-variant-numeric:tabular-nums">${i+1}</span>
+            <span style="font-size:13px">${icon}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12.5px;font-weight:600;color:var(--near-black);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.name)}</div>
+              <div style="font-size:10.5px;color:var(--dark-gray);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.sub)}</div>
+              <div style="height:4px;background:var(--line);border-radius:2px;margin-top:5px;overflow:hidden"><div style="width:${w}%;height:100%;background:${color}"></div></div>
+            </div>
+            <strong style="font-size:12.5px;color:${color};font-variant-numeric:tabular-nums;white-space:nowrap">${fmtK(x.m)}/año</strong>
+          </div>`;
+      }).join('')}
+    </div>`;
 }
 
 // Dual-axis quarterly chart: stacked deals (by sub-product) on left axis, revenue bars on right axis
