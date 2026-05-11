@@ -252,8 +252,10 @@
   .log-form .row>*{flex:1;min-width:120px}
 
   .sparkline{display:block}
-  .chart-card{background:#fff;border-radius:14px;padding:20px 22px;box-shadow:var(--shadow-sm);border:1px solid var(--line);margin-bottom:14px}
-  .chart-card h3{font-size:12.5px;font-weight:700;color:var(--near-black);margin-bottom:16px;letter-spacing:-.005em}
+  .chart-card{background:#fff;border-radius:14px;padding:20px 22px;box-shadow:var(--shadow-sm);border:1px solid var(--line);margin-bottom:14px;transition:box-shadow .2s}
+  .chart-card:hover{box-shadow:var(--shadow-md)}
+  .chart-card h3{font-size:12.5px;font-weight:700;color:var(--near-black);margin-bottom:10px;letter-spacing:-.005em}
+  .chart-card .chart-sub{font-size:11.5px;color:var(--dark-gray);margin:-4px 0 14px;line-height:1.5}
   .chart-card svg{display:block;width:100%;overflow:visible}
 
   .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
@@ -615,8 +617,15 @@
         <div id="chart-priority-stack"></div>
       </div>
       <div class="chart-card">
-        <h3>Top 10 cuentas por margen anual</h3>
-        <div style="font-size:11.5px;color:var(--dark-gray);margin:-8px 0 12px;line-height:1.5">Brokers + inmobiliarias mezclados. Toca el nombre para abrir el detalle.</div>
+        <h3 style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <span>Top 10 cuentas por margen anual</span>
+          <span role="tablist" aria-label="Filtrar top 10" style="display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;gap:1px">
+            <button class="top-pool active" data-pool="all"    onclick="setTopMarginPool('all')"    style="padding:5px 12px;border:none;border-radius:999px;font-size:11px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff;font-family:inherit">Todas</button>
+            <button class="top-pool"        data-pool="broker" onclick="setTopMarginPool('broker')" style="padding:5px 12px;border:none;border-radius:999px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:var(--dark-gray);font-family:inherit">Brokers</button>
+            <button class="top-pool"        data-pool="inmo"   onclick="setTopMarginPool('inmo')"   style="padding:5px 12px;border:none;border-radius:999px;font-size:11px;font-weight:600;cursor:pointer;background:transparent;color:var(--dark-gray);font-family:inherit">Inmobiliarias</button>
+          </span>
+        </h3>
+        <div style="font-size:11.5px;color:var(--dark-gray);margin:-4px 0 12px;line-height:1.5">Toca el nombre para abrir el detalle.</div>
         <div id="chart-top-margin"></div>
       </div>
     </div>
@@ -627,15 +636,16 @@
     <div class="chart-card" style="margin-bottom:14px">
       <h3 style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
         <span>Mapa de cobertura · Roles × Ciclo de vida</span>
-        <span style="font-size:11px;font-weight:500;color:var(--dark-gray)" id="cov-matrix-meta">—</span>
+        <span style="font-size:11px;font-weight:500;color:var(--dark-gray);font-variant-numeric:tabular-nums" id="cov-matrix-meta">—</span>
       </h3>
+      <div class="chart-sub">Cada celda muestra qué % de las cuentas en ese cruce tienen dueño asignado. Verde más oscuro = mejor cobertura.</div>
       <div style="display:flex;align-items:center;gap:14px;font-size:10px;color:var(--dark-gray);margin-bottom:10px;flex-wrap:wrap;letter-spacing:.04em">
         <span style="font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#9CA3AF">% asignado</span>
-        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;background:#3F0E48"></span> 80+</span>
-        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;background:#671E75"></span> 60–79</span>
-        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;background:#B14EB5"></span> 40–59</span>
-        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;background:#E2ACD7"></span> 1–39</span>
-        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;background:#DC2626"></span> 0 · sin persona</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;border-radius:2px;background:#0E3D22"></span> 80+</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;border-radius:2px;background:#14532D"></span> 60–79</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;border-radius:2px;background:#34A874"></span> 40–59</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;border-radius:2px;background:#A7F3D0"></span> 1–39</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:18px;height:8px;border-radius:2px;background:#DC2626"></span> 0 · sin persona</span>
         <span style="margin-left:auto">— sin cuentas</span>
       </div>
       <div style="display:flex;gap:0;margin-bottom:10px;border:1px solid var(--line);border-radius:8px;width:fit-content;overflow:hidden">
@@ -647,28 +657,46 @@
     </div>
 
     <div class="chart-card">
-      <h3>Asignaciones por persona <small style="font-weight:400;color:var(--dark-gray);letter-spacing:0">— cuentas en cartera (brokers + inmobiliarias)</small></h3>
+      <h3>Asignaciones por persona</h3>
+      <div class="chart-sub">Cuántas cuentas (brokers + inmobiliarias) están en la cartera de cada persona del equipo. Ayuda a detectar carga despareja.</div>
       <div id="chart-assignments-by-owner"></div>
     </div>
 
     <!-- ─── SALUD ─── -->
     <div class="ed-divider"><span class="ed-label">Salud · señales de la cartera</span><span class="ed-line"></span></div>
     <div class="charts-grid">
-      <div class="chart-card"><h3>Distribución de Riesgo</h3><div id="chart-risk"></div></div>
-      <div class="chart-card"><h3>Distribución por etapa del ciclo de vida</h3><div id="chart-lc"></div></div>
+      <div class="chart-card">
+        <h3>Distribución de Riesgo</h3>
+        <div class="chart-sub">Cuántos brokers caen en ALTO / MEDIO / BAJO. Más rojo = más cuentas en riesgo.</div>
+        <div id="chart-risk"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Distribución por etapa del ciclo de vida</h3>
+        <div class="chart-sub">Onboarding · Growing · Mature-Healthy · Active-Low · Declining · At-Risk · Churned.</div>
+        <div id="chart-lc"></div>
+      </div>
     </div>
 
     <!-- ─── VOLUMEN ─── -->
     <div class="ed-divider"><span class="ed-label">Volumen · cómo se mueve la cartera</span><span class="ed-line"></span></div>
     <div class="charts-grid">
-      <div class="chart-card"><h3>Actividad por quarter · últimos 8Q</h3><div id="chart-q"></div></div>
-      <div class="chart-card"><h3>Distribución por tenure</h3><div id="chart-tenure"></div></div>
+      <div class="chart-card">
+        <h3>Actividad por quarter · últimos 8Q</h3>
+        <div class="chart-sub">Barras apiladas por sub-producto (M3, M6, M12, M Legal). Línea de revenue al eje derecho.</div>
+        <div id="chart-q"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Distribución por tenure</h3>
+        <div class="chart-sub">Cuánto tiempo lleva cada broker con MoradaUno (en meses).</div>
+        <div id="chart-tenure"></div>
+      </div>
     </div>
 
     <!-- ─── PRODUCTO ─── -->
     <div class="ed-divider"><span class="ed-label">Producto · qué venden</span><span class="ed-line"></span></div>
     <div class="chart-card">
       <h3>Distribución de rentas (tickets)</h3>
+      <div class="chart-sub">Tamaño promedio de la renta del inquilino. Rentas más altas dejan más margen — ver Metodología.</div>
       <div id="chart-rent"></div>
     </div>
 
@@ -3175,11 +3203,16 @@ function renderAnalytics(){
   //  per CS feedback — the coverage matrix above already conveys this information.)
 
   // ─── 2. Composición y salud ───
-  // Lifecycle distribution
+  // Lifecycle distribution — each stage colored to match its semantic meaning
+  // (matches the lc-* pill colors used elsewhere).
   const lcCounts = {};
   BROKERS.forEach(r=>lcCounts[r.lifecycle]=(lcCounts[r.lifecycle]||0)+1);
   const lcOrder = ['Onboarding','Growing','Mature-Healthy','Active-Low','Declining','At-Risk','Churned'];
-  drawBars('#chart-lc', lcOrder.map(k=>({name:k,value:lcCounts[k]||0})), '#B14EB5');
+  const LC_COLOR = {
+    'Onboarding':'#1D4ED8', 'Growing':'#0E9384', 'Mature-Healthy':'#047857',
+    'Active-Low':'#9CA3AF', 'Declining':'#D97706', 'At-Risk':'#DC2626', 'Churned':'#1F2937',
+  };
+  drawBars('#chart-lc', lcOrder.map(k=>({name:k, value:lcCounts[k]||0, color:LC_COLOR[k]})), '#14532D');
 
   // Risk distribution — stacked horizontal bar
   const RISK_COLOR = {ALTO:'#DC2626', MEDIO:'#D97706', BAJO:'#059669'};
@@ -3209,7 +3242,7 @@ function renderAnalytics(){
     const t = b.tenure_months ?? 0;
     for(let i=0;i<tenureBins.length-1;i++){ if(t>=tenureBins[i] && t<tenureBins[i+1]){ tBuckets[i]++; break; } }
   });
-  drawBars('#chart-tenure', tenureLabels.map((l,i)=>({name:l, value:tBuckets[i]})), '#06038D');
+  drawBars('#chart-tenure', tenureLabels.map((l,i)=>({name:l, value:tBuckets[i]})), '#14532D');
 
   // ─── 4. Producto y top accounts ───
   // Ticket distribution
@@ -3220,7 +3253,7 @@ function renderAnalytics(){
     const t = b.avg_ticket;
     for(let i=0;i<bins.length-1;i++){ if(t>=bins[i] && t<bins[i+1]){ buckets[i]++; break; }}
   });
-  drawBars('#chart-rent', labels.map((l,i)=>({name:l,value:buckets[i]})), '#00C7B1');
+  drawBars('#chart-rent', labels.map((l,i)=>({name:l,value:buckets[i]})), '#14532D');
 
   // (Uso por producto + Top 10 Inmobiliarias por Revenue L12M charts removed
   //  May-2026 per CS feedback — Top-by-margen above replaces the revenue ranking.)
@@ -3296,21 +3329,50 @@ function renderPriorityStackChart(){
     </div>`;
 }
 
-// ─── Top 10 cuentas por margen anual (brokers + inmos juntos) ───
+// ─── Top 10 cuentas por margen anual ───
+// `topMarginPool` is 'all' | 'broker' | 'inmo'. Persisted in localStorage so the
+// preference survives reloads.
+let topMarginPool = localStorage.getItem('m1cs_top_margin_pool_v1') || 'all';
+function setTopMarginPool(p){
+  topMarginPool = p;
+  localStorage.setItem('m1cs_top_margin_pool_v1', p);
+  document.querySelectorAll('.top-pool').forEach(b => {
+    const active = b.dataset.pool === p;
+    b.style.background = active ? 'var(--accent)' : 'transparent';
+    b.style.color      = active ? '#fff' : 'var(--dark-gray)';
+  });
+  renderTopMarginChart();
+}
 function renderTopMarginChart(){
-  const all = [
-    ...BROKERS.map(b => ({type:'broker', id:b.id, name:b.broker, sub:b.company||'Independiente', m:b.margin_run_rate_annual||0})),
-    ...INMOS.map(i   => ({type:'inmo',   id:i.id, name:i.company, sub:`${i.brokers_total} brokers`, m:i.margin_run_rate_annual||0})),
-  ].filter(x => x.m > 0).sort((a,b)=>b.m-a.m).slice(0,10);
+  // Sync visual state of toggle (matters on first render and after re-renders)
+  document.querySelectorAll('.top-pool').forEach(b => {
+    const active = b.dataset.pool === topMarginPool;
+    b.style.background = active ? 'var(--accent)' : 'transparent';
+    b.style.color      = active ? '#fff' : 'var(--dark-gray)';
+  });
+
+  let pool = [];
+  if(topMarginPool !== 'inmo'){
+    pool.push(...BROKERS.map(b => ({type:'broker', id:b.id, name:b.broker, sub:b.company||'Independiente', m:b.margin_run_rate_annual||0})));
+  }
+  if(topMarginPool !== 'broker'){
+    pool.push(...INMOS.map(i => ({type:'inmo', id:i.id, name:i.company, sub:`${i.brokers_total} brokers`, m:i.margin_run_rate_annual||0})));
+  }
+  const all = pool.filter(x => x.m > 0).sort((a,b)=>b.m-a.m).slice(0,10);
+
   const el = document.querySelector('#chart-top-margin');
   if(!el) return;
-  if(!all.length){ el.innerHTML = '<div class="empty" style="padding:30px 16px">Sin datos de margen disponibles.</div>'; return; }
+  if(!all.length){
+    const label = topMarginPool === 'inmo' ? 'inmobiliarias' : (topMarginPool === 'broker' ? 'brokers' : 'cuentas');
+    el.innerHTML = `<div class="empty" style="padding:30px 16px">Sin ${label} con margen estimado.</div>`;
+    return;
+  }
   const maxV = all[0].m;
   el.innerHTML = `
     <div style="display:flex;flex-direction:column;gap:8px">
       ${all.map((x,i) => {
         const w = (x.m/maxV)*100;
-        const color = x.type === 'inmo' ? '#671E75' : 'var(--accent)';
+        const color = x.type === 'inmo' ? '#6D28D9' : 'var(--accent)';
         const icon  = x.type === 'inmo' ? '🏢' : '👤';
         const onClick = x.type === 'inmo' ? `openInmo('${escAttr(x.id)}')` : `openBroker('${escAttr(x.id)}')`;
         return `
@@ -3568,21 +3630,21 @@ const COV_MATRIX_STAGES = [
   {key:'At-Risk',         tenure:'60–90d sin act'},
   {key:'Churned',         tenure:'180d+ sin act'}
 ];
-// Paleta editorial: rampa monocromática púrpura para % cubierto.
+// Paleta editorial: rampa monocromática verde para % cubierto (matches the new accent).
 // Rojo se reserva exclusivamente para 0% (gap real). Sin datos → tono neutro.
 function _covColorForPct(pct){
-  if(pct === null) return '#FAFAF9';
+  if(pct === null) return '#FAFAF7';
   if(pct === 0)    return '#DC2626';
-  if(pct >= 80)    return '#3F0E48';
-  if(pct >= 60)    return '#671E75';
-  if(pct >= 40)    return '#B14EB5';
-  return '#E2ACD7';
+  if(pct >= 80)    return '#0E3D22';   // accent — darkest
+  if(pct >= 60)    return '#14532D';   // accent base
+  if(pct >= 40)    return '#34A874';   // mid green
+  return '#A7F3D0';                    // pale green
 }
 function _covTextColorFor(pct){
   if(pct === null) return '#9CA3AF';
   if(pct === 0)    return '#fff';
   if(pct >= 40)    return '#fff';
-  return '#3F0E48'; // texto oscuro sobre lavanda clara
+  return '#064E3B'; // texto oscuro sobre verde claro (mantiene contraste WCAG)
 }
 let COV_SCOPE = 'brokers';
 function setCovScope(scope){
@@ -3793,28 +3855,49 @@ function drawGroupedHBars(sel, items, opts){
   el.innerHTML = svg;
 }
 
-function drawBars(sel, items, color){
-  if(!items.length){ document.querySelector(sel).innerHTML=''; return; }
-  const W=500, H=200, pad={t:10,r:10,b:50,l:40};
+// Bar chart — refined version with rounded top, hover lift, tabular numerals,
+// and per-bar color override via item.color (so categorical charts like the
+// lifecycle distribution can color each stage on its own).
+function drawBars(sel, items, color, opts){
+  const el = document.querySelector(sel); if(!el) return;
+  if(!items.length){ el.innerHTML='<div class="empty" style="padding:24px 12px">Sin datos</div>'; return; }
+  opts = opts || {};
+  const W=520, H=220, pad={t:18,r:14,b:58,l:46};
   const slot = (W-pad.l-pad.r)/items.length;
-  const bw = slot*0.7;
-  const maxV = Math.max(...items.map(i=>i.value),1);
-  let svg = `<svg viewBox="0 0 ${W} ${H}">`;
+  const bw = slot*0.66;
+  const maxV = Math.max(...items.map(i=>i.value), 1);
+  const id = 'bg' + Math.random().toString(36).slice(2,7);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%">`;
+  // Subtle gradient defs — gives bars a slight depth without screaming
+  svg += `<defs>
+    <linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity=".82"/>
+    </linearGradient>
+  </defs>`;
+  // Gridlines + y-axis labels (tabular numerals, soft gray)
   for(let i=0;i<=3;i++){
     const yy = pad.t + i*(H-pad.t-pad.b)/3;
-    svg+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#E6E7E8"/>`;
-    svg+=`<text x="${pad.l-4}" y="${yy+3}" text-anchor="end" font-size="9" fill="#6B6B78">${Math.round(maxV*(3-i)/3).toLocaleString()}</text>`;
+    svg += `<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#ECEAE5" stroke-width="1"/>`;
+    svg += `<text x="${pad.l-6}" y="${yy+3}" text-anchor="end" font-size="9.5" fill="#9CA3AF" style="font-variant-numeric:tabular-nums">${Math.round(maxV*(3-i)/3).toLocaleString()}</text>`;
   }
   items.forEach((it,i)=>{
     const x = pad.l + i*slot + (slot-bw)/2;
     const h = (it.value/maxV)*(H-pad.t-pad.b);
-    svg+=`<rect x="${x}" y="${H-pad.b-h}" width="${bw}" height="${h}" rx="3" fill="${color}"/>`;
-    svg+=`<text x="${x+bw/2}" y="${H-pad.b-h-4}" text-anchor="middle" font-size="10" fill="#12051A" font-weight="700">${it.value}</text>`;
-    const label = it.name.length>10?it.name.slice(0,10)+'…':it.name;
-    svg+=`<text x="${x+bw/2}" y="${H-25}" text-anchor="middle" font-size="9" fill="#6B6B78" transform="rotate(-30 ${x+bw/2} ${H-25})">${label}</text>`;
+    const fill = it.color || `url(#${id})`;
+    // Bar — slight rounded top via path
+    const y0 = H-pad.b-h;
+    svg += `<g style="transition:opacity .15s">`;
+    svg += `<rect x="${x}" y="${y0}" width="${bw}" height="${h}" rx="4" fill="${fill}"><title>${esc(it.name)}: ${it.value.toLocaleString()}</title></rect>`;
+    // Value label above bar
+    svg += `<text x="${x+bw/2}" y="${y0-6}" text-anchor="middle" font-size="11" fill="#0F0B14" font-weight="700" style="font-variant-numeric:tabular-nums">${it.value.toLocaleString()}</text>`;
+    svg += `</g>`;
+    // X-axis label (rotated to fit longer names)
+    const label = it.name.length>14 ? it.name.slice(0,13)+'…' : it.name;
+    svg += `<text x="${x+bw/2}" y="${H-pad.b+14}" text-anchor="middle" font-size="10" fill="#6B6B78" transform="rotate(-22 ${x+bw/2} ${H-pad.b+14})">${esc(label)}</text>`;
   });
-  svg+='</svg>';
-  document.querySelector(sel).innerHTML = svg;
+  svg += '</svg>';
+  el.innerHTML = svg;
 }
 
 function drawLineChart(sel, labels, series){
