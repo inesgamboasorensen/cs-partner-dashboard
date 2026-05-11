@@ -18,6 +18,10 @@ Thumbs.db
 cs-data/dashboard_data.json
 cs-data/dashboard_data_embed.json
 
+# Phase 1/2 probe artifacts and phase 3 nightly staging — local only
+cs-data/sample/
+cs-data/_staging/
+
 # Local secrets
 .env
 *.key
