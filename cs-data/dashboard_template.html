@@ -369,6 +369,8 @@
       </div>
     </div>
 
+    <div id="banner-brokers"></div>
+
     <div class="section">
       <div class="section-hdr">
         <h2>Cola de prioridades</h2>
@@ -392,6 +394,7 @@
         <table class="worklist" id="tbl-work">
           <thead><tr>
             <th>#</th>
+            <th class="tooltip" data-tip="Lo que importa de un vistazo: 🔥 Urgente = enfócate hoy · ⚡ Importante = esta semana · 💎 Saludable = mantener cadencia. Ordenado por dónde tu hora rinde más margen.">Prioridad</th>
             <th>Cuenta</th>
             <th>PIC</th>
             <th>Plaza</th>
@@ -463,6 +466,8 @@
       <strong>Vista Inmobiliaria:</strong> agrupa brokers por empresa. Mide penetración (cuántos brokers están activos), lifecycle distribution, y revenue consolidado por inmobiliaria.
     </div>
 
+    <div id="banner-inmos"></div>
+
     <div class="section">
       <div class="section-hdr">
         <h2>Cola de prioridades · Inmobiliarias</h2>
@@ -474,12 +479,12 @@
           <select id="f-inmo-risk"><option value="">Todo riesgo</option><option>ALTO</option><option>MEDIO</option><option>BAJO</option></select>
           <select id="f-inmo-intervention"><option value="">Toda intervención</option><option value="yes">Requiere intervención</option><option value="no">Sana (sin intervención)</option></select>
           <select id="f-inmo-amonly"><option value="">Cobertura · todas</option><option value="cs">Con CS Partner</option><option value="amonly">Sólo AM (sin CS)</option></select>
-          <select id="f-inmo-sort"><option value="deals_total">Por Vol histórico</option><option value="avg_deal_revenue">Por Ticket promedio</option><option value="brokers_total">Por # brokers</option><option value="penetration">Por penetración</option><option value="deals_l12m">Por Deals L12M</option></select>
+          <select id="f-inmo-sort"><option value="__priority">Por Prioridad (default)</option><option value="margin_run_rate_annual">Por Margen anual</option><option value="deals_total">Por Vol histórico</option><option value="avg_deal_revenue">Por Ticket promedio</option><option value="brokers_total">Por # brokers</option><option value="penetration">Por penetración</option><option value="deals_l12m">Por Deals L12M</option></select>
         </div>
       </div>
       <div style="overflow-x:auto;max-height:72vh;overflow-y:auto">
         <table class="worklist">
-          <thead><tr><th>#</th><th>Inmobiliaria</th><th>PIC</th><th>Plaza</th><th>Vol histórico</th><th class="tooltip" data-tip="Ingreso promedio MoradaUno por deal (no es el valor de la renta).">Ticket prom</th><th>Intervención</th><th class="tooltip" data-tip="ALTO = ≥1/3 de los brokers de la inmo en riesgo ALTO. MEDIO = más de la mitad en ALTO o MEDIO. BAJO = el resto. Toca la inmo para ver señales por broker.">Riesgo</th><th>Brokers</th><th>Penetración</th><th>Tendencia</th><th>Renov.</th><th>Cobertura</th></tr></thead>
+          <thead><tr><th>#</th><th class="tooltip" data-tip="Lo que importa de un vistazo: 🔥 Urgente = enfócate hoy · ⚡ Importante = esta semana · 💎 Saludable = mantener cadencia. Ordenado por dónde tu hora rinde más margen.">Prioridad</th><th>Inmobiliaria</th><th>PIC</th><th>Plaza</th><th>Vol histórico</th><th class="tooltip" data-tip="Ingreso promedio MoradaUno por deal (no es el valor de la renta).">Ticket prom</th><th>Intervención</th><th class="tooltip" data-tip="ALTO = ≥1/3 de los brokers de la inmo en riesgo ALTO. MEDIO = más de la mitad en ALTO o MEDIO. BAJO = el resto. Toca la inmo para ver señales por broker.">Riesgo</th><th>Brokers</th><th>Penetración</th><th>Tendencia</th><th>Renov.</th><th>Cobertura</th></tr></thead>
           <tbody id="tbody-inmo"></tbody>
         </table>
       </div>
@@ -626,131 +631,238 @@
 
   <!-- METODOLOGÍA -->
   <section class="tab-pane" id="tab-metodologia">
-    <div class="summary-note">
-      <strong>Cómo se construye el dashboard.</strong> Visión holística de la cartera de Asesores e Inmobiliarias de MoradaUno: a quién cubrimos, dónde está el riesgo, y cómo medimos resultados. Las fórmulas detalladas están al final.
+    <!-- Hero -->
+    <div style="background:linear-gradient(135deg,var(--accent) 0%,#0F3D22 100%);color:#fff;border-radius:16px;padding:32px 28px 28px;margin-bottom:18px;box-shadow:var(--shadow-accent)">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.18em">Guía rápida</div>
+      <h1 style="font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-top:8px">Cómo trabajar este dashboard</h1>
+      <div style="font-size:14px;color:rgba(255,255,255,.85);margin-top:10px;max-width:680px;line-height:1.55">Una sola idea: tu hora vale más en las cuentas donde hay más margen en riesgo. Aquí abajo te explicamos qué significa cada color y cómo decidir por dónde empezar.</div>
     </div>
 
-    <!-- 1. Modelo de cobertura (4 roles) -->
+    <!-- Cómo trabajar — 4 pasos visuales -->
     <div class="section">
-      <div class="section-hdr"><h2>1 · Modelo de cobertura · 4 roles</h2></div>
-      <div style="padding:16px 20px;line-height:1.6;font-size:13px">
-        <p>Cada cuenta cae en exactamente uno de estos 5 buckets para que sepamos <strong>dónde sí hay dueño y dónde no</strong>:</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px">
-          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid var(--blue)">
-            <span class="pill role-AM">AM</span> <strong>Account Manager</strong>
-            <div style="font-size:12px;margin-top:4px">Lifecycle: <code>Onboarding</code> (primeros meses con M1).</div>
-          </div>
-          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid #008073">
-            <span class="pill role-CS">CS</span> <strong>CS Partner</strong>
-            <div style="font-size:12px;margin-top:4px">Lifecycle: <code>Growing</code>, <code>Mature-Healthy</code>, <code>Active-Low</code>, <code>Declining</code>, <code>At-Risk</code>.</div>
-          </div>
-          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid #B14E00">
-            <span class="pill role-TRAINER">TRAINER</span> <strong>Trainer (cartera)</strong>
-            <div style="font-size:12px;margin-top:4px">Cuentas activas con <code>tenure ≥ 12 meses</code> que no tienen AM/CS asignado.</div>
-          </div>
-          <div style="background:#FAFAF9;border-radius:8px;padding:10px 12px;border-left:3px solid var(--purple-dark)">
-            <span class="pill role-BDR">BDR</span> <strong>BDR (auto)</strong>
-            <div style="font-size:12px;margin-top:4px">Lifecycle: <code>Churned</code>. Auto-asignado para reactivación.</div>
-          </div>
-          <div style="background:#FEF2F2;border-radius:8px;padding:10px 12px;border-left:3px solid var(--red)">
-            <span class="pill role-NONE">SIN ASIGNAR</span>
-            <div style="font-size:12px;margin-top:4px">Sin dueño y fuera de overlay (joven y sin asignar). <strong>Es el gap a cerrar.</strong></div>
-          </div>
+      <div class="section-hdr"><h2>Tu rutina diaria · 4 pasos</h2></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;padding:18px 20px">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">1</div><strong style="font-size:13.5px">Filtra por tu nombre</strong></div>
+          <div style="font-size:12.5px;color:var(--dark-gray);line-height:1.5">En "Dueño", escoge tu nombre. El banner verde "Tus próximas cuentas" se va a recalcular para mostrar tus 3 cuentas más urgentes.</div>
         </div>
-        <p style="margin-top:12px;font-size:12px;color:var(--dark-gray)">El "rol esperado" se deriva del lifecycle. Si una persona del pool está asignada manualmente, esa cuenta cuenta como cubierta. Si no, cae en el overlay (Trainer ≥12mo, BDR para Churned) o en "Sin asignar".</p>
-      </div>
-    </div>
-
-    <!-- 2. Lifecycle stages -->
-    <div class="section">
-      <div class="section-hdr"><h2>2 · Etapas del ciclo de vida</h2></div>
-      <div style="padding:16px 20px;line-height:1.6;font-size:13px">
-        <p>Clasificación automática por <code>tenure_months</code>, <code>days_since_last</code>, <code>deals_90d</code>, <code>trend_pct</code>:</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:8px">
-          <div style="background:#FAFAF9;border-radius:6px;padding:8px 10px;border-left:3px solid var(--blue)"><span class="pill lc-Onboarding">Onboarding</span><div style="font-size:11.5px;margin-top:4px">Tenure &lt; 3 meses.</div></div>
-          <div style="background:#FAFAF9;border-radius:6px;padding:8px 10px;border-left:3px solid #008073"><span class="pill lc-Growing">Growing</span><div style="font-size:11.5px;margin-top:4px">3-12 meses con 2+ deals L90D.</div></div>
-          <div style="background:#FAFAF9;border-radius:6px;padding:8px 10px;border-left:3px solid var(--green)"><span class="pill lc-Mature-Healthy">Mature-Healthy</span><div style="font-size:11.5px;margin-top:4px">≥12 meses, trend ≥ 0, 2+ deals L90D.</div></div>
-          <div style="background:#FAFAF9;border-radius:6px;padding:8px 10px;border-left:3px solid var(--dark-gray)"><span class="pill lc-Active-Low">Active-Low</span><div style="font-size:11.5px;margin-top:4px">Activo pero baja productividad.</div></div>
-          <div style="background:#FAFAF9;border-radius:6px;padding:8px 10px;border-left:3px solid var(--amber)"><span class="pill lc-Declining">Declining</span><div style="font-size:11.5px;margin-top:4px">≥6 meses con trend &lt; -20%.</div></div>
-          <div style="background:#FAFAF9;border-radius:6px;padding:8px 10px;border-left:3px solid var(--red)"><span class="pill lc-At-Risk">At-Risk</span><div style="font-size:11.5px;margin-top:4px">Sin actividad 60-90 días.</div></div>
-          <div style="background:#FAFAF9;border-radius:6px;padding:8px 10px;border-left:3px solid var(--near-black)"><span class="pill lc-Churned">Churned</span><div style="font-size:11.5px;margin-top:4px">Sin actividad +190 días.</div></div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">2</div><strong style="font-size:13.5px">Empieza por 🔥 Urgente</strong></div>
+          <div style="font-size:12.5px;color:var(--dark-gray);line-height:1.5">La columna Prioridad ya ordena tu cartera de mayor a menor impacto. La primera fila es tu siguiente llamada.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">3</div><strong style="font-size:13.5px">Abre la cuenta</strong></div>
+          <div style="font-size:12.5px;color:var(--dark-gray);line-height:1.5">Toca cualquier fila para ver el detalle: por qué es prioritaria, qué brokers tiene, qué señales muestra. Si es una inmobiliaria, te decimos por qué broker empezar.</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">4</div><strong style="font-size:13.5px">Anota qué pasó</strong></div>
+          <div style="font-size:12.5px;color:var(--dark-gray);line-height:1.5">Dentro del detalle, registra la actividad (llamada, WhatsApp, demo…). El estado en el Embudo se actualiza solo.</div>
         </div>
       </div>
     </div>
 
-    <!-- 3. Riesgo y renovación -->
+    <!-- Prioridad — el corazón -->
     <div class="section">
-      <div class="section-hdr"><h2>3 · Riesgo y renovación</h2></div>
-      <div style="padding:16px 20px;line-height:1.6;font-size:13px">
-        <p><strong>Riesgo (ALTO / MEDIO / BAJO)</strong> — peor señal entre tres independientes:</p>
-        <ul style="margin:8px 0 12px 20px">
-          <li><strong>Inactividad</strong>: ALTO si <code>days_since_last &gt; 180</code> con 2+ deals · MEDIO si &gt; 60.</li>
-          <li><strong>Caída de uso</strong>: ALTO si <code>trend_pct ≤ -50%</code> · MEDIO si ≤ -20%.</li>
-          <li><strong>Renovación baja</strong>: ALTO si tasa copita &lt; 30% con 3+ contratos past-grace · MEDIO si &lt; 50%.</li>
+      <div class="section-hdr"><h2>¿Cómo decidimos qué es prioridad?</h2></div>
+      <div style="padding:18px 20px">
+        <div style="font-size:13.5px;color:var(--near-black);line-height:1.6;margin-bottom:14px">Combinamos dos cosas en una sola etiqueta: <strong>¿cuánto margen vale esta cuenta al año?</strong> y <strong>¿qué tan probable es que la perdamos si no actuamos?</strong></div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;line-height:1.55">
+          <div style="font-family:Merriweather,serif;font-size:15px;color:var(--accent);font-weight:700;letter-spacing:-.01em">Prioridad = Margen anual × Riesgo</div>
+          <div style="margin-top:6px;color:var(--dark-gray)">El riesgo pesa más cuando es ALTO (1.0), menos cuando es MEDIO (0.4), y casi nada cuando es BAJO (0.05) — una cuenta sana no necesita que la persigas.</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+          <div style="border:1px solid #FECACA;border-radius:12px;padding:16px;background:#FEF2F2">
+            <div style="font-size:22px;line-height:1">🔥</div>
+            <div style="font-size:13.5px;font-weight:700;color:#B91C1C;margin-top:6px">Urgente</div>
+            <div style="font-size:12px;color:#7F1D1D;margin-top:4px;line-height:1.5">Top 10% de tu cartera. Atención esta semana. Donde tu hora rinde más margen protegido.</div>
+          </div>
+          <div style="border:1px solid #FDE68A;border-radius:12px;padding:16px;background:#FEF3C7">
+            <div style="font-size:22px;line-height:1">⚡</div>
+            <div style="font-size:13.5px;font-weight:700;color:#92400E;margin-top:6px">Importante</div>
+            <div style="font-size:12px;color:#78350F;margin-top:4px;line-height:1.5">El siguiente 30%. Tenlas en tu agenda del mes. No están en llamas, pero merecen una visita.</div>
+          </div>
+          <div style="border:1px solid #A7F3D0;border-radius:12px;padding:16px;background:#ECFDF5">
+            <div style="font-size:22px;line-height:1">💎</div>
+            <div style="font-size:13.5px;font-weight:700;color:#047857;margin-top:6px">Saludable</div>
+            <div style="font-size:12px;color:#064E3B;margin-top:4px;line-height:1.5">El resto. Mantén cadencia, no rompas nada. No gastes ahí el día.</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:#F0EEE8;border-radius:10px;font-size:12px;color:var(--dark-gray);line-height:1.55"><strong style="color:var(--near-black)">Importante:</strong> PIC, Plaza, Tendencia y la fase del Embudo son <strong>filtros</strong>, no parte de la fórmula. Decides cuándo activarlos según el caso.</div>
+      </div>
+    </div>
+
+    <!-- Qué significa cada color -->
+    <div class="section">
+      <div class="section-hdr"><h2>¿Qué significan los colores?</h2></div>
+      <div style="padding:18px 20px">
+
+        <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Riesgo</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:24px">
+          <div style="border:1px solid #FECACA;border-radius:10px;padding:12px;background:#FEF2F2"><span class="pill risk-ALTO">ALTO</span><div style="font-size:12px;margin-top:6px;line-height:1.5">Hay al menos una señal grave: la cuenta lleva mucho sin actividad, su uso cayó fuerte, o no está renovando contratos.</div></div>
+          <div style="border:1px solid #FDE68A;border-radius:10px;padding:12px;background:#FEF3C7"><span class="pill risk-MEDIO">MEDIO</span><div style="font-size:12px;margin-top:6px;line-height:1.5">Hay una señal moderada: menos actividad de lo usual, o renovación bajando. Vale la pena revisar antes de que escale.</div></div>
+          <div style="border:1px solid #A7F3D0;border-radius:10px;padding:12px;background:#ECFDF5"><span class="pill risk-BAJO">BAJO</span><div style="font-size:12px;margin-top:6px;line-height:1.5">Sin señales preocupantes. La cuenta opera dentro de lo esperado.</div></div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Intervención</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:24px">
+          <div style="border:1px solid #FECACA;border-radius:10px;padding:12px;background:#FEF2F2"><span class="pill" style="background:#FEE2E2;color:var(--red);font-weight:600">Sí</span><div style="font-size:12px;margin-top:6px;line-height:1.5">La cuenta no está en BAJO o ya tiene un caso abierto. Necesita acción del equipo.</div></div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)"><span class="pill" style="background:#D1FAE5;color:var(--green);font-weight:600">No</span><div style="font-size:12px;margin-top:6px;line-height:1.5">Sin señales abiertas. Mantenimiento normal.</div></div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">PIC · Sólo AM</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:24px">
+          <div style="border:1px solid #DDD6FE;border-radius:10px;padding:12px;background:#F5F3FF"><span style="background:#F5F3FF;color:#6D28D9;border:1px solid #DDD6FE;font-weight:700;font-size:11px;padding:3px 9px;border-radius:999px">★ PIC</span><div style="font-size:12px;margin-top:6px;line-height:1.5">Ideal Customer Profile — el tipo de cliente que más nos conviene. Úsalo como filtro cuando quieras priorizar dentro de un grupo grande.</div></div>
+          <div style="border:1px solid #BFDBFE;border-radius:10px;padding:12px;background:#EFF6FF"><span style="background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE;font-weight:600;font-size:11px;padding:3px 9px;border-radius:999px">Sólo AM</span><div style="font-size:12px;margin-top:6px;line-height:1.5">Cuenta que se queda con Account Manager y no requiere CS Partner. Toggle dentro del detalle.</div></div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Tendencia</div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.55">Compara cuántos deals hizo la cuenta en los últimos 6 meses contra los 6 meses previos. <strong>▲ verde</strong> sube, <strong>▼ amarillo</strong> baja moderado, <strong>▼▼ rojo</strong> baja fuerte. Si una cuenta tuvo muy pocos deals (≤ 2 en 12 meses) ponemos <strong>"— bajo vol."</strong> porque el % se vuelve engañoso con tan pocos casos.</div>
+
+      </div>
+    </div>
+
+    <!-- Embudo fases -->
+    <div class="section">
+      <div class="section-hdr"><h2>Fases del Embudo</h2></div>
+      <div style="padding:18px 20px">
+        <div style="font-size:13px;color:var(--near-black);line-height:1.55;margin-bottom:14px">Cuando registras una actividad o cambias el estado dentro del detalle, la cuenta se mueve sola entre estas fases:</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+          <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
+            <div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--mid-gray)"></span><strong style="font-size:13px">No Contactado</strong></div>
+            <div style="font-size:11.5px;color:var(--dark-gray);margin-top:6px;line-height:1.5">Aún no hablas con la cuenta. Punto de partida.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
+            <div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--peach)"></span><strong style="font-size:13px">Trabajando</strong></div>
+            <div style="font-size:11.5px;color:var(--dark-gray);margin-top:6px;line-height:1.5">Ya hubo contacto. Estás moviéndola — agendaste algo, mandaste material, hay conversación abierta.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
+            <div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent)"></span><strong style="font-size:13px">Estable</strong></div>
+            <div style="font-size:11.5px;color:var(--dark-gray);margin-top:6px;line-height:1.5">Cuenta operando bien. La movieron a "Activación" o "Renovación firmada". Mantenimiento normal.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
+            <div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--red)"></span><strong style="font-size:13px">Perdida</strong></div>
+            <div style="font-size:11.5px;color:var(--dark-gray);margin-top:6px;line-height:1.5">La cuenta rechazó o no se pudo recuperar. Considera reactivación futura.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Roles -->
+    <div class="section">
+      <div class="section-hdr"><h2>Roles del equipo</h2></div>
+      <div style="padding:18px 20px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+          <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
+            <span class="pill role-AM">AM</span> <strong style="margin-left:4px">Account Manager</strong>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">Acompaña a la cuenta durante el onboarding (primeros meses). Cuando la cuenta madura, pasa a CS Partner mediante un traspaso.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
+            <span class="pill role-CS">CS</span> <strong style="margin-left:4px">CS Partner</strong>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">Cuida la relación post-onboarding. Recibe el traspaso del AM y trabaja la cuenta hasta que se vuelva estable o entre en riesgo.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
+            <span class="pill role-TRAINER">TRAINER</span> <strong style="margin-left:4px">Trainer</strong>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">Capacitación para cuentas que llevan ≥ 12 meses pero aún no tienen persona asignada.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
+            <span class="pill role-BDR">BDR</span> <strong style="margin-left:4px">BDR</strong>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">Reactivación de cuentas que ya entraron en Churned. Cuando un broker no muestra actividad por 190+ días, cae aquí automáticamente.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Margen — economía -->
+    <div class="section">
+      <div class="section-hdr"><h2>¿De dónde sale el margen?</h2></div>
+      <div style="padding:18px 20px">
+        <div style="font-size:13px;color:var(--near-black);line-height:1.55;margin-bottom:14px">Cerrar y operar una renta nos cuesta dinero. El <strong>margen es lo que queda</strong> después de ese costo. Dos cosas mueven el margen:</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:14px">
+          <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface)">
+            <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em">El valor de la renta</div>
+            <div style="font-size:13px;margin-top:6px;line-height:1.55">Rentas más altas dejan más margen. Una renta de $30,000 deja ~$4,000. Una de $15,000 deja ~$500 (nueva) o ~$1,000 (renovación).</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface)">
+            <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em">Nueva renta o renovación</div>
+            <div style="font-size:13px;margin-top:6px;line-height:1.55">Las renovaciones <strong>no</strong> son menos rentables — al revés: nos ahorramos el screening, así que en rentas chicas dejan más margen que las nuevas.</div>
+          </div>
+        </div>
+        <div style="background:#F0EEE8;border-radius:10px;overflow:hidden;border:1px solid var(--line)">
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+            <thead><tr style="background:var(--surface)">
+              <th style="text-align:left;padding:9px 12px;font-size:10.5px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em">Renta mensual</th>
+              <th style="text-align:right;padding:9px 12px;font-size:10.5px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em">Nueva renta</th>
+              <th style="text-align:right;padding:9px 12px;font-size:10.5px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.06em">Renovación</th>
+            </tr></thead>
+            <tbody>
+              <tr style="background:#fff"><td style="padding:10px 12px">Menos de $15K</td><td style="padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums">~$500</td><td style="padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700">~$1,000</td></tr>
+              <tr style="background:#fff"><td style="padding:10px 12px">$20K – $25K</td><td style="padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums">~$1,690</td><td style="padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700">~$1,800</td></tr>
+              <tr style="background:#fff"><td style="padding:10px 12px">$30K – $40K</td><td style="padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums">~$4,000</td><td style="padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700">~$4,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px;font-size:11.5px;color:var(--dark-gray);line-height:1.55">Para rentas entre los rangos, el margen se calcula proporcional. M Legal añade ~$300 extra porque es ligeramente más rentable. El "Margen anual estimado" que aparece en los detalles multiplica esto por los deals reales de los últimos 6 meses, proyectado a 12 meses.</div>
+      </div>
+    </div>
+
+    <!-- Renovación -->
+    <div class="section">
+      <div class="section-hdr"><h2>Las dos tasas de renovación</h2></div>
+      <div style="padding:18px 20px">
+        <div style="font-size:13px;color:var(--near-black);line-height:1.55;margin-bottom:14px">Cuando vence un contrato de Protección de Renta, dos cosas pueden pasar — y medimos las dos por separado:</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+          <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface)">
+            <div style="font-weight:700;color:var(--accent);font-size:13.5px">¿El cliente quiso quedarse?</div>
+            <div style="font-size:11px;color:var(--dark-gray);margin:4px 0 8px;text-transform:uppercase;letter-spacing:.06em">Tasa Copita · Retención</div>
+            <div style="font-size:12.5px;line-height:1.55">Cuenta cuántos contratos vencidos iniciaron una renovación (aunque luego no se cierre). Si es baja, el problema es producto o experiencia — el cliente no quiere regresar.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface)">
+            <div style="font-weight:700;color:var(--accent);font-size:13.5px">¿Cerramos lo que arrancó?</div>
+            <div style="font-size:11px;color:var(--dark-gray);margin:4px 0 8px;text-transform:uppercase;letter-spacing:.06em">Tasa Cierre · Funnel</div>
+            <div style="font-size:12.5px;line-height:1.55">De las renovaciones que arrancaron, cuántas llegaron a firma. Si es baja, el problema es operativo — perdimos la copita en el camino.</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:12px 14px;background:#F0EEE8;border-radius:10px;font-size:12px;color:var(--dark-gray);line-height:1.55"><strong style="color:var(--near-black)">Lectura combinada:</strong> Copita alta + Cierre bajo = el cliente quiere quedarse, pero perdemos en operación. Copita baja = revisar producto o relación.</div>
+      </div>
+    </div>
+
+    <!-- Tech / data — collapsed -->
+    <details class="section" style="overflow:hidden">
+      <summary style="padding:14px 20px;cursor:pointer;font-size:13px;font-weight:700;color:var(--near-black);user-select:none;display:flex;justify-content:space-between;align-items:center"><span>Detalles técnicos · fórmulas exactas y origen de la data</span><span style="font-size:11px;color:var(--dark-gray);font-weight:500">Tap para abrir</span></summary>
+      <div style="padding:0 20px 20px;font-size:12.5px;line-height:1.6;color:var(--near-black)">
+        <h3 style="font-size:12px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 8px">Fórmulas</h3>
+        <ul style="margin:0 0 14px 18px">
+          <li><code>priority_$ = margin_run_rate_annual × risk_weight</code> donde risk_weight = {ALTO: 1.0, MEDIO: 0.4, BAJO: 0.05}.</li>
+          <li><code>margin_run_rate_annual = margin_l6m × 2</code>. Solo cuenta deals Closed (nuevas) y Renewal — excluye Open (pipeline no realizado) y Cancelled.</li>
+          <li><code>trend_l6m_pct = (deals_l6m − deals_prior_6m) / deals_prior_6m × 100</code>. Ventanas simétricas 180/180. Se marca "bajo vol." si el total &lt; 3.</li>
+          <li><strong>Riesgo</strong> = peor señal entre: inactividad (días sin actividad), caída (trend ≤ -50% ALTO, ≤ -20% MEDIO), renovación baja (copita &lt; 30% con 3+ vencidos = ALTO).</li>
+          <li><strong>Pago Total</strong> = renta × cost_percent (cuando enriquecido) o renta × base_rate × (1 + IVA 16%) (fallback).</li>
         </ul>
-        <p><strong>Dos tasas de renovación complementarias</strong> (solo aplica a Protección de Renta):</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-top:8px">
-          <div style="background:#FAFAF9;border:1px solid var(--light-gray);border-radius:8px;padding:12px">
-            <div style="font-weight:700;color:var(--purple-dark)">🟡 Tasa de copita · RETENCIÓN</div>
-            <div style="font-size:12px;color:var(--dark-gray);margin:4px 0 6px">¿El cliente regresó? — match cross-broker.</div>
-            <code style="font-size:11.5px">copitas_past_grace / total_past_grace</code>
-          </div>
-          <div style="background:#FAFAF9;border:1px solid var(--light-gray);border-radius:8px;padding:12px">
-            <div style="font-weight:700;color:var(--purple-dark)">🟢 Tasa de cierre · FUNNEL</div>
-            <div style="font-size:12px;color:var(--dark-gray);margin:4px 0 6px">¿Cerramos las renovaciones iniciadas? — propias del broker.</div>
-            <code style="font-size:11.5px">renewals_completed / renewals_total</code>
-          </div>
-        </div>
-        <p style="margin-top:10px;font-size:12px;color:var(--dark-gray)"><strong>Lectura combinada:</strong> Copita alta + Cierre bajo → cliente quiere quedarse pero el pipeline pierde renovaciones (problema operativo). Copita baja → problema de producto/experiencia.</p>
-      </div>
-    </div>
-
-    <!-- 4. Revenue -->
-    <div class="section">
-      <div class="section-hdr"><h2>4 · Revenue</h2></div>
-      <div style="padding:16px 20px;line-height:1.6;font-size:13px">
-        <div style="background:linear-gradient(135deg,rgba(103,30,117,.06),rgba(177,78,181,.02));border:1px solid rgba(177,78,181,.2);border-radius:8px;padding:12px 14px;margin-bottom:10px">
-          <div style="font-size:14px"><code>Pago Total = renta × base_rate × (1 + IVA 16%)</code></div>
-          <div style="font-size:12px;color:var(--dark-gray);margin-top:4px">Net revenue (sin IVA) = <code>renta × base_rate</code>. <strong>Revenue L12M</strong> excluye Cancelados.</div>
-        </div>
-        <p><strong>Base rates autorizados</strong> (sin IVA):</p>
-        <ul style="margin:6px 0 8px 20px;font-size:12.5px">
-          <li><strong>Protección de Renta</strong>: M3 = 30% · M6 = 40% · M12 = 60% · M Legal = 25% · M3 Light = 25%</li>
-          <li><strong>Investigación</strong>: Normal ≈ 7.7% · con RPP ≈ 8.5%</li>
-          <li><strong>Legal/Contracts</strong> ≈ 3% · <strong>Justicia Alternativa</strong> ≈ 5%</li>
+        <h3 style="font-size:12px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 8px">Base rates de Protección de Renta</h3>
+        <ul style="margin:0 0 14px 18px">
+          <li>M3 = 30% · M6 = 40% · M12 = 60% · M Legal = 25% · M3 Light = 25%</li>
+          <li>Investigación ≈ 7.7% (normal) / 8.5% (con RPP). Legal/Contracts ≈ 3%. Justicia Alternativa ≈ 5%.</li>
         </ul>
-        <p style="font-size:12px;color:var(--dark-gray)">Cuando un deal tiene <code>cost_percent</code> real (vía <code>get_deal_detail</code>), ese rate sobrescribe el baseline. Quality flag: <span class="pill green">✓ actual</span> · <span class="pill amber">parcial</span> · <span class="pill amber">estimado</span>.</p>
-      </div>
-    </div>
-
-    <!-- 5. Pipeline & data -->
-    <div class="section">
-      <div class="section-hdr"><h2>5 · Pipeline de datos</h2><div class="meta">MCP MoradaUno · refresh diario</div></div>
-      <div style="padding:16px 20px;line-height:1.6;font-size:13px">
-        <p>Toda la data viene del MCP de MoradaUno (<code>admin_deals</code>, <code>get_brokers</code>, <code>get_deal_detail</code>). El pipeline corre cada mañana (<code>cs-dashboard-daily-refresh</code>) y:</p>
-        <ol style="margin:8px 0 8px 20px;font-size:12.5px">
-          <li>Pulla deals nuevos hasta encontrar IDs ya vistos.</li>
+        <h3 style="font-size:12px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 8px">Origen de la data</h3>
+        <p style="margin:0 0 8px">MCP MoradaUno (<code>admin_deals</code>, <code>get_brokers</code>, <code>get_deal_detail</code>). Pipeline diario:</p>
+        <ol style="margin:0 0 14px 18px">
+          <li>Pull deals nuevos hasta encontrar IDs vistos.</li>
           <li>Backfill de los 40 brokers ALTO/MEDIO con menos historia.</li>
-          <li>Enriquece 20 brokers/día al registry canónico (<code>broker.created</code>, org info).</li>
+          <li>Enriquece 20 brokers/día al registry canónico.</li>
           <li>Obtiene <code>cost_percent</code> real de 30 deals priorizados por revenue.</li>
           <li>Reprocesa el dataset y reconstruye el HTML.</li>
         </ol>
-        <p style="font-size:12px;color:var(--dark-gray)"><strong>Ventanas:</strong> <code>L12M</code> = revenue/deals operativos · <code>L90D</code> y <code>L90D-180D</code> = trend · <code>2Y</code> = dataset completo · <code>8Q</code> = chart histórico (solo nuevas rentas; excluye Renewals/Cancelados).</p>
-      </div>
-    </div>
-
-    <!-- 6. Limitaciones -->
-    <div class="section" style="border-left:4px solid var(--amber)">
-      <div class="section-hdr"><h2>Limitaciones conocidas</h2></div>
-      <div style="padding:14px 20px;line-height:1.6;font-size:12.5px">
-        <ul style="margin:0 0 0 20px">
-          <li><strong>Tenure aproximado</strong>: ~1,168 brokers viejos sin <code>broker.created</code>. Tenure se estima desde el primer deal observado (<span class="pill amber">~</span> en el worklist). Se cierra con el enrichment diario.</li>
+        <h3 style="font-size:12px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 8px">Limitaciones conocidas</h3>
+        <ul style="margin:0">
+          <li><strong>Tenure aproximado</strong>: ~1,168 brokers viejos sin <code>broker.created</code>. Tenure se estima desde el primer deal observado (<span class="pill amber">~</span>). Se cierra con el enrichment diario.</li>
           <li><strong>Revenue estimado</strong>: cuando no hay <code>cost_percent</code> real, se usa baseline. Sobre/sub-estima ~15%. Pill <span class="pill amber">estimado</span> en el modal.</li>
           <li><strong>Renewals pre-2024</strong>: pueden inflar "perdidos" si el padre quedó fuera de la ventana de 2 años.</li>
           <li><strong>Trainer + BDR</strong>: pools de personas vacíos hoy — los buckets muestran cuentas en cartera pero "0 con persona" hasta que se definan los nombres.</li>
+          <li><strong>Plaza</strong>: por ahora se deriva de city/state del broker registry. Cuando el MCP entregue plaza directamente, se usa esa.</li>
+          <li><strong>PIC</strong>: hoy se marca a mano dentro de cada cuenta. Cuando el MCP exponga <code>pic</code> a nivel broker/inmo, ese campo tendrá prioridad.</li>
         </ul>
       </div>
-    </div>
+    </details>
   </section>
 </main>
 
@@ -1119,6 +1231,139 @@ function inmoInterventionReason(inmo){
   return { reasons, memberSignals };
 }
 
+// ─── Prioridad (margin × risk) ───
+// El score es invisible para el usuario; lo expresamos en 3 niveles visuales:
+//   🔥 Urgente   — top 10% por priority_$
+//   ⚡ Importante — siguiente 30%
+//   💎 Saludable — el resto (incluye accounts con priority_$ = 0)
+// priority_$ = margin_run_rate_annual × peso_de_riesgo (ALTO=1.0, MEDIO=0.4, BAJO=0.05).
+// El peso refleja "qué tan probable es perder este margen si no actuamos".
+const RISK_WEIGHT = { ALTO: 1.0, MEDIO: 0.4, BAJO: 0.05 };
+function priorityDollar(item){
+  if(!item) return 0;
+  const annual = item.margin_run_rate_annual || 0;
+  const w = RISK_WEIGHT[item.risk] != null ? RISK_WEIGHT[item.risk] : 0;
+  return Math.round(annual * w);
+}
+// Per-pool percentile thresholds. Recomputed lazily on first use of priorityTier.
+let _priorityThresholds = null;
+function recomputePriorityThresholds(){
+  const pct = (sorted, p) => sorted.length ? sorted[Math.max(0, Math.floor(sorted.length * p) - 1)] : Infinity;
+  const brokerScores = BROKERS.map(priorityDollar).filter(v => v > 0).sort((a,b)=>b-a);
+  const inmoScores   = INMOS.map(priorityDollar).filter(v => v > 0).sort((a,b)=>b-a);
+  _priorityThresholds = {
+    broker: { urgent: pct(brokerScores, 0.10), important: pct(brokerScores, 0.40) },
+    inmo:   { urgent: pct(inmoScores, 0.10),   important: pct(inmoScores, 0.40) },
+  };
+}
+function priorityTier(item, kind /* 'broker' | 'inmo' */){
+  if(!_priorityThresholds) recomputePriorityThresholds();
+  const p = priorityDollar(item);
+  if(p === 0) return 'low';
+  const t = _priorityThresholds[kind] || _priorityThresholds.broker;
+  if(p >= t.urgent)    return 'urgent';
+  if(p >= t.important) return 'important';
+  return 'low';
+}
+// Visual badge — used in the worklists, banner, and inmo modal title.
+function priorityBadge(tier, withLabel = true){
+  const map = {
+    urgent:    { icon: '🔥', label: 'Urgente',   bg: '#FEE2E2', fg: '#B91C1C', border: '#FECACA' },
+    important: { icon: '⚡', label: 'Importante', bg: '#FEF3C7', fg: '#92400E', border: '#FDE68A' },
+    low:       { icon: '💎', label: 'Saludable', bg: '#ECFDF5', fg: '#047857', border: '#A7F3D0' },
+  };
+  const m = map[tier] || map.low;
+  return `<span class="pill" style="background:${m.bg};color:${m.fg};border:1px solid ${m.border};font-weight:700;letter-spacing:.005em">${m.icon}${withLabel?' '+m.label:''}</span>`;
+}
+// Plain-Spanish reason a CS sees on hover — explains the tier without showing math.
+function priorityReason(item, kind){
+  const tier = priorityTier(item, kind);
+  const annual = item.margin_run_rate_annual || 0;
+  const risk = item.risk || 'BAJO';
+  if(tier === 'urgent'){
+    return `Urgente — esta cuenta genera ~${fmt$(annual)} de margen anual y está en riesgo ${risk}. Atención esta semana protege la mayor parte de ese flujo.`;
+  }
+  if(tier === 'important'){
+    return `Importante — ~${fmt$(annual)} de margen anual con riesgo ${risk}. Plantéalo en tu agenda de este mes.`;
+  }
+  if(annual > 0){
+    return `Saludable — ~${fmt$(annual)} de margen anual sin señales graves. Mantén la cadencia.`;
+  }
+  return 'Saludable — sin actividad reciente, baja prioridad. Verifica si la cuenta sigue viva antes de invertir tiempo.';
+}
+// "Tus próximas cuentas" banner — top 3 by priority (filtered to selected owner
+// if one is set). Aims to remove the "where do I start?" question.
+function nextUpSubLine(item, kind){
+  // One-line action hint built from the strongest signal we have on the item.
+  const sig = item.primary_signal && item.primary_signal !== 'Healthy' ? item.primary_signal : '';
+  const trend = (item.trend_l6m_pct != null && item.trend_l6m_pct <= -20) ? `cae ${item.trend_l6m_pct}% L6M` : '';
+  const renov = (item.renewal_rate_copita != null && item.renewal_rate_copita < 30 && (item.contracts_expired||0) >= 3) ? `renov. ${item.renewal_rate_copita}%` : '';
+  const interv = (kind==='inmo' && inmoNeedsIntervention(item)) ? 'requiere intervención' : '';
+  const dayssl = (item.days_since_last||0) > 60 ? `${item.days_since_last}d sin actividad` : '';
+  const bits = [sig, trend, renov, interv, dayssl].filter(Boolean);
+  return bits.slice(0,2).join(' · ') || `${item.brokers_total||item.deals_total||0} ${kind==='inmo'?'brokers':'deals'} en cartera`;
+}
+function renderNextUpBanner(containerId, kind, ownerFilter){
+  const el = $('#'+containerId); if(!el) return;
+  const items = topPriority(kind, 3, ownerFilter);
+  if(!items.length){ el.innerHTML = ''; return; }
+  const headerLine = ownerFilter
+    ? `Tus próximas cuentas · ${esc(ownerFilter)}`
+    : 'Tus próximas cuentas';
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,var(--accent) 0%,#0F3D22 100%);color:#fff;border-radius:16px;padding:18px 22px 16px;margin-bottom:16px;box-shadow:var(--shadow-accent)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.14em">${esc(headerLine)}</div>
+          <div style="font-size:15px;font-weight:600;margin-top:2px;letter-spacing:-.005em">Empieza por aquí — son las cuentas donde tu hora rinde más margen.</div>
+        </div>
+        <div style="font-size:10.5px;color:rgba(255,255,255,.65);font-weight:600;letter-spacing:.04em">Cambia con tu filtro de Dueño</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+        ${items.map(it => {
+          const name = kind==='inmo' ? it.company : it.broker;
+          const sub  = kind==='inmo' ? `${it.brokers_total} brokers · ${it.brokers_active_90d} activos` : (it.company||'Independiente');
+          const action = nextUpSubLine(it, kind);
+          const onClick = kind==='inmo' ? `openInmo('${escAttr(it.id)}')` : `openBroker('${escAttr(it.id)}')`;
+          const tier = priorityTier(it, kind);
+          return `
+            <div onclick="${onClick}" style="background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:13px 14px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background='rgba(255,255,255,.18)'" onmouseleave="this.style.background='rgba(255,255,255,.10)'">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
+                <span style="font-size:11px;font-weight:700;background:rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:2px 9px;letter-spacing:.005em">${priorityBadge(tier,true).match(/>([^<]+)</)[1].trim()}</span>
+                <span style="font-size:10.5px;color:rgba(255,255,255,.65);font-weight:600;font-variant-numeric:tabular-nums" title="Margen anual estimado">${fmt$(it.margin_run_rate_annual||0)} / año</span>
+              </div>
+              <div style="font-size:14px;font-weight:700;line-height:1.3;letter-spacing:-.005em">${esc(name)}</div>
+              <div style="font-size:11.5px;color:rgba(255,255,255,.7);margin-top:3px">${esc(sub)}</div>
+              <div style="font-size:11.5px;color:rgba(255,255,255,.85);margin-top:6px;border-top:1px solid rgba(255,255,255,.12);padding-top:6px"><strong style="color:#fff">Acción:</strong> ${esc(action)}</div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// Sort comparator: by priority_$ desc, ties broken by margin_run_rate desc.
+function comparePriority(a, b){
+  const pa = priorityDollar(a), pb = priorityDollar(b);
+  if(pb !== pa) return pb - pa;
+  return (b.margin_run_rate_annual||0) - (a.margin_run_rate_annual||0);
+}
+// "Tus próximas cuentas" — top N items by priority, optionally filtered to one owner.
+// Returns brokers OR inmos depending on `pool`. Used to render the banner at the top
+// of each worklist so CS can see where to spend their next hour.
+function topPriority(pool /* 'broker'|'inmo' */, n, ownerFilter){
+  recomputePriorityThresholds();
+  const items = (pool === 'broker' ? BROKERS : INMOS).slice();
+  let filtered = items;
+  if(ownerFilter){
+    filtered = items.filter(it => {
+      const st = pool === 'broker' ? getA(it.id) : getI(it.id);
+      if(ownerFilter === '__unassigned__') return !st.owner;
+      return st.owner === ownerFilter;
+    });
+  }
+  return filtered.sort(comparePriority).slice(0, n).filter(it => priorityDollar(it) > 0);
+}
+
 // Cascade — when a CS Partner / AM is assigned to an inmobiliaria, propagate that
 // owner to all the inmo's brokers. Confirms before overwriting prior owners.
 function cascadeInmoOwnerToBrokers(inmo, newOwner){
@@ -1385,7 +1630,7 @@ function lifecyclePill(lc){ return `<span class="pill lc-${lc}">${lc}</span>` }
 function riskPill(r){ return `<span class="pill risk-${r}">${r}</span>` }
 
 // ─── WORKLIST ───
-let SORT = {key:'deals_total', dir:-1};
+let SORT = {key:'__priority', dir:-1};
 // Regla de intervención: el broker requiere atención de CS si tiene riesgo ALTO/MEDIO
 // o ya tiene actividades CS registradas (caso abierto). Tener deals cerrando ahora es
 // una señal positiva — NO se considera intervención (el broker está cerrando por sí mismo).
@@ -1424,6 +1669,8 @@ function refreshCityFilterOptions(){
 function renderWorklist(){
   refreshOwnerFilterOptions();
   refreshCityFilterOptions();
+  // "Tus próximas cuentas" — uses the Owner filter as the personalization signal
+  renderNextUpBanner('banner-brokers', 'broker', $('#f-owner')?.value || '');
   const search = $('#f-search').value.trim().toLowerCase();
   const fo=$('#f-owner').value, fs=$('#f-segment').value, fr=$('#f-risk').value, flc=$('#f-lifecycle').value, fst=$('#f-status').value;
   const frole = $('#f-role').value, fcity = $('#f-city').value;
@@ -1452,10 +1699,16 @@ function renderWorklist(){
     if(fAmOnly==='cs'     && r._amOnly) return false;
     return true;
   });
-  data.sort((a,b)=>{
-    const va=a[SORT.key]??0, vb=b[SORT.key]??0;
-    return (va-vb)*SORT.dir;
-  });
+  // Default sort is by priority desc. If the user clicks a sortable column, SORT.key
+  // is set to that column and we fall back to numeric sort.
+  if(SORT.key === '__priority' || !SORT.key){
+    data.sort(comparePriority);
+  } else {
+    data.sort((a,b)=>{
+      const va=a[SORT.key]??0, vb=b[SORT.key]??0;
+      return (va-vb)*SORT.dir;
+    });
+  }
   const tbody = $('#tbody-work');
   const MAX_ROWS = 300;
   const viewData = data.slice(0, MAX_ROWS);
@@ -1477,8 +1730,10 @@ function renderWorklist(){
       : `<span class="pill role-${bucket} tooltip" data-tip="${roleLabel(bucket)}${a.owner?' · '+esc(a.owner):' · cartera (sin persona)'}">${bucket}</span>`;
     const handoffCell = handoffPill(r);
     const amOnlyChip  = r._amOnly ? `<div style="margin-top:2px">${amOnlyBadge()}</div>` : '';
+    const tier = priorityTier(r, 'broker');
     return `<tr>
       <td class="rank">${i+1}</td>
+      <td class="tooltip" data-tip="${esc(priorityReason(r,'broker'))}">${priorityBadge(tier, false)}</td>
       <td class="broker-cell" onclick="openBroker('${escAttr(r.id)}')" style="cursor:pointer"><div class="name">${esc(r.broker)}</div><div class="company">${esc(r.company||'Independiente')}${r.agent?' · '+esc(r.agent):''}</div></td>
       <td>${picBadge(r._pic)}</td>
       <td>${plazaCell}</td>
@@ -1493,9 +1748,9 @@ function renderWorklist(){
       <td>${roleCell}${handoffCell?'<div style="margin-top:2px">'+handoffCell+'</div>':''}${amOnlyChip}</td>
       <td><select class="cell-select sel-owner" data-id="${escAttr(r.id)}">${ownerOpts}</select></td>
     </tr>`;
-  }).join('') || `<tr><td colspan="14" class="empty">Sin cuentas que coincidan.</td></tr>`;
+  }).join('') || `<tr><td colspan="15" class="empty">Sin cuentas que coincidan.</td></tr>`;
   if(data.length > MAX_ROWS){
-    tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="14" class="empty">Mostrando primeras ${MAX_ROWS} de ${data.length} cuentas. Usa filtros para reducir.</td></tr>`);
+    tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="15" class="empty">Mostrando primeras ${MAX_ROWS} de ${data.length} cuentas. Usa filtros para reducir.</td></tr>`);
   }
 
   $$('.sel-status').forEach(el=>el.onchange=e=>{
@@ -1687,6 +1942,7 @@ function inmoNeedsIntervention(i){
 function renderInmos(){
   refreshInmoPlazaFilterOptions();
   refreshInmoOwnerFilterOptions();
+  renderNextUpBanner('banner-inmos', 'inmo', $('#f-inmo-owner')?.value || '');
   const q = $('#f-search-inmo').value.trim().toLowerCase();
   const fr = $('#f-inmo-risk').value, sortKey = $('#f-inmo-sort').value;
   const fInter = $('#f-inmo-intervention').value;
@@ -1712,7 +1968,12 @@ function renderInmos(){
     else if(fOwner && i._owner !== fOwner) return false;
     return true;
   });
-  data.sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0));
+  // Default sort: priority desc. Explicit sortKey from the dropdown overrides.
+  if(!sortKey || sortKey === '__priority'){
+    data.sort(comparePriority);
+  } else {
+    data.sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0));
+  }
 
   // KPIs
   const top10 = data.slice(0,10).reduce((s,i)=>s+(i.revenue_l12m||0),0);
@@ -1736,8 +1997,10 @@ function renderInmos(){
     const ownerLabel = iSt.owner ? `<span class="pill role-${roleOfOwner(iSt.owner)||'NONE'}" title="${esc(iSt.owner)}">${esc(iSt.owner)}</span>` :
       (i._amOnly ? amOnlyBadge() : '<span class="pill role-NONE" title="Sin owner asignado">Sin asignar</span>');
     const handoffChip = handoffPillInmo(i);
+    const tier = priorityTier(i, 'inmo');
     return `<tr onclick="openInmo('${escAttr(i.id)}')" style="cursor:pointer">
       <td class="rank">${idx+1}</td>
+      <td class="tooltip" data-tip="${esc(priorityReason(i,'inmo'))}">${priorityBadge(tier, false)}</td>
       <td class="broker-cell"><div class="name">${esc(i.company)}</div><div class="company">${i.brokers_total} brokers · ${i.brokers_active_90d} activos · ${i.tenure_months}mo en M1</div></td>
       <td>${picBadge(i._pic)}</td>
       <td>${plazaPill(i._plaza)}</td>
@@ -1751,8 +2014,8 @@ function renderInmos(){
       <td>${renewalCell({renewal_count:i.renewal_count,contracts_expired:i.contracts_expired,renewal_rate:i.renewal_rate,renewal_rate_copita:i.renewal_rate_copita,contracts_expired_copitas:i.contracts_expired_copitas})}</td>
       <td>${ownerLabel}${handoffChip?'<div style="margin-top:3px">'+handoffChip+'</div>':''}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="13" class="empty">—</td></tr>';
-  if(data.length>MAX) $('#tbody-inmo').insertAdjacentHTML('beforeend',`<tr><td colspan="13" class="empty">Mostrando ${MAX} de ${data.length}</td></tr>`);
+  }).join('') || '<tr><td colspan="14" class="empty">—</td></tr>';
+  if(data.length>MAX) $('#tbody-inmo').insertAdjacentHTML('beforeend',`<tr><td colspan="14" class="empty">Mostrando ${MAX} de ${data.length}</td></tr>`);
   $('#tc-inmo').textContent = data.length;
 }
 
@@ -2226,7 +2489,31 @@ function openInmo(id){
       </div>
     </div>` : '';
 
+  // "Por qué es prioritaria" — el resumen accionable: tier + margen + dónde empezar.
+  const tier = priorityTier(inmo, 'inmo');
+  const tierBadge = priorityBadge(tier, true);
+  const annual = inmo.margin_run_rate_annual || 0;
+  const topB = inmo.top_broker_for_priority;
+  const startWith = (tier !== 'low' && topB && topB.share_pct >= 20)
+    ? `<div style="font-size:12px;color:#4B5563;margin-top:8px;line-height:1.5">→ <strong>Empieza por:</strong> <span style="font-weight:600;color:var(--near-black);cursor:pointer;text-decoration:underline" onclick="openBroker('${escAttr(topB.id)}')">${esc(topB.broker)}</span> · concentra el <strong>${topB.share_pct}%</strong> del margen de la inmo.</div>`
+    : '';
+  const priorityLine = `
+    <div style="background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            ${tierBadge}
+            <span style="font-size:13px;font-weight:600;color:var(--near-black)">~${fmt$(annual)} de margen anual estimado</span>
+            <span style="font-size:11px;color:var(--dark-gray)">· riesgo ${inmo.risk}</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--dark-gray);margin-top:6px;line-height:1.5">${esc(priorityReason(inmo,'inmo'))}</div>
+          ${startWith}
+        </div>
+      </div>
+    </div>`;
+
   $('#m-body').innerHTML = `
+    ${priorityLine}
     ${intervBanner}
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">

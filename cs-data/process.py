@@ -74,6 +74,43 @@ def net_revenue_of(deal):
     """Net revenue (sin IVA) to MoradaUno = Pago Total / (1+IVA)"""
     return revenue_of(deal) / (1 + IVA)
 
+def margin_for_deal(value, is_renewal, product_name=None):
+    """Estimated MoradaUno margin (MXN) per deal.
+
+    Tiers per CS feedback (May-2026):
+      ≤ $15k  → new=$500,   renewal=$1,000
+      $20-25k → new=$1,690, renewal=$1,800
+      ≥ $30k  → new=$4,000, renewal=$4,000
+
+    Smooth linear interpolation between tiers so a $19k deal doesn't have a cliff
+    against a $20k deal. M Legal gets a small flat bonus ($300) since it's
+    slightly more profitable in real cost analysis.
+
+    `value` is the monthly rent in MXN (`agreement.value` field on the deal).
+    `is_renewal` is True for deal_type == 'Renewal'; False for new Closed deals.
+    """
+    v = max(0.0, float(value or 0))
+    if v <= 15000:
+        m = 1000 if is_renewal else 500
+    elif v < 20000:
+        t = (v - 15000) / 5000.0
+        new_m = 500   + t * (1690 - 500)
+        ren_m = 1000  + t * (1800 - 1000)
+        m = ren_m if is_renewal else new_m
+    elif v <= 25000:
+        m = 1800 if is_renewal else 1690
+    elif v < 30000:
+        t = (v - 25000) / 5000.0
+        new_m = 1690 + t * (4000 - 1690)
+        ren_m = 1800 + t * (4000 - 1800)
+        m = ren_m if is_renewal else new_m
+    else:
+        m = 4000
+    if product_name == 'Legal':
+        m += 300
+    return round(m)
+
+
 def parse_dt(s):
     if not s: return None
     try:
@@ -559,6 +596,37 @@ def process():
         l12m_deals_list = [d for d in revenue_deals if (TODAY - parse_dt(d['created'])).days <= 365]
         deals_l12m = len(l12m_deals_list)
         revenue_l12m = sum(revenue_of(d) for d in l12m_deals_list)
+
+        # === MARGIN MODEL ===
+        # Margin only counts realized deals — Closed (new) and Renewal. Open is pipeline
+        # (not yet realized), Cancelled earned no margin. The per-deal estimate uses
+        # margin_for_deal() with rent-value tiers + product bonus.
+        margin_l6m = 0
+        margin_l12m = 0
+        margin_mix_new_l12m = 0
+        margin_mix_renewal_l12m = 0
+        margin_deal_count_l6m = 0
+        margin_deal_count_l12m = 0
+        for d in ds:
+            dt = d.get('deal_type')
+            if dt not in ('Closed', 'Renewal'):
+                continue
+            is_renewal = (dt == 'Renewal')
+            m = margin_for_deal(to_num(d.get('value')), is_renewal, d.get('product_name'))
+            days_ago = (TODAY - parse_dt(d['created'])).days
+            if days_ago <= 180:
+                margin_l6m += m
+                margin_deal_count_l6m += 1
+            if days_ago <= 365:
+                margin_l12m += m
+                margin_deal_count_l12m += 1
+                if is_renewal:
+                    margin_mix_renewal_l12m += m
+                else:
+                    margin_mix_new_l12m += m
+        # Forward-looking annual rate: project the L6M actual forward
+        margin_run_rate_annual = margin_l6m * 2
+        margin_per_deal_l12m = int(margin_l12m / max(1, margin_deal_count_l12m)) if margin_deal_count_l12m else 0
         # Product mix L12M
         l12m_by_product = Counter(d.get('product_name') or 'Unknown' for d in l12m_deals_list)
         avg_deal_revenue_l12m = int(revenue_l12m / max(1, deals_l12m))
@@ -693,6 +761,15 @@ def process():
             'l12m_enriched': l12m_enriched,
             'revenue_quality_l12m': revenue_quality_l12m,
             'l12m_product_mix': [{'product': p, 'count': c} for p, c in l12m_by_product.most_common()],
+            # Margin model (May-2026): rent-tier × new/renewal × product bonus
+            'margin_l6m':              int(margin_l6m),
+            'margin_l12m':             int(margin_l12m),
+            'margin_run_rate_annual':  int(margin_run_rate_annual),
+            'margin_per_deal_l12m':    int(margin_per_deal_l12m),
+            'margin_mix_new_l12m':     int(margin_mix_new_l12m),
+            'margin_mix_renewal_l12m': int(margin_mix_renewal_l12m),
+            'margin_deal_count_l6m':   int(margin_deal_count_l6m),
+            'margin_deal_count_l12m':  int(margin_deal_count_l12m),
             # Ticket distribution
             'avg_ticket': avg_ticket,
             'median_ticket': median_ticket,
@@ -813,6 +890,25 @@ def process():
         inmo_deals_l12m = sum(b['deals_l12m'] for b in bs)
         inmo_revenue_l12m = sum(b['revenue_l12m'] for b in bs)
 
+        # Margin rollup
+        inmo_margin_l6m              = sum(b.get('margin_l6m', 0) for b in bs)
+        inmo_margin_l12m             = sum(b.get('margin_l12m', 0) for b in bs)
+        inmo_margin_run_rate_annual  = sum(b.get('margin_run_rate_annual', 0) for b in bs)
+        inmo_margin_mix_new_l12m     = sum(b.get('margin_mix_new_l12m', 0) for b in bs)
+        inmo_margin_mix_renewal_l12m = sum(b.get('margin_mix_renewal_l12m', 0) for b in bs)
+        # Top broker by margin within the inmo — for "empezar por" pointer in the UI.
+        bs_by_margin = sorted(bs, key=lambda b: -(b.get('margin_run_rate_annual') or 0))
+        top_broker_obj = bs_by_margin[0] if bs_by_margin else None
+        if top_broker_obj and inmo_margin_run_rate_annual > 0:
+            top_broker_for_priority = {
+                'broker':  top_broker_obj['broker'],
+                'id':      top_broker_obj['id'],
+                'margin_run_rate_annual': top_broker_obj.get('margin_run_rate_annual', 0),
+                'share_pct': int(round(top_broker_obj.get('margin_run_rate_annual', 0) / inmo_margin_run_rate_annual * 100)),
+            }
+        else:
+            top_broker_for_priority = None
+
         # Lifecycle distribution
         lc_dist = Counter(b['lifecycle'] for b in bs)
 
@@ -861,6 +957,13 @@ def process():
             'total_revenue': total_revenue,   # full 2y
             'deals_l12m': inmo_deals_l12m,
             'revenue_l12m': inmo_revenue_l12m,
+            # Margin rollup
+            'margin_l6m':              inmo_margin_l6m,
+            'margin_l12m':             inmo_margin_l12m,
+            'margin_run_rate_annual':  inmo_margin_run_rate_annual,
+            'margin_mix_new_l12m':     inmo_margin_mix_new_l12m,
+            'margin_mix_renewal_l12m': inmo_margin_mix_renewal_l12m,
+            'top_broker_for_priority': top_broker_for_priority,
             'avg_ticket': avg_ticket,
             'product_mix': [{'product': p, 'count': c} for p, c in all_products.most_common()],
             'quarters': quarters,
