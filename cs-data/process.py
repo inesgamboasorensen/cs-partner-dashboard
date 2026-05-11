@@ -317,6 +317,11 @@ def process():
         deals_180_365 = sum(1 for d in ds if 180 < (TODAY - parse_dt(d['created'])).days <= 365)
         deals_365_plus = sum(1 for d in ds if (TODAY - parse_dt(d['created'])).days > 365)
 
+        # New windows for the L6M-vs-prior-3M trend (smoother, less noisy than 90/90 split).
+        # L6M = last 180 days. Prior 3M = days 180-270 (the 90 days that precede the L6M window).
+        deals_l6m = sum(1 for d in ds if (TODAY - parse_dt(d['created'])).days <= 180)
+        deals_prior_3m = sum(1 for d in ds if 180 < (TODAY - parse_dt(d['created'])).days <= 270)
+
         active_now = deals_90d > 0
 
         # Quarterly buckets (last 8 quarters) — NEW RENTS ONLY (exclude Renewals and Cancelled)
@@ -340,7 +345,7 @@ def process():
                     rev_quarters[q] += revenue_of(d)
                     quarters_by_product[q][stack_key(d)] += 1
 
-        # Trend: recent 90d vs prior 90d rate
+        # Trend: recent 90d vs prior 90d rate (legacy — kept for backwards compatibility)
         trend_pct = None
         rate_recent = deals_90d / 90.0
         rate_prior = deals_90_180 / 90.0
@@ -348,6 +353,23 @@ def process():
             trend_pct = round((rate_recent - rate_prior) / rate_prior * 100)
         elif rate_recent > 0:
             trend_pct = 100  # brand new activity
+
+        # PRIMARY trend (per CS feedback May-2026): L6M vs prior 3M — wider window dampens
+        # week-to-week noise so we don't false-trigger on brokers with naturally low cadence.
+        # Reported as percent change of *daily rate* (so the 180d vs 90d window difference
+        # doesn't bias the result).
+        trend_l6m_pct = None
+        rate_l6m   = deals_l6m / 180.0
+        rate_pr3m  = deals_prior_3m / 90.0
+        if rate_pr3m > 0:
+            trend_l6m_pct = round((rate_l6m - rate_pr3m) / rate_pr3m * 100)
+        elif rate_l6m > 0:
+            trend_l6m_pct = 100
+
+        # Low-volume guard: when the broker has very few deals overall, percent-change
+        # metrics like trend become noisy / misleading. Flagging it lets the UI gate
+        # the display ("Datos insuficientes" tooltip).
+        low_volume = (deals_l6m + deals_prior_3m) < 3
 
         # Revenue trend (Q vs Q-1)
         q_keys = sorted(quarters.keys())
@@ -612,7 +634,11 @@ def process():
             'deals_90_180': deals_90_180,
             'deals_180_365': deals_180_365,
             'deals_365_plus': deals_365_plus,
-            'trend_pct': trend_pct,
+            'deals_l6m': deals_l6m,
+            'deals_prior_3m': deals_prior_3m,
+            'trend_pct': trend_pct,             # legacy 90d/90d
+            'trend_l6m_pct': trend_l6m_pct,     # primary 180d vs prior 90d (rates)
+            'low_volume': low_volume,
             'rev_trend_pct': rev_trend_pct,
             # Deal type breakdown
             'open_count': open_ct,
@@ -736,11 +762,20 @@ def process():
         churned_brokers = sum(1 for b in bs if b['days_since_last'] > 90)
         deals_90d_all = sum(b['deals_90d'] for b in bs)
         deals_90_180_all = sum(b['deals_90_180'] for b in bs)
+        deals_l6m_all = sum(b.get('deals_l6m', 0) for b in bs)
+        deals_prior_3m_all = sum(b.get('deals_prior_3m', 0) for b in bs)
         rate_recent = deals_90d_all / 90.0 if deals_90d_all else 0
         rate_prior = deals_90_180_all / 90.0 if deals_90_180_all else 0
         trend_pct = None
         if rate_prior > 0: trend_pct = round((rate_recent - rate_prior) / rate_prior * 100)
         elif rate_recent > 0: trend_pct = 100
+        # L6M-vs-prior-3M trend (same definition as broker level)
+        rate_l6m_all  = deals_l6m_all / 180.0 if deals_l6m_all else 0
+        rate_pr3m_all = deals_prior_3m_all / 90.0 if deals_prior_3m_all else 0
+        trend_l6m_pct = None
+        if rate_pr3m_all > 0: trend_l6m_pct = round((rate_l6m_all - rate_pr3m_all) / rate_pr3m_all * 100)
+        elif rate_l6m_all > 0: trend_l6m_pct = 100
+        low_volume_inmo = (deals_l6m_all + deals_prior_3m_all) < 3
 
         oldest_first = min((b['first_active'] for b in bs), default='')
         newest_last = max((b['last_deal'] for b in bs), default='')
@@ -748,7 +783,14 @@ def process():
         tenure_months = max((b['tenure_months'] for b in bs), default=0)
 
         total_revenue = sum(b['total_revenue'] for b in bs)
+        # avg_ticket = weighted mean of broker rent values (what the tenant pays).
+        # KEEP for backwards compatibility, but the UI now reads avg_deal_revenue —
+        # the *MoradaUno* revenue per deal (Pago Total ÷ deals). The user feedback
+        # was that "Ticket promedio" was showing the rent value, not MoradaUno's cut.
         avg_ticket = int(sum(b['avg_ticket'] * b['deals_total'] for b in bs) / max(1, all_deals_total))
+        # Effective non-cancelled deal count for revenue-per-deal math
+        deals_for_rev = sum(max(0, b['deals_total'] - b.get('renewal_count', 0) * 0) for b in bs)  # rev_deals already excludes Cancelled inside revenue_of
+        avg_deal_revenue = int(total_revenue / max(1, all_deals_total)) if all_deals_total else 0
         # Inmo renewal rates (same definitions as per-broker, rolled up)
         inmo_renewal_denom = inmo_copitas + inmo_lost   # past-grace total
         renewal_rate_copita = int(inmo_copitas / inmo_renewal_denom * 100) if inmo_renewal_denom else None
@@ -793,7 +835,12 @@ def process():
             'deals_total': all_deals_total,
             'deals_90d': deals_90d_all,
             'deals_90_180': deals_90_180_all,
-            'trend_pct': trend_pct,
+            'deals_l6m': deals_l6m_all,
+            'deals_prior_3m': deals_prior_3m_all,
+            'trend_pct': trend_pct,                 # legacy 90/90
+            'trend_l6m_pct': trend_l6m_pct,         # primary 180 vs prior 90
+            'low_volume': low_volume_inmo,
+            'avg_deal_revenue': avg_deal_revenue,   # MoradaUno revenue per deal
             'renewal_count': all_renewal,
             'renewal_rate': renewal_rate,
             'renewal_rate_copita': renewal_rate_copita,
