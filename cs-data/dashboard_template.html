@@ -646,11 +646,6 @@
       <div id="chart-cov-matrix"></div>
     </div>
 
-    <div class="charts-grid">
-      <div class="chart-card"><h3>Revenue L12M por rol</h3><div id="chart-cov-rev"></div></div>
-      <div class="chart-card"><h3>Brokers vs Inmobiliarias por rol</h3><div id="chart-cov-mix"></div></div>
-    </div>
-
     <div class="chart-card">
       <h3>Asignaciones por persona <small style="font-weight:400;color:var(--dark-gray);letter-spacing:0">— cuentas en cartera (brokers + inmobiliarias)</small></h3>
       <div id="chart-assignments-by-owner"></div>
@@ -672,13 +667,9 @@
 
     <!-- ─── PRODUCTO ─── -->
     <div class="ed-divider"><span class="ed-label">Producto · qué venden</span><span class="ed-line"></span></div>
-    <div class="charts-grid">
-      <div class="chart-card"><h3>Distribución de rentas (tickets)</h3><div id="chart-rent"></div></div>
-      <div class="chart-card"><h3>Uso por producto</h3><div id="chart-prod"></div></div>
-    </div>
     <div class="chart-card">
-      <h3>Top 10 Inmobiliarias por Revenue L12M</h3>
-      <div id="chart-top-inmos"></div>
+      <h3>Distribución de rentas (tickets)</h3>
+      <div id="chart-rent"></div>
     </div>
 
   </section>
@@ -3180,30 +3171,8 @@ function renderAnalytics(){
   const COV_COLOR = {AM:'#06038D', CS:'#008073', TRAINER:'#B14E00', BDR:'#671E75', NONE:'#DC2626'};
   const COV_LABEL = {AM:'Account Manager', CS:'CS Partner', TRAINER:'Trainer', BDR:'BDR', NONE:'Sin asignar'};
   const revByRole = {AM:0, CS:0, TRAINER:0, BDR:0, NONE:0};
-  const cntByRoleB = {AM:0, CS:0, TRAINER:0, BDR:0, NONE:0};
-  BROKERS.forEach(r=>{
-    const b = coverageBucket({owner:getA(r.id).owner, lifecycle:r.lifecycle, tenure_months:r.tenure_months});
-    revByRole[b] += (r.revenue_l12m||0);
-    cntByRoleB[b]++;
-  });
-  drawHBars('#chart-cov-rev', COV_KEYS.map(k=>({
-    name: COV_LABEL[k],
-    value: revByRole[k],
-    color: COV_COLOR[k],
-    sub: `${cntByRoleB[k]} brokers`
-  })), {valueFmt: fmtK, labelW: 130});
-
-  // Brokers vs Inmos por rol — grouped horizontal bars
-  const cntByRoleI = {AM:0, CS:0, TRAINER:0, BDR:0, NONE:0};
-  INMOS.forEach(im=>{
-    const b = coverageBucket({owner:getI(im.id).owner, lifecycle:inmoLifecycle(im), tenure_months:im.tenure_months});
-    cntByRoleI[b]++;
-  });
-  drawGroupedHBars('#chart-cov-mix', COV_KEYS.map(k=>({
-    name: COV_LABEL[k],
-    a: cntByRoleB[k],
-    b: cntByRoleI[k]
-  })), {aLabel:'Brokers', bLabel:'Inmobiliarias', aColor:'#671E75', bColor:'#00C7B1'});
+  // (Revenue L12M por rol / Brokers vs Inmobiliarias por rol charts removed May-2026
+  //  per CS feedback — the coverage matrix above already conveys this information.)
 
   // ─── 2. Composición y salud ───
   // Lifecycle distribution
@@ -3253,22 +3222,8 @@ function renderAnalytics(){
   });
   drawBars('#chart-rent', labels.map((l,i)=>({name:l,value:buckets[i]})), '#00C7B1');
 
-  // Product usage
-  const prodCounts = {};
-  BROKERS.forEach(b=>(b.product_mix||[]).forEach(p=>{prodCounts[p.product]=(prodCounts[p.product]||0)+p.count}));
-  drawBars('#chart-prod', Object.entries(prodCounts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>({name:k,value:v})), '#671E75');
-
-  // Top 10 inmobiliarias por revenue L12M
-  const topInmos = [...INMOS]
-    .map(im => ({...im, _rev: im.revenue_l12m || im.total_revenue || 0}))
-    .sort((a,b)=>b._rev - a._rev)
-    .slice(0,10);
-  drawHBars('#chart-top-inmos', topInmos.map(im=>({
-    name: im.company,
-    value: im._rev,
-    color: '#671E75',
-    sub: `${im.brokers_active_90d||0}/${im.brokers_total||0} activos`
-  })), {valueFmt: fmtK, labelW: 180, rowH: 26});
+  // (Uso por producto + Top 10 Inmobiliarias por Revenue L12M charts removed
+  //  May-2026 per CS feedback — Top-by-margen above replaces the revenue ranking.)
 
   // Asignaciones por persona — cuenta brokers + inmos en cartera de cada owner.
   // Una persona puede aparecer en ambos lados (es común para AMs durante onboarding).
