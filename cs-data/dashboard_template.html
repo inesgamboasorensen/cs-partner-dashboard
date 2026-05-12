@@ -2247,6 +2247,9 @@ function renderPipeline(){
         const onClick = isInmo ? `openInmo('${escAttr(r.id)}')` : `openBroker('${escAttr(r.id)}')`;
         const ownerLine = stObj.owner ? `<div style="font-size:10.5px;color:var(--dark-gray);margin-top:4px">👤 ${esc(stObj.owner)}</div>` : '';
         const tier = priorityTier(r, isInmo ? 'inmo' : 'broker');
+        const lcStage = isInmo ? (dominantStage(r.lifecycle_dist) || inmoLifecycle(r)) : r.lifecycle;
+        const lcTip = isInmo ? 'Etapa dominante: la mayoría de los brokers de esta inmobiliaria están en esta etapa del ciclo de vida.' : 'Etapa del ciclo de vida del broker.';
+        const lcPill = lcStage ? `<span class="pill lc-${lcStage}" title="${esc(lcTip)}">${lcStage}</span>` : '';
         return `
         <div draggable="true"
              ondragstart="dragStartCard(event,'${kindToken}','${escAttr(r.id)}')"
@@ -2260,9 +2263,10 @@ function renderPipeline(){
             <span style="font-size:10.5px">${priorityBadge(tier, false)}</span>
           </div>
           <div style="font-size:10.5px;color:var(--dark-gray);margin-top:2px">${esc(sub)}</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:6px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px">
             <span class="pill risk-${r.risk}">${r.risk}</span>
-            <span style="font-size:11px;font-weight:700;color:var(--near-black);font-variant-numeric:tabular-nums" title="Volumen L6M · Margen anual estimado">${r.deals_l6m||0} deals · ${fmtK(r.margin_run_rate_annual||0)}/año</span>
+            ${lcPill}
+            <span style="font-size:11px;font-weight:700;color:var(--near-black);font-variant-numeric:tabular-nums;margin-left:auto" title="Volumen L6M · Margen anual estimado">${r.deals_l6m||0} deals · ${fmtK(r.margin_run_rate_annual||0)}/año</span>
           </div>
           ${ownerLine}
         </div>`;
