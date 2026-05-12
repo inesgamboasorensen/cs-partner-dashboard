@@ -21,6 +21,10 @@ cs-data/dashboard_data_embed.json
 # Phase 1/2 probe artifacts and phase 3 nightly staging — local only
 cs-data/sample/
 cs-data/_staging/
+cs-data/_nightly_raw/
+cs-data/_enrichment*.jsonl
+cs-data/_enrichment_todo.txt
+cs-data/_enrich_chunk_*.txt
 
 # Local secrets
 .env
