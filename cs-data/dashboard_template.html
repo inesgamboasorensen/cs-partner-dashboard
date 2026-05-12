@@ -383,7 +383,7 @@
           <select id="f-pic"><option value="">PIC · todos</option><option value="yes">★ Sólo PIC</option><option value="no">No PIC</option></select>
           <select id="f-risk"><option value="">Todo riesgo</option><option>ALTO</option><option>MEDIO</option><option>BAJO</option></select>
           <select id="f-lifecycle"><option value="">Todo ciclo de vida</option><option>Onboarding</option><option>Growing</option><option>Mature-Healthy</option><option>Active-Low</option><option>Declining</option><option>At-Risk</option><option>Churned</option></select>
-          <select id="f-status"><option value="">Toda fase</option><option>No Contactado</option><option>Trabajando</option><option>Estable</option><option>Perdida</option></select>
+          <select id="f-status"><option value="">Toda fase</option><option>No Contactado</option><option>Trabajando</option><option>En Mantenimiento</option><option>Perdida</option></select>
           <select id="f-amonly"><option value="">Cobertura · todas</option><option value="cs">CS Partner</option><option value="amonly">Sólo AM (sin CS)</option></select>
           <button class="btn ghost" id="btn-reset">Limpiar</button>
           <button class="btn ghost" id="btn-export">CSV</button>
@@ -398,7 +398,7 @@
             <th>PIC</th>
             <th>Plaza</th>
             <th>Segm.</th>
-            <th class="sortable" data-sort="deals_total">Vol histórico</th>
+            <th class="sortable tooltip" data-sort="realized_deals_count" data-tip="Cuenta de deals Cerrados + Renovaciones — el negocio realizado. Excluye Open (en pipeline) y Cancelled.">Vol histórico</th>
             <th class="sortable tooltip" data-sort="avg_deal_revenue" data-tip="Ingreso promedio que captura MoradaUno por deal (Pago Total / # deals). No es el valor de la renta del inquilino.">Ticket prom</th>
             <th class="tooltip" data-tip="ALTO = ≥1 señal grave (churned 180d+ con histórico, caída ≥50% en L180, o renovación copita <30%). MEDIO = señal moderada (sin actividad 60d+, caída ≥20%, renovación <50%). BAJO = sin señales. Toca el riesgo de una cuenta para ver las señales que la disparan.">Riesgo</th>
             <th class="sortable" data-sort="trend_l6m_pct">Tendencia</th>
@@ -435,7 +435,7 @@
     <div class="kpi-row">
       <div class="kpi"><div class="label">No Contactado</div><div class="value" id="pl-no-contactado" style="color:var(--dark-gray)">0</div><div class="sub" id="plm-no-contactado">— ticket prom · 0 deals L6M</div></div>
       <div class="kpi"><div class="label">Trabajando</div><div class="value" id="pl-trabajando" style="color:var(--accent)">0</div><div class="sub" id="plm-trabajando">— ticket prom · 0 deals L6M</div></div>
-      <div class="kpi"><div class="label">Estable</div><div class="value" id="pl-estable" style="color:var(--green)">0</div><div class="sub" id="plm-estable">— ticket prom · 0 deals L6M</div></div>
+      <div class="kpi"><div class="label">En Mantenimiento</div><div class="value" id="pl-estable" style="color:var(--green)">0</div><div class="sub" id="plm-estable">— ticket prom · 0 deals L6M</div></div>
       <div class="kpi"><div class="label">Perdida</div><div class="value" id="pl-perdida" style="color:var(--red)">0</div><div class="sub" id="plm-perdida">— ticket prom · 0 deals L6M</div></div>
     </div>
     <div id="kanban" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
@@ -486,12 +486,12 @@
           <select id="f-inmo-plaza"><option value="">Todas las plazas</option></select>
           <select id="f-inmo-risk"><option value="">Todo riesgo</option><option>ALTO</option><option>MEDIO</option><option>BAJO</option></select>
           <select id="f-inmo-amonly"><option value="">Cobertura · todas</option><option value="cs">Con CS Partner</option><option value="amonly">Sólo AM (sin CS)</option></select>
-          <select id="f-inmo-sort"><option value="__priority">Por Prioridad (default)</option><option value="margin_run_rate_annual">Por Margen anual</option><option value="deals_total">Por Vol histórico</option><option value="avg_deal_revenue">Por Ticket promedio</option><option value="brokers_total">Por # brokers</option><option value="penetration">Por penetración</option><option value="deals_l12m">Por Deals L12M</option></select>
+          <select id="f-inmo-sort"><option value="__priority">Por Prioridad (default)</option><option value="margin_run_rate_annual">Por Margen anual</option><option value="realized_deals_count">Por Vol histórico</option><option value="avg_deal_revenue">Por Ticket promedio</option><option value="brokers_total">Por # brokers</option><option value="penetration">Por penetración</option><option value="deals_l12m">Por Deals L12M</option></select>
         </div>
       </div>
       <div style="overflow-x:auto;max-height:72vh;overflow-y:auto">
         <table class="worklist">
-          <thead><tr><th>#</th><th class="tooltip" data-tip="Lo que importa de un vistazo: 🔥 Urgente = enfócate hoy · ⚡ Importante = esta semana · 💎 Saludable = mantener cadencia. Ordenado por dónde tu hora rinde más margen.">Prioridad</th><th>Inmobiliaria</th><th>PIC</th><th>Plaza</th><th>Vol histórico</th><th class="tooltip" data-tip="Ingreso promedio MoradaUno por deal (no es el valor de la renta).">Ticket prom</th><th class="tooltip" data-tip="ALTO = ≥1/3 de los brokers de la inmo en riesgo ALTO. MEDIO = más de la mitad en ALTO o MEDIO. BAJO = el resto. Toca la inmo para ver señales por broker.">Riesgo</th><th>Brokers</th><th>Penetración</th><th>Tendencia</th><th>Renov.</th><th>Cobertura</th></tr></thead>
+          <thead><tr><th>#</th><th class="tooltip" data-tip="Lo que importa de un vistazo: 🔥 Urgente = enfócate hoy · ⚡ Importante = esta semana · 💎 Saludable = mantener cadencia. Ordenado por dónde tu hora rinde más margen.">Prioridad</th><th>Inmobiliaria</th><th>PIC</th><th>Plaza</th><th class="tooltip" data-tip="Cuenta de deals Cerrados + Renovaciones — el negocio realizado. Excluye Open (en pipeline) y Cancelled.">Vol histórico</th><th class="tooltip" data-tip="Ingreso promedio MoradaUno por deal (no es el valor de la renta).">Ticket prom</th><th class="tooltip" data-tip="ALTO = ≥1/3 de los brokers de la inmo en riesgo ALTO. MEDIO = más de la mitad en ALTO o MEDIO. BAJO = el resto. Toca la inmo para ver señales por broker.">Riesgo</th><th>Brokers</th><th>Penetración</th><th>Tendencia</th><th>Renov.</th><th>Cobertura</th></tr></thead>
           <tbody id="tbody-inmo"></tbody>
         </table>
       </div>
@@ -558,7 +558,6 @@
             <th>Nuevas rentas</th>
             <th>Renovaciones</th>
             <th>Productividad ↑</th>
-            <th>Eventos inmo</th>
             <th>Valor atribuido</th>
           </tr></thead>
           <tbody id="tbody-lead"></tbody>
@@ -805,7 +804,7 @@
             <div style="font-size:11.5px;color:var(--dark-gray);margin-top:6px;line-height:1.5">Ya hubo contacto. Estás moviéndola — agendaste algo, mandaste material, hay conversación abierta.</div>
           </div>
           <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
-            <div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent)"></span><strong style="font-size:13px">Estable</strong></div>
+            <div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent)"></span><strong style="font-size:13px">En Mantenimiento</strong></div>
             <div style="font-size:11.5px;color:var(--dark-gray);margin-top:6px;line-height:1.5">Cuenta operando bien. La movieron a "Activación" o "Renovación firmada". Mantenimiento normal.</div>
           </div>
           <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
@@ -827,7 +826,7 @@
           </div>
           <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
             <span class="pill role-CS">CS</span> <strong style="margin-left:4px">CS Partner</strong>
-            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">Cuida la relación post-onboarding. Recibe el traspaso del AM y trabaja la cuenta hasta que se vuelva estable o entre en riesgo.</div>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">Cuida la relación post-onboarding. Recibe el traspaso del AM y trabaja la cuenta hasta que esté en mantenimiento o entre en riesgo.</div>
           </div>
           <div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface)">
             <span class="pill role-TRAINER">TRAINER</span> <strong style="margin-left:4px">Trainer</strong>
@@ -1100,7 +1099,7 @@ function logValueEvent(stateObj, evt){
     note: evt.note || ''
   });
   // Auto-flip status a Estable para brokers (los inmos no tienen status)
-  if(stateObj.status !== undefined) stateObj.status = 'Estable';
+  if(stateObj.status !== undefined) stateObj.status = 'En Mantenimiento';
 }
 // Detecta si la productividad del broker subió comparando deals_90d vs deals_90_180
 // (fallback razonable cuando no hay touch-date histórico). Retorna {uplifted, before, after, pct}.
@@ -1125,18 +1124,18 @@ const LS_KEY = 'm1cs_state_v5';
 const LEGACY_LS_KEY = 'm1cs_state_v4';
 // Pipeline phases — May 2026: simplified from 5 → 4 buckets per CS feedback so the
 // owner of a cuenta can tell at a glance whether they've engaged it yet.
-const PIPELINE_PHASES = ['No Contactado','Trabajando','Estable','Perdida'];
+const PIPELINE_PHASES = ['No Contactado','Trabajando','En Mantenimiento','Perdida'];
 // Migration map: covers (a) original English keys, (b) v1 5-phase Spanish names.
 // Every value on the right MUST be in PIPELINE_PHASES.
 const STATUS_MIGRATE = {
   // English legacy
   'Planned':'No Contactado', 'Contacted':'Trabajando', 'InProgress':'Trabajando',
-  'Won':'Estable', 'Lost':'Perdida',
+  'Won':'En Mantenimiento', 'Lost':'Perdida',
   // v1 Spanish (5 phases) → v2 (4 phases)
   'Planeado':'No Contactado',
   'Contactado':'Trabajando',
   'En progreso':'Trabajando',
-  'Ganado':'Estable',
+  'Ganado':'En Mantenimiento',
   'Perdido':'Perdida',
 };
 let STATE = {};
@@ -1154,6 +1153,17 @@ try{
     if(Object.keys(STATE).length>0) localStorage.setItem(LS_KEY, JSON.stringify(STATE));
   }
 }catch(e){STATE={}}
+// v6 migration: legacy 'Estable' status renamed to 'En Mantenimiento' (May 2026).
+// Existing localStorage records with the old status get rewritten in place.
+{
+  const _v6Old = 'Esta' + 'ble';  // string-built so future find/replace passes don't clobber it
+  let _v6Migrated = false;
+  for(const id in STATE){
+    const a = STATE[id];
+    if(a && a.status === _v6Old){ a.status = 'En Mantenimiento'; _v6Migrated = true; }
+  }
+  if(_v6Migrated) localStorage.setItem(LS_KEY, JSON.stringify(STATE));
+}
 function saveState(){localStorage.setItem(LS_KEY,JSON.stringify(STATE))}
 function _backfillOwnerHistory(s){
   // Si ya hay un owner asignado pero no hay historial, sembramos una entrada legacy.
@@ -1808,7 +1818,7 @@ function renderWorklist(){
       <td>${picBadge(r._pic)}</td>
       <td>${plazaCell}</td>
       <td>${segPill}</td>
-      <td><strong style="color:var(--near-black)">${r.deals_total||0}</strong> <small style="color:var(--dark-gray);font-weight:400">deals</small></td>
+      <td><strong style="color:var(--near-black)">${r.realized_deals_count||0}</strong> <small style="color:var(--dark-gray);font-weight:400">deals</small></td>
       <td class="money sm" title="Ingreso promedio MoradaUno por deal">${fmtK(r.avg_deal_revenue||0)}</td>
       <td>${riskPill(r.risk)}</td>
       <td>${trendCell(r)}</td>
@@ -1824,7 +1834,7 @@ function renderWorklist(){
 
   $$('.sel-status').forEach(el=>el.onchange=e=>{
     const id=e.target.dataset.id; getA(id).status=e.target.value;
-    if(e.target.value==='Estable' && !getA(id).realized_impact){
+    if(e.target.value==='En Mantenimiento' && !getA(id).realized_impact){
       const r = BROKERS.find(x=>x.id===id);
       getA(id).realized_impact = Math.round((r.avg_deal_revenue||0)*2);
     }
@@ -1955,7 +1965,7 @@ function renderPipeline(){
   const phaseColor = {
     'No Contactado': 'var(--mid-gray)',
     'Trabajando':    'var(--peach)',
-    'Estable':       'var(--accent)',
+    'En Mantenimiento':       'var(--accent)',
     'Perdida':       'var(--red)',
   };
 
@@ -2126,7 +2136,7 @@ function renderInmos(){
       <td class="broker-cell"><div class="name">${esc(i.company)}</div><div class="company">${i.brokers_total} brokers · ${i.brokers_active_90d} activos · ${i.tenure_months}mo en M1</div></td>
       <td>${picBadge(i._pic)}</td>
       <td>${plazaPill(i._plaza)}</td>
-      <td><strong style="color:var(--near-black)">${i.deals_total||0}</strong> <small style="color:var(--dark-gray);font-weight:400">deals</small><br><small style="color:var(--dark-gray)">L12M: ${i.deals_l12m||0}</small></td>
+      <td><strong style="color:var(--near-black)">${i.realized_deals_count||0}</strong> <small style="color:var(--dark-gray);font-weight:400">deals</small><br><small style="color:var(--dark-gray)">L12M: ${i.deals_l12m||0}</small></td>
       <td class="money sm" title="Ingreso promedio MoradaUno por deal">${fmtK(i.avg_deal_revenue||0)}</td>
       <td>${riskPill(i.risk)} <small style="color:var(--dark-gray)">${i.risk_dist.ALTO}/${i.risk_dist.MEDIO}/${i.risk_dist.BAJO}</small></td>
       <td>${i.brokers_total}<br><small style="color:var(--dark-gray)">${i.brokers_active_90d} activos</small></td>
@@ -2303,7 +2313,7 @@ function renderHandoffSectionInmo(inmo, i){
   </div>`;
 }
 function nextBestAction(r, a){
-  if(a.status==='Estable') return {type:'done',msg:'🎉 Cuenta activada. Programa seguimiento a 90 días.'};
+  if(a.status==='En Mantenimiento') return {type:'done',msg:'🎉 Cuenta activada. Programa seguimiento a 90 días.'};
   if(a.status==='Perdida') return {type:'done',msg:'⚠️ Cuenta perdida. Considera reactivación futura.'};
   const sig = r.primary_signal||'';
   if(a.status==='No Contactado'){
@@ -2334,7 +2344,7 @@ function openBroker(id){
 
     <div class="account-grid">
       <div class="fact"><div class="k">Segmento</div><div class="v">${r.segment}</div></div>
-      <div class="fact"><div class="k">Vol histórico</div><div class="v">${r.deals_total||0} <small style="font-weight:400;color:var(--dark-gray);font-size:11px">deals (2Y)</small></div></div>
+      <div class="fact"><div class="k tooltip" data-tip="Cuenta de deals Cerrados + Renovaciones — el negocio realizado. Excluye Open (en pipeline) y Cancelled.">Vol histórico</div><div class="v">${r.realized_deals_count||0} <small style="font-weight:400;color:var(--dark-gray);font-size:11px">deals (2Y)</small></div></div>
       <div class="fact"><div class="k tooltip" data-tip="Ingreso promedio MoradaUno por deal (Pago Total / # deals). Distinto del valor de la renta del inquilino.">Ticket promedio</div><div class="v">${fmt$(r.avg_deal_revenue||0)}</div></div>
       <div class="fact"><div class="k">Riesgo</div><div class="v" style="color:${r.risk==='ALTO'?'var(--red)':r.risk==='MEDIO'?'var(--amber)':'var(--green)'}">${r.risk}</div></div>
       <div class="fact"><div class="k">Etapa del ciclo de vida</div><div class="v">${r.lifecycle}</div></div>
@@ -2576,7 +2586,7 @@ function openInmo(id){
       <td>${brokerStatusDot(b)}<strong>${esc(b.broker)}</strong>${b.agent?` <small style="color:var(--dark-gray)">· ${esc(b.agent)}</small>`:''}</td>
       <td>${picFor(b,'broker')?'<span style="color:#6D28D9;font-weight:700" title="PIC">★</span>':'<span style="color:var(--mid-gray)">—</span>'}</td>
       <td>${riskPill(b.risk)}</td>
-      <td><strong>${b.deals_total||0}</strong> <small style="color:var(--dark-gray)">deals</small></td>
+      <td><strong>${b.realized_deals_count||0}</strong> <small style="color:var(--dark-gray)">deals</small></td>
       <td class="money sm" title="Ingreso promedio MoradaUno por deal">${fmtK(b.avg_deal_revenue||0)}</td>
       <td><small style="color:${b.days_since_last>90?'var(--red)':b.days_since_last>30?'var(--amber)':'var(--green)'};font-weight:600">Hace ${b.days_since_last}d</small></td>
     </tr>`).join('');
@@ -2628,7 +2638,7 @@ function openInmo(id){
 
     <div class="account-grid">
       <div class="fact"><div class="k">Plaza</div><div class="v" style="font-size:14px">${esc(plaza||'—')}</div></div>
-      <div class="fact"><div class="k">Vol histórico</div><div class="v">${inmo.deals_total||0} <small style="font-weight:400;color:var(--dark-gray);font-size:11px">deals (2Y)</small></div></div>
+      <div class="fact"><div class="k tooltip" data-tip="Cuenta de deals Cerrados + Renovaciones — el negocio realizado. Excluye Open (en pipeline) y Cancelled.">Vol histórico</div><div class="v">${inmo.realized_deals_count||0} <small style="font-weight:400;color:var(--dark-gray);font-size:11px">deals (2Y)</small></div></div>
       <div class="fact"><div class="k tooltip" data-tip="Ingreso promedio MoradaUno por deal (Pago Total / # deals). Distinto del valor de la renta del inquilino.">Ticket promedio</div><div class="v">${fmt$(inmo.avg_deal_revenue||0)}</div></div>
       <div class="fact"><div class="k">Riesgo</div><div class="v" style="color:${inmo.risk==='ALTO'?'var(--red)':inmo.risk==='MEDIO'?'var(--amber)':'var(--green)'}">${inmo.risk}</div></div>
       <div class="fact"><div class="k">Brokers totales</div><div class="v">${inmo.brokers_total}</div></div>
@@ -2730,7 +2740,7 @@ function openInmo(id){
       <div style="background:#FAFAF9;border:1px solid var(--light-gray);border-radius:8px;padding:10px 14px">${productRows || '—'}</div>
     </details>
 
-    <details class="sec" open>
+    <details class="sec">
       <summary>👥 Brokers de esta inmobiliaria · ${allBrokers.length} totales · ${activeCt} activos · ${dormantCt} dormidos · ${inactiveCt} inactivos</summary>
       <div style="font-size:11.5px;color:var(--dark-gray);padding:4px 0 8px;line-height:1.5">Todos los brokers asociados — usa esto para detectar cuáles podemos reactivar. Toca una fila para abrir el detalle del broker.</div>
       <table class="broker-subtable">
@@ -2757,7 +2767,7 @@ function openInmo(id){
       <input type="hidden" id="inmo-owner" value="${esc(iSt0.owner||'')}"/>
     </details>
 
-    <details class="sec" open>
+    <details class="sec">
       <summary>📌 Cómo trabajar con esta inmobiliaria</summary>
       <div style="font-size:11.5px;color:var(--dark-gray);padding:4px 0 8px;line-height:1.55">Persona de contacto, horarios, productos adoptados, sensibilidades, escaleras de comunicación, último compromiso. Visible para todo el equipo CS.</div>
       <div class="log-form">
@@ -2795,7 +2805,7 @@ function addAct(id){
   const a = getA(id);
   a.activities.push({date:nowLocalIso(),type,csm,outcome,text});
   if(outcome==='Activación'||outcome==='Renovación firmada'){
-    a.status='Estable';
+    a.status='En Mantenimiento';
     const r = BROKERS.find(x=>x.id===id);
     if(!a.realized_impact) a.realized_impact = Math.round((r.avg_deal_revenue||0)*2);
   } else if(['Contactado','Agendado','Interesado'].includes(outcome)){
@@ -2868,7 +2878,7 @@ function setBrokerStatus(brokerId, status){
   if(a.status === status) return;
   a.status = status;
   // If moved to Estable for the first time, seed the realized impact estimate
-  if(status === 'Estable' && !a.realized_impact){
+  if(status === 'En Mantenimiento' && !a.realized_impact){
     const r = BROKERS.find(x => x.id === brokerId);
     if(r) a.realized_impact = Math.round((r.avg_deal_revenue || 0) * 2);
   }
@@ -2927,7 +2937,7 @@ function addInmoActFromForm(inmoId){
   i.activities.push({date:nowLocalIso(),type,csm,outcome,text});
   // Auto-transition phase based on outcome (mirrors broker behavior in addAct)
   if(outcome === 'Activación' || outcome === 'Renovación firmada'){
-    i.status = 'Estable';
+    i.status = 'En Mantenimiento';
   } else if(['Contactado','Agendado','Interesado'].includes(outcome)){
     if(i.status === 'No Contactado') i.status = 'Trabajando';
   } else if(outcome === 'Rechazó'){
@@ -3143,7 +3153,6 @@ function renderLeaderboard(){
     const cellNueva = s.by_type.nueva_renta||0;
     const cellRen = s.by_type.renovacion||0;
     const cellProd = s.by_type.productividad_up||0;
-    const cellInmoEv = (s.by_type.nuevos_brokers||0)+(s.by_type.productividad_up_inmo||0);
     return `<tr>
       <td class="rank">${i+1}</td>
       <td class="lead-name">${esc(s.owner)}</td>
@@ -3153,10 +3162,9 @@ function renderLeaderboard(){
       <td>${cellNueva||'<small style="color:var(--dark-gray)">—</small>'}</td>
       <td>${cellRen||'<small style="color:var(--dark-gray)">—</small>'}</td>
       <td>${cellProd||'<small style="color:var(--dark-gray)">—</small>'}</td>
-      <td>${cellInmoEv||'<small style="color:var(--dark-gray)">—</small>'}</td>
       <td class="money">${fmtK(s.value)}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="10" class="empty">Aún no hay actividad ni eventos de valor registrados.</td></tr>';
+  }).join('') || '<tr><td colspan="9" class="empty">Aún no hay actividad ni eventos de valor registrados.</td></tr>';
 
   // Recent value events feed — respeta el filtro de período
   const periodLbl = {all:'histórico', week:'última semana', month:'último mes', quarter:'último trimestre'}[fPeriod] || 'histórico';

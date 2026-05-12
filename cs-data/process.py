@@ -326,6 +326,9 @@ def process():
         renewal_ct = sum(1 for d in ds if d.get('deal_type') == 'Renewal')
         cancelled_ct = sum(1 for d in ds if d.get('deal_type') == 'Cancelled')
         closed_ct = sum(1 for d in ds if d.get('deal_type') == 'Closed')
+        # "Vol histórico" displayed in the UI = revenue-realizing deals only (excludes
+        # Open and Cancelled). Closed = new rents that closed; Renewal = renovations.
+        realized_deals_ct = closed_ct + renewal_ct
 
         # Deals in progress (actively closing right now) — solo NUEVAS rentas en pipeline activo.
         # NO incluye renovaciones ni contratos ya cerrados. Filtro por pipefy_phase_name:
@@ -710,6 +713,7 @@ def process():
             'open_count': open_ct,
             'renewal_count': renewal_ct,
             'closed_count': closed_ct,
+            'realized_deals_count': realized_deals_ct,   # Closed + Renewal (UI: "Vol histórico")
             # Deals closing right now
             'in_progress_count': in_progress_count,
             'in_progress_value': int(in_progress_value),
@@ -820,6 +824,8 @@ def process():
 
         all_deals_total = sum(b['deals_total'] for b in bs)
         all_renewal = sum(b['renewal_count'] for b in bs)
+        all_closed = sum(b['closed_count'] for b in bs)
+        all_realized = sum(b.get('realized_deals_count', 0) for b in bs)
         all_expired = sum(b['contracts_expired'] for b in bs)
         all_expiring = sum(b['contracts_expiring_90d'] for b in bs)
         inmo_copitas = sum(b.get('contracts_expired_copitas', 0) for b in bs)
@@ -936,6 +942,8 @@ def process():
             'low_volume': low_volume_inmo,
             'avg_deal_revenue': avg_deal_revenue,   # MoradaUno revenue per deal
             'renewal_count': all_renewal,
+            'closed_count': all_closed,
+            'realized_deals_count': all_realized,   # Closed + Renewal (UI: "Vol histórico")
             'renewal_rate': renewal_rate,
             'renewal_rate_copita': renewal_rate_copita,
             'renewal_rate_cierre': renewal_rate_cierre,
