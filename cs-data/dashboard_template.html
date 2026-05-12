@@ -923,6 +923,51 @@
       </div>
     </div>
 
+    <!-- Desempeño por dueño -->
+    <div class="section">
+      <div class="section-hdr"><h2>Desempeño por dueño</h2></div>
+      <div style="padding:18px 20px">
+        <div style="font-size:13.5px;color:var(--near-black);line-height:1.6;margin-bottom:14px">Es el <strong>leaderboard del equipo</strong>: cada fila es un AM, CS Partner, Trainer o BDR. Resume cómo está rindiendo cada persona — cuántas cuentas trabajó, en qué etapa están, y cuánto valor generó. Pensado para que el manager identifique en quién apoyarse y dónde hay capacidad disponible.</div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Las columnas</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-bottom:18px">
+          <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)">
+            <strong style="font-size:13px">Cuentas tocadas</strong>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">Brokers + inmobiliarias donde el dueño registró al menos 1 actividad o evento de valor en el período. Las inmobiliarias cuentan como una sola cuenta aunque haya tocado varios de sus brokers.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)">
+            <strong style="font-size:13px">Ciclo (etapa dominante)</strong>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">La etapa del ciclo de vida más frecuente entre sus cuentas tocadas. Te dice <em>dónde concentra su atención</em>: ¿está cuidando cuentas maduras, rescatando cuentas en riesgo, o construyendo cuentas nuevas?</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)">
+            <strong style="font-size:13px">Actividades</strong>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">Cuántas actividades registró el dueño en el período (llamada, WhatsApp, demo, reunión, etc.). Es la medida directa de esfuerzo.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)">
+            <strong style="font-size:13px">Productividad</strong>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">% de sus cuentas tocadas que <em>crecieron</em> (más deals en los últimos 6 meses que en los 6 anteriores). <span style="color:var(--green);font-weight:600">≥50% verde</span> = trabaja con cuentas que están subiendo · <span style="color:var(--amber);font-weight:600">25–49% ámbar</span> · <span style="color:var(--red);font-weight:600">&lt;25% rojo</span> = posiblemente rescatando casos difíciles. Es <strong>direccional, no causal</strong> — la cuenta pudo crecer por razones ajenas al dueño.</div>
+          </div>
+          <div style="border:1px solid var(--accent);border-radius:10px;padding:12px;background:#F0F7F2">
+            <strong style="font-size:13px;color:var(--accent)">Valor atribuido ($)</strong>
+            <div style="font-size:12px;color:var(--dark-gray);margin-top:6px;line-height:1.55">Suma de los <em>eventos de valor</em> que el dueño registró a mano en el modal de cada cuenta — nueva renta cerrada, renovación firmada, productividad mejorada. El dueño se captura al momento del evento, así que la atribución no cambia si después se reasigna la cuenta.</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Los filtros</div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.7;margin-bottom:14px">
+          <div><strong>Período</strong> · qué ventana de tiempo medir. "Histórico" suma todo lo registrado; "Última semana / mes / trimestre" recorta.</div>
+          <div><strong>Vista</strong> · <em>Todas / Sólo brokers / Sólo inmobiliarias</em>. Cuando el dueño es punto de contacto de una inmobiliaria como empresa (no de sus brokers individuales), filtra a "Sólo inmobiliarias" para ver su desempeño aislado.</div>
+          <div><strong>Rol</strong> · AM / CS / Trainer / BDR. Útil para comparar dentro del mismo rol — no tiene sentido medir a un BDR (reactivación) con la misma vara que un AM (onboarding).</div>
+          <div><strong>Ciudad</strong> · filtra las cuentas por plaza (sólo aplica a brokers, las inmobiliarias no tienen plaza única).</div>
+          <div><strong>Ordenar por</strong> · valor atribuido (default), # eventos, # actividades, o # cuentas tocadas.</div>
+        </div>
+
+        <div style="background:#F0EEE8;border-radius:10px;padding:12px 14px;font-size:12px;color:var(--dark-gray);line-height:1.6">
+          <strong style="color:var(--near-black)">Cómo leerlo:</strong> Esta tabla <em>no</em> es un ranking competitivo — un dueño con poco valor atribuido pero alta productividad en cuentas At-Risk está haciendo el trabajo más valioso del equipo. Léelo en conjunto: actividades + etapa dominante + productividad cuentan la historia completa. Los <em>eventos de valor</em> se registran a mano, así que la columna de $ sólo refleja lo que el equipo se acuerda de capturar — si está baja, primero revisa la disciplina de registro, no la atribución.
+        </div>
+      </div>
+    </div>
+
     <!-- Margen — economía -->
     <div class="section">
       <div class="section-hdr"><h2>¿De dónde sale el margen?</h2></div>
