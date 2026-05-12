@@ -429,7 +429,6 @@
           <select id="f-risk"><option value="">Todo riesgo</option><option>ALTO</option><option>MEDIO</option><option>BAJO</option></select>
           <select id="f-lifecycle"><option value="">Todo ciclo de vida</option><option>Onboarding</option><option>Growing</option><option>Mature-Healthy</option><option>Active-Low</option><option>Declining</option><option>At-Risk</option><option>Churned</option></select>
           <select id="f-status"><option value="">Toda fase</option><option>No Contactado</option><option>Trabajando</option><option>En Mantenimiento</option><option>Perdida</option></select>
-          <select id="f-amonly"><option value="">Cobertura · todas</option><option value="cs">CS Partner</option><option value="amonly">Sólo AM (sin CS)</option></select>
           <button class="btn ghost" id="btn-reset">Limpiar</button>
           <button class="btn ghost" id="btn-export">CSV</button>
         </div>
@@ -530,7 +529,6 @@
           <select id="f-inmo-pic"><option value="">PIC · todos</option><option value="yes">★ Sólo PIC</option><option value="no">No PIC</option></select>
           <select id="f-inmo-plaza"><option value="">Todas las plazas</option></select>
           <select id="f-inmo-risk"><option value="">Todo riesgo</option><option>ALTO</option><option>MEDIO</option><option>BAJO</option></select>
-          <select id="f-inmo-amonly"><option value="">Cobertura · todas</option><option value="cs">Con CS Partner</option><option value="amonly">Sólo AM (sin CS)</option></select>
           <select id="f-inmo-sort"><option value="__priority">Por Prioridad (default)</option><option value="margin_run_rate_annual">Por Margen anual</option><option value="realized_deals_count">Por Vol histórico</option><option value="avg_deal_revenue">Por Ticket promedio</option><option value="brokers_total">Por # brokers</option><option value="penetration">Por penetración</option><option value="deals_l12m">Por Deals L12M</option></select>
         </div>
       </div>
@@ -822,10 +820,9 @@
           <div style="border:1px solid #A7F3D0;border-radius:10px;padding:12px;background:#ECFDF5"><span class="pill risk-BAJO">BAJO</span><div style="font-size:12px;margin-top:6px;line-height:1.5">Sin señales preocupantes. La cuenta opera dentro de lo esperado.</div></div>
         </div>
 
-        <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">PIC · Sólo AM</div>
+        <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">PIC</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:24px">
           <div style="border:1px solid #DDD6FE;border-radius:10px;padding:12px;background:#F5F3FF"><span style="background:#F5F3FF;color:#6D28D9;border:1px solid #DDD6FE;font-weight:700;font-size:11px;padding:3px 9px;border-radius:999px">★ PIC</span><div style="font-size:12px;margin-top:6px;line-height:1.5">Ideal Customer Profile — el tipo de cliente que más nos conviene. Úsalo como filtro cuando quieras priorizar dentro de un grupo grande.</div></div>
-          <div style="border:1px solid #BFDBFE;border-radius:10px;padding:12px;background:#EFF6FF"><span style="background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE;font-weight:600;font-size:11px;padding:3px 9px;border-radius:999px">Sólo AM</span><div style="font-size:12px;margin-top:6px;line-height:1.5">Cuenta que se queda con Account Manager y no requiere CS Partner. Toggle dentro del detalle.</div></div>
         </div>
 
         <div style="font-size:11px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Tendencia</div>
@@ -1275,7 +1272,7 @@ function _backfillOwnerHistory(s){
   }
 }
 function getA(id){
-  if(!STATE[id]) STATE[id] = {status:'No Contactado',owner:'',city:'',activities:[],value_events:[],next_action:null,notes:'',realized_impact:0,handed_off:false,handoff_date:null,am_snapshot:null,owner_history:[],pic_override:null,no_cs_required:false,intervention_detail:'',handoff_log:[]};
+  if(!STATE[id]) STATE[id] = {status:'No Contactado',owner:'',city:'',activities:[],value_events:[],next_action:null,notes:'',realized_impact:0,handed_off:false,handoff_date:null,am_snapshot:null,owner_history:[],pic_override:null,intervention_detail:'',handoff_log:[]};
   // Backfill missing keys for older records
   if(STATE[id].city===undefined) STATE[id].city='';
   if(!STATE[id].value_events) STATE[id].value_events=[];
@@ -1284,7 +1281,6 @@ function getA(id){
   if(STATE[id].am_snapshot===undefined) STATE[id].am_snapshot=null;
   if(STATE[id].pic_override===undefined) STATE[id].pic_override=null;
   if(STATE[id].risk_override===undefined) STATE[id].risk_override=null;  // Round 2: manual risk
-  if(STATE[id].no_cs_required===undefined) STATE[id].no_cs_required=false;
   if(STATE[id].intervention_detail===undefined) STATE[id].intervention_detail='';
   if(!STATE[id].handoff_log) STATE[id].handoff_log=[];
   _backfillOwnerHistory(STATE[id]);
@@ -1295,7 +1291,7 @@ function getA(id){
 // Inmobiliaria-level state (separate keyspace, prefix 'inmo:')
 function getI(inmoId){
   const key = 'inmo:'+inmoId;
-  if(!STATE[key]) STATE[key] = {status:'No Contactado',owner:'',activities:[],value_events:[],notes:'',handed_off:false,handoff_date:null,am_snapshot:null,owner_history:[],pic_override:null,no_cs_required:false,intervention_detail:'',handoff_log:[],working_notes:''};
+  if(!STATE[key]) STATE[key] = {status:'No Contactado',owner:'',activities:[],value_events:[],notes:'',handed_off:false,handoff_date:null,am_snapshot:null,owner_history:[],pic_override:null,intervention_detail:'',handoff_log:[],working_notes:''};
   if(!STATE[key].value_events) STATE[key].value_events=[];
   if(!STATE[key].activities) STATE[key].activities=[];
   if(STATE[key].handed_off===undefined) STATE[key].handed_off=false;
@@ -1303,7 +1299,6 @@ function getI(inmoId){
   if(STATE[key].am_snapshot===undefined) STATE[key].am_snapshot=null;
   if(STATE[key].pic_override===undefined) STATE[key].pic_override=null;
   if(STATE[key].risk_override===undefined) STATE[key].risk_override=null;  // Round 2: manual risk
-  if(STATE[key].no_cs_required===undefined) STATE[key].no_cs_required=false;
   if(STATE[key].intervention_detail===undefined) STATE[key].intervention_detail='';
   if(!STATE[key].handoff_log) STATE[key].handoff_log=[];
   if(STATE[key].working_notes===undefined) STATE[key].working_notes='';
@@ -1339,7 +1334,7 @@ function statusSlug(s){ return String(s).toLowerCase().replace(/\s+/g,'-'); }
 function cityFor(broker){ return broker.city || getA(broker.id).city || ''; }
 function cityFromRegistry(broker){ return !!broker.city; }
 
-// ─── Plaza · PIC · AM-only · Intervención · Cascade ───
+// ─── Plaza · PIC · Intervención · Cascade ───
 // Plaza: sales territory. Today derived from broker/inmo city; the `plaza` field will
 // arrive directly from the MCP in a future iteration (see process.py). Until then we
 // reuse city as the plaza label so the UI doesn't show a blank column.
@@ -1374,22 +1369,6 @@ function picBadge(isPic){
   return isPic
     ? '<span class="pill" style="background:#F5F3FF;color:#6D28D9;border:1px solid #DDD6FE;font-weight:700;font-size:10.5px;letter-spacing:.04em" title="Ideal Customer Profile">★ PIC</span>'
     : '<span class="pill" style="background:var(--light-gray);color:var(--mid-gray);font-size:10.5px" title="Sin marcar como PIC">○ —</span>';
-}
-
-// "AM-only / no-CS" — accounts that go through Account Manager and don't end up
-// with a CS Partner. Stored per-broker/per-inmo in localStorage.
-function isAmOnly(item, kind){
-  const st = kind==='inmo' ? getI(item.id) : getA(item.id);
-  return !!(st && st.no_cs_required);
-}
-function toggleAmOnly(id, kind){
-  const st = kind==='inmo' ? getI(id) : getA(id);
-  st.no_cs_required = !st.no_cs_required;
-  saveState();
-  if(kind==='inmo'){ renderInmos(); openInmo(id); } else { renderWorklist(); openBroker(id); }
-}
-function amOnlyBadge(){
-  return '<span class="pill" style="background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE;font-weight:600;font-size:10.5px" title="Esta cuenta se queda con AM, no requiere CS Partner">Sólo AM</span>';
 }
 
 // Intervention reason — derived from broker risk signals + inmo aggregate signals.
@@ -1957,12 +1936,11 @@ function renderWorklist(){
   const fo=$('#f-owner').value, fs=$('#f-segment').value, fr=$('#f-risk').value, flc=$('#f-lifecycle').value, fst=$('#f-status').value;
   const frole = $('#f-role').value, fcity = $('#f-city').value;
   const fPic   = ($('#f-pic')?.value)||'';
-  const fAmOnly= ($('#f-amonly')?.value)||'';
   const fPriority = ($('#f-priority')?.value)||'';
   let data = BROKERS.map(r=>{
     const a=getA(r.id);
     const _bucket = coverageBucket({owner:a.owner, lifecycle:r.lifecycle, tenure_months:r.tenure_months});
-    return {...r, _a:a, _role: roleFor(r), _bucket, _pic: picFor(r,'broker'), _amOnly: isAmOnly(r,'broker'), _priority: priorityTier(r,'broker')};
+    return {...r, _a:a, _role: roleFor(r), _bucket, _pic: picFor(r,'broker'), _priority: priorityTier(r,'broker')};
   });
   data = data.filter(r=>{
     if(search && !((r.broker+' '+(r.company||'')).toLowerCase().includes(search))) return false;
@@ -1975,8 +1953,6 @@ function renderWorklist(){
     if(fst && r._a.status!==fst) return false;
     if(fPic==='yes' && !r._pic) return false;
     if(fPic==='no'  && r._pic) return false;
-    if(fAmOnly==='amonly' && !r._amOnly) return false;
-    if(fAmOnly==='cs'     && r._amOnly) return false;
     if(fPriority && r._priority !== fPriority) return false;
     return true;
   });
@@ -2010,7 +1986,6 @@ function renderWorklist(){
       ? `<span class="pill role-NONE tooltip" data-tip="Sin owner · expected ${roleLabel(role)}" style="font-weight:700">Sin asignar</span>`
       : `<span class="pill role-${bucket} tooltip" data-tip="${roleLabel(bucket)}${a.owner?' · '+esc(a.owner):' · cartera (sin persona)'}">${bucket}</span>`;
     const handoffCell = handoffPill(r);
-    const amOnlyChip  = r._amOnly ? `<div style="margin-top:2px">${amOnlyBadge()}</div>` : '';
     const tier = priorityTier(r, 'broker');
     return `<tr>
       <td class="rank">${i+1}</td>
@@ -2025,7 +2000,7 @@ function renderWorklist(){
       <td>${trendCell(r)}</td>
       <td>${renewalCell(r)}</td>
       <td><select class="cell-select sel-status" data-id="${escAttr(r.id)}">${PIPELINE_PHASES.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
-      <td>${roleCell}${handoffCell?'<div style="margin-top:2px">'+handoffCell+'</div>':''}${amOnlyChip}</td>
+      <td>${roleCell}${handoffCell?'<div style="margin-top:2px">'+handoffCell+'</div>':''}</td>
       <td><select class="cell-select sel-owner" data-id="${escAttr(r.id)}">${ownerOpts}</select></td>
     </tr>`;
   }).join('') || `<tr><td colspan="14" class="empty">Sin cuentas que coincidan.</td></tr>`;
@@ -2281,12 +2256,11 @@ function renderInmos(){
   const fr = $('#f-inmo-risk').value, sortKey = $('#f-inmo-sort').value;
   const fPic   = ($('#f-inmo-pic')?.value)||'';
   const fPlaza = ($('#f-inmo-plaza')?.value)||'';
-  const fAmOnly= ($('#f-inmo-amonly')?.value)||'';
   const fOwner = ($('#f-inmo-owner')?.value)||'';
   const fPriority = ($('#f-inmo-priority')?.value)||'';
   let data = INMOS.map(i=>{
     const iSt = getI(i.id);
-    return {...i, _pic: picFor(i,'inmo'), _plaza: inmoPlazaFor(i), _amOnly: isAmOnly(i,'inmo'), _owner: iSt.owner || '', _priority: priorityTier(i,'inmo')};
+    return {...i, _pic: picFor(i,'inmo'), _plaza: inmoPlazaFor(i), _owner: iSt.owner || '', _priority: priorityTier(i,'inmo')};
   });
   data = data.filter(i=>{
     if(q && !i.company.toLowerCase().includes(q)) return false;
@@ -2294,8 +2268,6 @@ function renderInmos(){
     if(fPic==='yes' && !i._pic) return false;
     if(fPic==='no'  && i._pic) return false;
     if(fPlaza && i._plaza !== fPlaza) return false;
-    if(fAmOnly==='amonly' && !i._amOnly) return false;
-    if(fAmOnly==='cs'     && i._amOnly) return false;
     if(fOwner === '__unassigned__'){ if(i._owner) return false; }
     else if(fOwner && i._owner !== fOwner) return false;
     if(fPriority && i._priority !== fPriority) return false;
@@ -2328,7 +2300,7 @@ function renderInmos(){
   $('#tbody-inmo').innerHTML = data.slice(0,MAX).map((i,idx)=>{
     const iSt = getI(i.id);
     const ownerLabel = iSt.owner ? `<span class="pill role-${roleOfOwner(iSt.owner)||'NONE'}" title="${esc(iSt.owner)}">${esc(iSt.owner)}</span>` :
-      (i._amOnly ? amOnlyBadge() : '<span class="pill role-NONE" title="Sin owner asignado">Sin asignar</span>');
+      '<span class="pill role-NONE" title="Sin owner asignado">Sin asignar</span>';
     const handoffChip = handoffPillInmo(i);
     const tier = priorityTier(i, 'inmo');
     return `<tr onclick="openInmo('${escAttr(i.id)}')" style="cursor:pointer">
@@ -2531,7 +2503,6 @@ function openBroker(id){
   const r = BROKERS.find(x=>x.id===id); if(!r) return;
   const a = getA(id);
   const isPic = picFor(r,'broker');
-  const amOnly = isAmOnly(r,'broker');
   const plaza = plazaFor(r);
   $('#m-title').textContent = r.broker;
   $('#m-sub').textContent = (r.company||'Independiente') + (r.agent?` · ${r.agent}`:'') + (plaza?` · 📍 ${plaza}`:'') + (r.phone?` · ${r.phone}`:'');
@@ -2539,7 +2510,6 @@ function openBroker(id){
   $('#m-body').innerHTML = `
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
       <button class="btn sm ${isPic?'primary':'ghost'}" onclick="togglePic('${escAttr(id)}','broker')" style="${isPic?'background:#6D28D9':''}">${isPic?'★ PIC':'☆ Marcar PIC'}</button>
-      <button class="btn sm ${amOnly?'primary':'ghost'}" onclick="toggleAmOnly('${escAttr(id)}','broker')" style="${amOnly?'background:var(--blue)':''}">${amOnly?'✓ Sólo AM (sin CS)':'Sólo AM · sin CS Partner'}</button>
       ${r.segment==='Independiente'?'<span class="pill" style="background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA;font-weight:600">Independiente</span>':'<span class="pill" style="background:var(--light-gray);color:var(--near-black);border:1px solid var(--light-gray);font-weight:600">'+esc(r.company)+'</span>'}
     </div>
 
@@ -2758,7 +2728,6 @@ function openInmo(id){
   $('#m-title').textContent = inmo.company;
 
   const isPic = picFor(inmo,'inmo');
-  const amOnly = isAmOnly(inmo,'inmo');
   const plaza = inmoPlazaFor(inmo);
   const subBits = [
     `${inmo.brokers_total} brokers`,
@@ -2831,7 +2800,6 @@ function openInmo(id){
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
       <button class="btn sm ${isPic?'primary':'ghost'}" onclick="togglePic('${escAttr(inmo.id)}','inmo')" style="${isPic?'background:#6D28D9':''}">${isPic?'★ PIC':'☆ Marcar PIC'}</button>
-      <button class="btn sm ${amOnly?'primary':'ghost'}" onclick="toggleAmOnly('${escAttr(inmo.id)}','inmo')" style="${amOnly?'background:var(--blue)':''}">${amOnly?'✓ Sólo AM (sin CS)':'Sólo AM · sin CS Partner'}</button>
       <label style="display:flex;align-items:center;gap:6px;margin-left:auto;font-size:11.5px;color:var(--dark-gray)">Fase en Embudo
         <select id="inmo-status-${escAttr(inmo.id)}" onchange="setInmoStatus('${escAttr(inmo.id)}', this.value)" style="font-size:12px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--near-black);font-weight:600">${PIPELINE_PHASES.map(s=>`<option ${iSt0.status===s?'selected':''}>${s}</option>`).join('')}</select>
       </label>
@@ -4281,10 +4249,10 @@ $$('.tab-btn').forEach(b=>b.onclick=()=>{
 // Pipeline filters
 ['f-pipe-search','f-pipe-owner','f-pipe-role','f-pipe-segment'].forEach(id=>{ const el=$('#'+id); if(el) el.oninput = renderPipeline; });
 const _pipeReset = $('#btn-pipe-reset'); if(_pipeReset) _pipeReset.onclick = ()=>{ ['f-pipe-search','f-pipe-owner','f-pipe-role','f-pipe-segment'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; }); renderPipeline(); };
-['f-search','f-role','f-owner','f-city','f-segment','f-risk','f-lifecycle','f-status','f-pic','f-amonly','f-priority'].forEach(id=>{ const el=$('#'+id); if(el) el.oninput=renderWorklist; });
+['f-search','f-role','f-owner','f-city','f-segment','f-risk','f-lifecycle','f-status','f-pic','f-priority'].forEach(id=>{ const el=$('#'+id); if(el) el.oninput=renderWorklist; });
 // Cuando cambia el rol, repuebla el dropdown de dueños antes de re-renderizar
 $('#f-role').onchange = ()=>{ refreshOwnerFilterOptions(); $('#f-owner').value=''; renderWorklist(); };
-$('#btn-reset').onclick=()=>{['f-search','f-role','f-owner','f-city','f-segment','f-risk','f-lifecycle','f-status','f-pic','f-amonly','f-priority'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; }); refreshOwnerFilterOptions(); renderWorklist()};
+$('#btn-reset').onclick=()=>{['f-search','f-role','f-owner','f-city','f-segment','f-risk','f-lifecycle','f-status','f-pic','f-priority'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; }); refreshOwnerFilterOptions(); renderWorklist()};
 $('#btn-export').onclick=()=>{
   const rows = [['Broker','Empresa','Ciudad','Segmento','Rol','Dueño','Riesgo','Lifecycle','Señal','Estado','Tiempo en M1','Últ. act.','Trend %','Deals','Renov.','Renewal%','Revenue LTV','Revenue L12M','# Eventos valor','Valor atribuido','Notas']];
   BROKERS.forEach(r=>{
@@ -4300,7 +4268,7 @@ $('#btn-export').onclick=()=>{
 $('#f-search-inmo').oninput = renderInmos;
 $('#f-inmo-risk').onchange = renderInmos;
 $('#f-inmo-sort').onchange = renderInmos;
-['f-inmo-pic','f-inmo-plaza','f-inmo-amonly','f-inmo-owner','f-inmo-priority'].forEach(id=>{ const el=$('#'+id); if(el) el.onchange = renderInmos; });
+['f-inmo-pic','f-inmo-plaza','f-inmo-owner','f-inmo-priority'].forEach(id=>{ const el=$('#'+id); if(el) el.onchange = renderInmos; });
 
 $$('.worklist thead th.sortable').forEach(th=>th.onclick=()=>{
   const k = th.dataset.sort;
