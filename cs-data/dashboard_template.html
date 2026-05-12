@@ -321,9 +321,54 @@
   <div class="hdr-meta">
     <span><span id="m-freshness" class="dot"></span><span id="m-generated">—</span></span>
     <span><span id="m-deals">0</span> deals · <span id="m-range">—</span></span>
-    <button class="btn sm ghost" onclick="location.reload()" style="padding:3px 9px;font-size:10.5px">↻</button>
+    <button class="btn sm" onclick="openRefreshModal()" style="padding:4px 12px;font-size:11.5px;background:var(--accent);color:#fff;border:1px solid var(--accent);font-weight:600;display:inline-flex;align-items:center;gap:5px" title="Trae los deals + brokers nuevos del MCP y reconstruye la página">🔄 Refrescar datos</button>
+    <button class="btn sm ghost" onclick="location.reload()" style="padding:3px 9px;font-size:10.5px" title="Recargar el HTML actual sin traer datos nuevos">↻</button>
   </div>
 </header>
+
+<!-- Refresh-data modal — explains how to trigger a fresh MCP pull. The actual
+     pull happens in a separate Claude Code session because MCP access is
+     scoped to the user's Claude.ai account; this modal is the bridge. -->
+<div class="modal-bg" id="refresh-modal" onclick="if(event.target.id==='refresh-modal')closeRefreshModal()">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr">
+      <div>
+        <div class="t">🔄 Refrescar datos del dashboard</div>
+        <div class="s">El refresh corre en una sesión de Claude Code · ~3 minutos</div>
+      </div>
+      <button class="x" onclick="closeRefreshModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:18px 22px;line-height:1.6;font-size:13px">
+      <div style="background:#FFF7E6;border:1px solid #FCD34D;border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:#92400E">
+        <strong>Última actualización del dashboard:</strong> <span id="refresh-modal-generated" style="font-weight:700;color:#78350F">—</span>
+      </div>
+
+      <p style="margin:0 0 12px"><strong>Para refrescar:</strong></p>
+      <ol style="margin:0 0 14px 18px;padding:0">
+        <li style="margin-bottom:8px">Abre <strong>Claude Code</strong> en la carpeta <code style="background:#F0EEE8;padding:1px 6px;border-radius:3px;font-size:11.5px">cs-partner-dashboard</code></li>
+        <li style="margin-bottom:8px">Pega este comando y dale enter:</li>
+      </ol>
+
+      <div style="position:relative;background:#1F2937;color:#F9FAFB;padding:13px 16px;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:12px;line-height:1.5;margin-bottom:14px">
+        <code id="refresh-command" style="color:inherit;background:none;font-size:inherit">Read docs/NIGHTLY_ROUTINE_PROMPT.md and execute it.</code>
+        <button onclick="copyRefreshCommand()" id="refresh-copy-btn" style="position:absolute;top:8px;right:8px;background:#374151;color:#F9FAFB;border:1px solid #4B5563;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">Copiar</button>
+      </div>
+
+      <p style="margin:0 0 8px;font-size:12.5px"><strong>Qué hace:</strong></p>
+      <ul style="margin:0 0 14px 18px;padding:0;font-size:12.5px;color:var(--dark-gray);line-height:1.55">
+        <li>Trae los deals nuevos desde el MCP de MoradaUno (típicamente 1–2 páginas)</li>
+        <li>Refresca el broker registry</li>
+        <li>Enriquece hasta 100 deals con cost_percent real (cierra el backlog)</li>
+        <li>Reconstruye el HTML y hace push a <code style="background:#F0EEE8;padding:1px 5px;border-radius:3px;font-size:11px">main</code></li>
+        <li>GitHub Pages redeploya en ~2 minutos · vuelve a esta página y recarga</li>
+      </ul>
+
+      <div style="background:#F0EEE8;border-radius:8px;padding:10px 14px;font-size:11.5px;color:var(--dark-gray);line-height:1.55">
+        <strong style="color:var(--near-black)">¿Por qué hay que pegar un comando?</strong> El MCP de MoradaUno solo se accede con tu sesión de Claude.ai — no hay forma de llamarlo desde un botón directo todavía. Cuando tengamos acceso al admin REST API esto se vuelve un click directo (ver Metodología → Limitaciones conocidas).
+      </div>
+    </div>
+  </div>
+</div>
 
 <nav class="tab-nav">
   <button class="tab-btn active" data-tab="inmobiliarias">Cartera · Inmobiliarias <span class="count" id="tc-inmo">0</span></button>
@@ -2897,6 +2942,48 @@ function openInmo(id){
 }
 
 function closeModal(){ $('#modal').classList.remove('open'); }
+
+// Refresh-data modal — handlers for the "🔄 Refrescar datos" header button.
+// The actual MCP pull happens in a separate Claude Code session because MCP
+// access is bound to the user's Claude.ai account; this modal hands off.
+function openRefreshModal(){
+  // Pull the freshness label from the page meta so the modal can show it.
+  const gen = ($('#m-generated') && $('#m-generated').textContent) || '—';
+  if($('#refresh-modal-generated')) $('#refresh-modal-generated').textContent = gen;
+  $('#refresh-modal').classList.add('open');
+}
+function closeRefreshModal(){ $('#refresh-modal').classList.remove('open'); }
+function copyRefreshCommand(){
+  const cmd = ($('#refresh-command') && $('#refresh-command').textContent) || '';
+  const btn = $('#refresh-copy-btn');
+  function flashOk(){
+    if(!btn) return;
+    const original = btn.textContent;
+    btn.textContent = '✓ Copiado';
+    btn.style.background = '#065F46';
+    setTimeout(() => { btn.textContent = original; btn.style.background = '#374151'; }, 1400);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(cmd).then(flashOk).catch(() => {
+      // Fallback if Clipboard API is blocked (e.g. file://). Select the text manually.
+      const el = $('#refresh-command');
+      if(el){
+        const range = document.createRange(); range.selectNodeContents(el);
+        const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        try{ document.execCommand('copy'); flashOk(); }catch(e){ /* user can copy manually */ }
+      }
+    });
+  } else {
+    // Older browsers — just select for the user
+    const el = $('#refresh-command');
+    if(el){
+      const range = document.createRange(); range.selectNodeContents(el);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      try{ document.execCommand('copy'); flashOk(); }catch(e){}
+    }
+  }
+}
+
 function actIcon(t){return{call:'📞',email:'✉',wa:'💬',meeting:'🎯',note:'📝'}[t]||'•'}
 function actLabel(t){return{call:'Llamada',email:'Email',wa:'WhatsApp',meeting:'Reunión',note:'Nota'}[t]||t}
 
@@ -4185,7 +4272,7 @@ $$('.worklist thead th.sortable').forEach(th=>th.onclick=()=>{
 });
 
 $('#modal').onclick = e => { if(e.target.id==='modal') closeModal() };
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeRefreshModal();}});
 
 // Round 2: manual risk override handler. Bound globally (delegation) so it
 // catches the .risk-override <select> in any drawer instance, even after
