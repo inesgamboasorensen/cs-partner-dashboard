@@ -587,6 +587,7 @@
         <h2>Leaderboard</h2>
         <div class="filters">
           <select id="lb-period"><option value="all">Histórico (all-time)</option><option value="week">Última semana</option><option value="month">Último mes</option><option value="quarter">Último trimestre</option></select>
+          <select id="lb-pool" title="Filtra las cuentas que cuentan en la tabla. Útil para ver quién es el dueño de cada inmobiliaria, sin que se diluya con sus brokers individuales."><option value="">Todas las cuentas</option><option value="broker">Sólo brokers</option><option value="inmo">Sólo inmobiliarias</option></select>
           <select id="lb-role"><option value="">Todos los roles</option><option value="AM">Account Manager</option><option value="CS">CS Partner</option><option value="TRAINER">Trainer</option><option value="BDR">BDR</option></select>
           <select id="lb-city"><option value="">Todas las ciudades</option></select>
           <select id="lb-sort"><option value="value">Por valor atribuido</option><option value="events">Por # eventos</option><option value="acts">Por # actividades</option><option value="accts">Por # cuentas</option></select>
@@ -599,7 +600,7 @@
             <th>Dueño</th>
             <th>Rol</th>
             <th class="tooltip" data-tip="Brokers + inmobiliarias donde este dueño registró al menos 1 actividad o evento de valor en el período. Independientes cuentan individualmente.">Cuentas tocadas</th>
-            <th class="tooltip" data-tip="Distribución de las cuentas tocadas por etapa del ciclo de vida — Onboarding · Growing · Mature-Healthy · Active-Low · Declining · At-Risk · Churned. Permite ver dónde está poniendo su atención el dueño.">Por etapa del ciclo</th>
+            <th class="tooltip" data-tip="Etapa dominante: la del ciclo de vida más frecuente entre las cuentas tocadas por este dueño. Pasa el cursor sobre el pill para ver el conteo. Las inmobiliarias se asignan a la etapa modal de sus brokers.">Ciclo (etapa dominante)</th>
             <th>Actividades</th>
             <th class="tooltip" data-tip="% de cuentas tocadas cuyos deals L6M superaron sus deals L6M previos (indicador direccional — no causal). Ver Metodología.">Productividad</th>
             <th class="tooltip" data-tip="Suma de los amounts ($) de los value_events cuyo owner = este dueño. Ver Metodología para la fórmula completa.">Valor atribuido</th>
@@ -833,6 +834,47 @@
       </div>
     </div>
 
+    <!-- Etapas del ciclo de vida -->
+    <div class="section">
+      <div class="section-hdr"><h2>Etapas del ciclo de vida</h2></div>
+      <div style="padding:18px 20px">
+        <div style="font-size:13.5px;color:var(--near-black);line-height:1.6;margin-bottom:14px">El ciclo de vida describe <strong>en qué momento de su relación con MoradaUno</strong> está cada broker. Define quién del equipo lo trabaja: AM para los recién llegados, CS Partner para los activos, BDR para los recuperables.</div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-bottom:18px">
+          <div style="border:1px solid #BFDBFE;border-radius:10px;padding:12px;background:#EFF6FF">
+            <span class="pill lc-Onboarding">Onboarding</span> <span class="pill role-AM" style="margin-left:4px">AM</span>
+            <div style="font-size:12px;margin-top:6px;line-height:1.5">Broker recién llegado — tenure &lt; 3 meses. Lo acompaña Account Manager hasta que tenga ≥ 4mo y se le haga handoff a CS.</div>
+          </div>
+          <div style="border:1px solid #99E5DC;border-radius:10px;padding:12px;background:#E6FAF7">
+            <span class="pill lc-Growing">Growing</span> <span class="pill role-CS" style="margin-left:4px">CS</span>
+            <div style="font-size:12px;margin-top:6px;line-height:1.5">Tenure 3–12 meses con 2+ deals en los últimos 90 días. Cuenta sana en expansión — el momento de invertir.</div>
+          </div>
+          <div style="border:1px solid #A7F3D0;border-radius:10px;padding:12px;background:#ECFDF5">
+            <span class="pill lc-Mature-Healthy">Mature-Healthy</span> <span class="pill role-CS" style="margin-left:4px">CS</span>
+            <div style="font-size:12px;margin-top:6px;line-height:1.5">Tenure ≥ 12 meses, tendencia ≥ 0 y 2+ deals L90D. Cuenta madura y estable — mantenimiento.</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)">
+            <span class="pill lc-Active-Low">Active-Low</span> <span class="pill role-CS" style="margin-left:4px">CS</span>
+            <div style="font-size:12px;margin-top:6px;line-height:1.5">Default para brokers activos pero con baja productividad (&lt; 0.5 rentas/mes). Candidato a capacitación o reactivación.</div>
+          </div>
+          <div style="border:1px solid #FDE68A;border-radius:10px;padding:12px;background:#FEF3C7">
+            <span class="pill lc-Declining">Declining</span> <span class="pill role-CS" style="margin-left:4px">CS</span>
+            <div style="font-size:12px;margin-top:6px;line-height:1.5">Tenure ≥ 6 meses con tendencia &lt; -20% (caída comparando 90d vs 90-180d). Alerta temprana — interviene antes de que escale a At-Risk.</div>
+          </div>
+          <div style="border:1px solid #FECACA;border-radius:10px;padding:12px;background:#FEF2F2">
+            <span class="pill lc-At-Risk">At-Risk</span> <span class="pill role-CS" style="margin-left:4px">CS</span>
+            <div style="font-size:12px;margin-top:6px;line-height:1.5">60–90 días sin actividad. La cuenta está callada — necesita contacto urgente para no caer en Churned.</div>
+          </div>
+          <div style="border:1px solid #D4D4D8;border-radius:10px;padding:12px;background:#F4F4F5">
+            <span class="pill lc-Churned">Churned</span> <span class="pill role-BDR" style="margin-left:4px">BDR</span>
+            <div style="font-size:12px;margin-top:6px;line-height:1.5">&gt; 190 días sin actividad. Se considera perdida — pasa al pool de reactivación de BDR para intento de recuperación.</div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--dark-gray);line-height:1.55"><strong style="color:var(--near-black)">Inmobiliarias:</strong> no tienen una sola etapa — cada inmobiliaria es una mezcla de brokers en distintas etapas. En las vistas que muestran un solo ciclo (worklist, Desempeño por dueño) se reporta la <em>etapa dominante</em> (la que tiene más brokers). El reparto completo aparece dentro del detalle de la inmo.</div>
+      </div>
+    </div>
+
     <!-- Embudo fases -->
     <div class="section">
       <div class="section-hdr"><h2>Fases del Embudo</h2></div>
@@ -954,7 +996,8 @@
         <h3 style="font-size:12px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 8px">Desempeño por dueño · cómo se calculan las columnas</h3>
         <ul style="margin:0 0 14px 18px">
           <li><strong>Cuentas tocadas</strong> = brokers + inmobiliarias donde este dueño registró ≥1 actividad O ≥1 evento de valor en el período. Si el filtro de período es "histórico", también se incluyen las cuentas donde es el owner asignado aunque no haya actividad registrada en este periodo. Independientes cuentan individualmente; las inmobiliarias se cuentan una sola vez aunque el dueño haya tocado varios de sus brokers.</li>
-          <li><strong>Por etapa del ciclo</strong> = distribución de las cuentas tocadas entre las 7 etapas (Onboarding · Growing · Mature-Healthy · Active-Low · Declining · At-Risk · Churned). Las inmobiliarias se asignan a la etapa <em>modal</em> (dominante) entre sus brokers. Permite al manager ver dónde concentra su atención cada miembro del equipo.</li>
+          <li><strong>Ciclo (etapa dominante)</strong> = etapa del ciclo de vida más frecuente entre las cuentas tocadas (Onboarding · Growing · Mature-Healthy · Active-Low · Declining · At-Risk · Churned). En empates, gana la etapa más temprana del funnel. Las inmobiliarias se asignan a la etapa <em>modal</em> entre sus brokers. El número junto al pill (<code>n/total</code>) indica cuántas cuentas están en esa etapa frente al total de tocadas.</li>
+          <li><strong>Filtro de vista</strong> (Todas / Sólo brokers / Sólo inmobiliarias) restringe las cuentas que entran a todas las columnas. Útil cuando el dueño es punto de contacto de una inmobiliaria — filtra a "Sólo inmobiliarias" para ver el desempeño aislado del trabajo con cuentas de empresa, sin que se diluya con brokers independientes.</li>
           <li><strong>Productividad</strong> = <code>(# cuentas tocadas con deals_l6m &gt; deals_prior_6m) / (# cuentas tocadas con deals_prior_6m &gt; 0 y no marcadas low_volume)</code> × 100. Se excluyen cuentas con &lt;3 deals totales en las dos ventanas porque el % sería ruido. <strong>Es un indicador direccional, no causal</strong>: una cuenta puede haber crecido por razones ajenas al esfuerzo del dueño. Lectura: ≥50% (verde) sugiere que el dueño está trabajando en cuentas que están creciendo; &lt;25% (rojo) sugiere lo contrario o que está trabajando rescates difíciles.</li>
           <li><strong>Valor atribuido</strong> = <code>Σ value_events[].amount</code> para los eventos cuyo <code>owner</code> = este dueño, dentro del período seleccionado. Los <code>value_events</code> se registran a mano desde el modal del broker/inmo cuando una acción del dueño genera valor concreto (nueva renta cerrada, renovación firmada, productividad mejorada). El <code>owner</code> se captura en el momento del evento, así que la atribución se mantiene aunque el dueño asignado a la cuenta cambie después.</li>
           <li><strong>Actividades</strong> = total de actividades registradas (llamada, WhatsApp, demo, etc.) por este dueño en el período.</li>
@@ -1854,6 +1897,18 @@ function renewalCell(r){
   return `<span style="color:${color};font-weight:600">${rate}%</span>${note}<br><small style="color:var(--dark-gray)">${copitas}/${denom}</small>`;
 }
 function lifecyclePill(lc){ return `<span class="pill lc-${lc}">${lc}</span>` }
+// Dominant lifecycle stage given a {stage: count} dist. Returns null when no
+// touched accounts. Ties broken by funnel order (earlier stage wins).
+function dominantStage(dist){
+  if(!dist) return null;
+  const order = ['Onboarding','Growing','Mature-Healthy','Active-Low','Declining','At-Risk','Churned'];
+  let best=null, bestN=0;
+  for(const k of order){
+    const n = dist[k] || 0;
+    if(n > bestN){ best = k; bestN = n; }
+  }
+  return best;
+}
 function riskPill(r){ return `<span class="pill risk-${r}">${r}</span>` }
 
 // ─── WORKLIST ───
@@ -3223,33 +3278,6 @@ function inWindow(dateStr, cutoff){
   if(!dateStr) return false;
   return String(dateStr).slice(0,10) >= cutoff;
 }
-// Mini stacked bar showing how many of an owner's touched accounts fall in each
-// lifecycle stage. Colours match the existing lifecycle pills elsewhere in the UI.
-// Returns "—" when the owner has zero touched accounts.
-function renderLifecycleMiniBar(dist, total){
-  if(!total || total <= 0) return '<small style="color:var(--dark-gray)">—</small>';
-  // Order = funnel direction (new → mature → at-risk → lost). Same palette as the
-  // lifecycle pills in the worklist columns so users learn the colour code once.
-  const order = [
-    ['Onboarding',     '#94A3B8'],
-    ['Growing',        '#06B6D4'],
-    ['Mature-Healthy', '#16A34A'],
-    ['Active-Low',     '#A3A3A3'],
-    ['Declining',      '#F59E0B'],
-    ['At-Risk',        '#F97316'],
-    ['Churned',        '#DC2626'],
-  ];
-  const segments = order.map(([label, color]) => {
-    const n = dist[label] || 0;
-    if(n === 0) return '';
-    const pct = (n / total) * 100;
-    return `<div style="background:${color};width:${pct}%;min-width:2px;height:100%" title="${label}: ${n}"></div>`;
-  }).join('');
-  const tipParts = order.filter(([l]) => (dist[l]||0) > 0).map(([l]) => `${l}: ${dist[l]}`);
-  const tip = tipParts.join(' · ');
-  return `<div class="tooltip" data-tip="${esc(tip)}" style="display:flex;height:14px;width:140px;border-radius:4px;overflow:hidden;border:1px solid var(--line);cursor:help">${segments}</div>`;
-}
-
 function renderLeaderboard(){
   // City filter dropdown for leaderboard
   const lbCitySel = $('#lb-city');
@@ -3263,6 +3291,7 @@ function renderLeaderboard(){
   const fCity = $('#lb-city').value;
   const fSort = $('#lb-sort').value;
   const fPeriod = ($('#lb-period') && $('#lb-period').value) || 'all';
+  const fPool = ($('#lb-pool') && $('#lb-pool').value) || '';
   const cutoff = periodCutoff(fPeriod);
 
   // Aggregate per-owner stats
@@ -3286,7 +3315,7 @@ function renderLeaderboard(){
   }
   ALL_OWNERS.forEach(ensure);
 
-  BROKERS.forEach(b=>{
+  if(fPool !== 'inmo') BROKERS.forEach(b=>{
     if(fCity && cityFor(b)!==fCity) return;
     const a = getA(b.id);
     const role = roleFor(b);
@@ -3326,7 +3355,7 @@ function renderLeaderboard(){
     });
   });
   // Inmo events
-  INMOS.forEach(im=>{
+  if(fPool !== 'broker') INMOS.forEach(im=>{
     const i = getI(im.id);
     const eventsInWin = (i.value_events||[]).filter(e=>inWindow(e.date, cutoff));
     const actsInWin = (i.activities||[]).filter(act=>inWindow(act.date, cutoff));
@@ -3397,10 +3426,18 @@ function renderLeaderboard(){
   if($('#lb-bdr-total')){ $('#lb-bdr-total').textContent = fmtK(bdSum.v); $('#lb-bdr-sub').textContent = `${bdSum.e} eventos`; }
   $('#lb-accts').textContent = totalAccts.size;
 
-  // Table body — Round 3 columns: Cuentas tocadas, Por etapa del ciclo, Actividades, Productividad, Valor.
+  // Table body — Cuentas tocadas · Ciclo dominante · Actividades · Productividad · Valor.
   const tbody = $('#tbody-lead');
   tbody.innerHTML = rows.map((s,i)=>{
-    const lifecycleBar = renderLifecycleMiniBar(s.lifecycle_dist, s.accts);
+    const domStage = dominantStage(s.lifecycle_dist);
+    let lifecycleCell;
+    if(!domStage){
+      lifecycleCell = '<small style="color:var(--dark-gray)">—</small>';
+    } else {
+      const n = s.lifecycle_dist[domStage] || 0;
+      const tip = `${n} de ${s.accts} cuentas tocadas en esta etapa`;
+      lifecycleCell = `<span class="tooltip" data-tip="${esc(tip)}">${lifecyclePill(domStage)} <small style="color:var(--dark-gray);font-variant-numeric:tabular-nums">${n}/${s.accts}</small></span>`;
+    }
     // Productividad (directional uplift): % of touched accounts whose L6M deals exceed prior-L6M.
     // Color-coded: ≥50% green, 25–49% amber, <25% red. "—" if no comparable accounts.
     let upliftDisplay;
@@ -3417,7 +3454,7 @@ function renderLeaderboard(){
       <td class="lead-name">${esc(s.owner)}</td>
       <td><span class="pill role-${s.role||'NONE'}">${roleLabel(s.role)}</span></td>
       <td><strong>${s.accts}</strong></td>
-      <td>${lifecycleBar}</td>
+      <td>${lifecycleCell}</td>
       <td>${s.activities}</td>
       <td>${upliftDisplay}</td>
       <td class="money">${fmtK(s.value)}</td>
@@ -4240,7 +4277,7 @@ $$('.tab-btn').forEach(b=>b.onclick=()=>{
   if(b.dataset.tab==='inmobiliarias') renderInmos();
   if(b.dataset.tab==='leaderboard') renderLeaderboard();
 });
-['lb-role','lb-city','lb-sort','lb-period'].forEach(id=>{ const el=$('#'+id); if(el) el.onchange = renderLeaderboard; });
+['lb-role','lb-city','lb-sort','lb-period','lb-pool'].forEach(id=>{ const el=$('#'+id); if(el) el.onchange = renderLeaderboard; });
 // Pipeline filters
 ['f-pipe-search','f-pipe-owner','f-pipe-role','f-pipe-segment'].forEach(id=>{ const el=$('#'+id); if(el) el.oninput = renderPipeline; });
 const _pipeReset = $('#btn-pipe-reset'); if(_pipeReset) _pipeReset.onclick = ()=>{ ['f-pipe-search','f-pipe-owner','f-pipe-role','f-pipe-segment'].forEach(id=>{ const el=$('#'+id); if(el) el.value=''; }); renderPipeline(); };
