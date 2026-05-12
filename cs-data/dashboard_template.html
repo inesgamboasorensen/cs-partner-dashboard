@@ -553,12 +553,11 @@
             <th>#</th>
             <th>Dueño</th>
             <th>Rol</th>
-            <th>Cuentas tocadas</th>
+            <th class="tooltip" data-tip="Brokers + inmobiliarias donde este dueño registró al menos 1 actividad o evento de valor en el período. Independientes cuentan individualmente.">Cuentas tocadas</th>
+            <th class="tooltip" data-tip="Distribución de las cuentas tocadas por etapa del ciclo de vida — Onboarding · Growing · Mature-Healthy · Active-Low · Declining · At-Risk · Churned. Permite ver dónde está poniendo su atención el dueño.">Por etapa del ciclo</th>
             <th>Actividades</th>
-            <th>Nuevas rentas</th>
-            <th>Renovaciones</th>
-            <th>Productividad ↑</th>
-            <th>Valor atribuido</th>
+            <th class="tooltip" data-tip="% de cuentas tocadas cuyos deals L6M superaron sus deals L6M previos (indicador direccional — no causal). Ver Metodología.">Productividad</th>
+            <th class="tooltip" data-tip="Suma de los amounts ($) de los value_events cuyo owner = este dueño. Ver Metodología para la fórmula completa.">Valor atribuido</th>
           </tr></thead>
           <tbody id="tbody-lead"></tbody>
         </table>
@@ -905,6 +904,15 @@
           <li><code>trend_l6m_pct = (deals_l6m − deals_prior_6m) / deals_prior_6m × 100</code>. Ventanas simétricas 180/180. Se marca "bajo vol." si el total &lt; 3.</li>
           <li><strong>Riesgo</strong> = peor señal entre: inactividad (días sin actividad), caída (trend ≤ -50% ALTO, ≤ -20% MEDIO), renovación baja (copita &lt; 30% con 3+ vencidos = ALTO).</li>
           <li><strong>Pago Total</strong> = renta × cost_percent (cuando enriquecido) o renta × base_rate × (1 + IVA 16%) (fallback).</li>
+        </ul>
+
+        <h3 style="font-size:12px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 8px">Desempeño por dueño · cómo se calculan las columnas</h3>
+        <ul style="margin:0 0 14px 18px">
+          <li><strong>Cuentas tocadas</strong> = brokers + inmobiliarias donde este dueño registró ≥1 actividad O ≥1 evento de valor en el período. Si el filtro de período es "histórico", también se incluyen las cuentas donde es el owner asignado aunque no haya actividad registrada en este periodo. Independientes cuentan individualmente; las inmobiliarias se cuentan una sola vez aunque el dueño haya tocado varios de sus brokers.</li>
+          <li><strong>Por etapa del ciclo</strong> = distribución de las cuentas tocadas entre las 7 etapas (Onboarding · Growing · Mature-Healthy · Active-Low · Declining · At-Risk · Churned). Las inmobiliarias se asignan a la etapa <em>modal</em> (dominante) entre sus brokers. Permite al manager ver dónde concentra su atención cada miembro del equipo.</li>
+          <li><strong>Productividad</strong> = <code>(# cuentas tocadas con deals_l6m &gt; deals_prior_6m) / (# cuentas tocadas con deals_prior_6m &gt; 0 y no marcadas low_volume)</code> × 100. Se excluyen cuentas con &lt;3 deals totales en las dos ventanas porque el % sería ruido. <strong>Es un indicador direccional, no causal</strong>: una cuenta puede haber crecido por razones ajenas al esfuerzo del dueño. Lectura: ≥50% (verde) sugiere que el dueño está trabajando en cuentas que están creciendo; &lt;25% (rojo) sugiere lo contrario o que está trabajando rescates difíciles.</li>
+          <li><strong>Valor atribuido</strong> = <code>Σ value_events[].amount</code> para los eventos cuyo <code>owner</code> = este dueño, dentro del período seleccionado. Los <code>value_events</code> se registran a mano desde el modal del broker/inmo cuando una acción del dueño genera valor concreto (nueva renta cerrada, renovación firmada, productividad mejorada). El <code>owner</code> se captura en el momento del evento, así que la atribución se mantiene aunque el dueño asignado a la cuenta cambie después.</li>
+          <li><strong>Actividades</strong> = total de actividades registradas (llamada, WhatsApp, demo, etc.) por este dueño en el período.</li>
         </ul>
         <h3 style="font-size:12px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 8px">Base rates de Protección de Renta</h3>
         <ul style="margin:0 0 14px 18px">
@@ -3128,6 +3136,33 @@ function inWindow(dateStr, cutoff){
   if(!dateStr) return false;
   return String(dateStr).slice(0,10) >= cutoff;
 }
+// Mini stacked bar showing how many of an owner's touched accounts fall in each
+// lifecycle stage. Colours match the existing lifecycle pills elsewhere in the UI.
+// Returns "—" when the owner has zero touched accounts.
+function renderLifecycleMiniBar(dist, total){
+  if(!total || total <= 0) return '<small style="color:var(--dark-gray)">—</small>';
+  // Order = funnel direction (new → mature → at-risk → lost). Same palette as the
+  // lifecycle pills in the worklist columns so users learn the colour code once.
+  const order = [
+    ['Onboarding',     '#94A3B8'],
+    ['Growing',        '#06B6D4'],
+    ['Mature-Healthy', '#16A34A'],
+    ['Active-Low',     '#A3A3A3'],
+    ['Declining',      '#F59E0B'],
+    ['At-Risk',        '#F97316'],
+    ['Churned',        '#DC2626'],
+  ];
+  const segments = order.map(([label, color]) => {
+    const n = dist[label] || 0;
+    if(n === 0) return '';
+    const pct = (n / total) * 100;
+    return `<div style="background:${color};width:${pct}%;min-width:2px;height:100%" title="${label}: ${n}"></div>`;
+  }).join('');
+  const tipParts = order.filter(([l]) => (dist[l]||0) > 0).map(([l]) => `${l}: ${dist[l]}`);
+  const tip = tipParts.join(' · ');
+  return `<div class="tooltip" data-tip="${esc(tip)}" style="display:flex;height:14px;width:140px;border-radius:4px;overflow:hidden;border:1px solid var(--line);cursor:help">${segments}</div>`;
+}
+
 function renderLeaderboard(){
   // City filter dropdown for leaderboard
   const lbCitySel = $('#lb-city');
@@ -3145,6 +3180,8 @@ function renderLeaderboard(){
 
   // Aggregate per-owner stats
   const stats = {};
+  // Round 3: lifecycle distribution + directional productivity tracked per owner.
+  const LIFECYCLE_KEYS = ['Onboarding','Growing','Mature-Healthy','Active-Low','Declining','At-Risk','Churned'];
   function ensure(owner){
     if(!stats[owner]) stats[owner] = {
       owner,
@@ -3153,7 +3190,10 @@ function renderLeaderboard(){
       activities: 0,
       events: 0,
       value: 0,
-      by_type: {}
+      by_type: {},
+      lifecycle_dist: Object.fromEntries(LIFECYCLE_KEYS.map(k => [k, 0])),
+      uplift_yes: 0,    // touched accounts where deals_l6m > deals_prior_6m
+      uplift_total: 0,  // touched accounts with enough prior-window data to compare
     };
     return stats[owner];
   }
@@ -3182,7 +3222,19 @@ function renderLeaderboard(){
         s.by_type[e.type] = (s.by_type[e.type]||0)+1;
       });
       if(myActs>0 || eventsInWin.some(e=>e.owner===o) || (!cutoff && a.owner===o)){
+        const fresh = !s.accounts.has(b.id);
         s.accounts.add(b.id);
+        if(fresh){
+          // Lifecycle bucket for the touched account
+          if(b.lifecycle && s.lifecycle_dist[b.lifecycle] !== undefined) s.lifecycle_dist[b.lifecycle]++;
+          // Directional productivity: only count brokers with enough prior-window
+          // volume to compare. low_volume flag from process.py marks <3 deals across
+          // both windows — exclude those, the % would be meaningless.
+          if(!b.low_volume && (b.deals_prior_6m||0) > 0){
+            s.uplift_total++;
+            if((b.deals_l6m||0) > (b.deals_prior_6m||0)) s.uplift_yes++;
+          }
+        }
       }
     });
   });
@@ -3210,7 +3262,25 @@ function renderLeaderboard(){
         s.by_type[e.type] = (s.by_type[e.type]||0)+1;
       });
       if(myActs>0 || eventsInWin.some(e=>e.owner===o)){
-        s.accounts.add('inmo:'+im.id);
+        const key = 'inmo:'+im.id;
+        const fresh = !s.accounts.has(key);
+        s.accounts.add(key);
+        if(fresh){
+          // Inmo-level "dominant lifecycle" — mode of its brokers' lifecycle_dist if present
+          if(im.lifecycle_dist){
+            let best=null, bestN=-1;
+            for(const k in im.lifecycle_dist){
+              const n = im.lifecycle_dist[k] || 0;
+              if(n > bestN){ best = k; bestN = n; }
+            }
+            if(best && s.lifecycle_dist[best] !== undefined) s.lifecycle_dist[best]++;
+          }
+          // Directional productivity for inmo
+          if(!im.low_volume && (im.deals_prior_6m||0) > 0){
+            s.uplift_total++;
+            if((im.deals_l6m||0) > (im.deals_prior_6m||0)) s.uplift_yes++;
+          }
+        }
       }
     });
   });
@@ -3240,24 +3310,32 @@ function renderLeaderboard(){
   if($('#lb-bdr-total')){ $('#lb-bdr-total').textContent = fmtK(bdSum.v); $('#lb-bdr-sub').textContent = `${bdSum.e} eventos`; }
   $('#lb-accts').textContent = totalAccts.size;
 
-  // Table body
+  // Table body — Round 3 columns: Cuentas tocadas, Por etapa del ciclo, Actividades, Productividad, Valor.
   const tbody = $('#tbody-lead');
   tbody.innerHTML = rows.map((s,i)=>{
-    const cellNueva = s.by_type.nueva_renta||0;
-    const cellRen = s.by_type.renovacion||0;
-    const cellProd = s.by_type.productividad_up||0;
+    const lifecycleBar = renderLifecycleMiniBar(s.lifecycle_dist, s.accts);
+    // Productividad (directional uplift): % of touched accounts whose L6M deals exceed prior-L6M.
+    // Color-coded: ≥50% green, 25–49% amber, <25% red. "—" if no comparable accounts.
+    let upliftDisplay;
+    if(s.uplift_total === 0){
+      upliftDisplay = '<small style="color:var(--dark-gray)" title="Sin cuentas con suficiente historia previa para comparar.">—</small>';
+    } else {
+      const pct = Math.round(100 * s.uplift_yes / s.uplift_total);
+      const color = pct >= 50 ? 'var(--green)' : pct >= 25 ? 'var(--amber)' : 'var(--red)';
+      const arrow = pct >= 50 ? '↑' : pct >= 25 ? '→' : '↓';
+      upliftDisplay = `<span style="color:${color};font-weight:700;font-variant-numeric:tabular-nums">${pct}% ${arrow}</span> <small style="color:var(--dark-gray);font-variant-numeric:tabular-nums">${s.uplift_yes}/${s.uplift_total}</small>`;
+    }
     return `<tr>
       <td class="rank">${i+1}</td>
       <td class="lead-name">${esc(s.owner)}</td>
       <td><span class="pill role-${s.role||'NONE'}">${roleLabel(s.role)}</span></td>
-      <td>${s.accts}</td>
+      <td><strong>${s.accts}</strong></td>
+      <td>${lifecycleBar}</td>
       <td>${s.activities}</td>
-      <td>${cellNueva||'<small style="color:var(--dark-gray)">—</small>'}</td>
-      <td>${cellRen||'<small style="color:var(--dark-gray)">—</small>'}</td>
-      <td>${cellProd||'<small style="color:var(--dark-gray)">—</small>'}</td>
+      <td>${upliftDisplay}</td>
       <td class="money">${fmtK(s.value)}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="9" class="empty">Aún no hay actividad ni eventos de valor registrados.</td></tr>';
+  }).join('') || '<tr><td colspan="8" class="empty">Aún no hay actividad ni eventos de valor registrados.</td></tr>';
 
   // Recent value events feed — respeta el filtro de período
   const periodLbl = {all:'histórico', week:'última semana', month:'último mes', quarter:'último trimestre'}[fPeriod] || 'histórico';
