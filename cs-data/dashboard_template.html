@@ -1187,6 +1187,7 @@ function getA(id){
   if(STATE[id].handoff_date===undefined) STATE[id].handoff_date=null;
   if(STATE[id].am_snapshot===undefined) STATE[id].am_snapshot=null;
   if(STATE[id].pic_override===undefined) STATE[id].pic_override=null;
+  if(STATE[id].risk_override===undefined) STATE[id].risk_override=null;  // Round 2: manual risk
   if(STATE[id].no_cs_required===undefined) STATE[id].no_cs_required=false;
   if(STATE[id].intervention_detail===undefined) STATE[id].intervention_detail='';
   if(!STATE[id].handoff_log) STATE[id].handoff_log=[];
@@ -1205,6 +1206,7 @@ function getI(inmoId){
   if(STATE[key].handoff_date===undefined) STATE[key].handoff_date=null;
   if(STATE[key].am_snapshot===undefined) STATE[key].am_snapshot=null;
   if(STATE[key].pic_override===undefined) STATE[key].pic_override=null;
+  if(STATE[key].risk_override===undefined) STATE[key].risk_override=null;  // Round 2: manual risk
   if(STATE[key].no_cs_required===undefined) STATE[key].no_cs_required=false;
   if(STATE[key].intervention_detail===undefined) STATE[key].intervention_detail='';
   if(!STATE[key].handoff_log) STATE[key].handoff_log=[];
@@ -1320,11 +1322,50 @@ function inmoInterventionReason(inmo){
 //   💎 Saludable — el resto (incluye accounts con priority_$ = 0)
 // priority_$ = margin_run_rate_annual × peso_de_riesgo (ALTO=1.0, MEDIO=0.4, BAJO=0.05).
 // El peso refleja "qué tan probable es perder este margen si no actuamos".
+//
+// Round 2 (May 2026) layers on:
+//   1. Manual risk override — CS Partners pueden cambiar el riesgo a mano si
+//      conocen contexto que el modelo no ve. Se guarda en state.risk_override
+//      y manda sobre el riesgo calculado para priority_$ y display.
+//   2. Activity cooldown — si tocaste la cuenta hace ≤30 días, baja un tier
+//      (Urgente → Importante, Importante → Saludable). EXCEPCIÓN: cuentas de
+//      alto valor (que serían Urgente por margen) regresan a Urgente si llevan
+//      ≥180 días sin actividad — no se pueden dejar olvidadas.
 const RISK_WEIGHT = { ALTO: 1.0, MEDIO: 0.4, BAJO: 0.05 };
+// Helpers — these read state.risk_override + state.activities to apply Round 2.
+function _itemKind(item){
+  return (item && typeof item.id === 'string' && item.id.startsWith('inmo:')) ? 'inmo' : 'broker';
+}
+function _itemState(item, kind){
+  kind = kind || _itemKind(item);
+  return kind === 'inmo' ? getI(item.id) : getA(item.id);
+}
+function effectiveRisk(item, kind){
+  const st = _itemState(item, kind);
+  const ov = st && st.risk_override;
+  return (ov === 'ALTO' || ov === 'MEDIO' || ov === 'BAJO') ? ov : (item.risk || 'BAJO');
+}
+function lastActivityDate(item, kind){
+  const st = _itemState(item, kind);
+  if(!st || !st.activities || !st.activities.length) return null;
+  let latest = null;
+  for(const a of st.activities){
+    if(!a || !a.date) continue;
+    if(!latest || a.date > latest) latest = a.date;
+  }
+  return latest;
+}
+function daysSinceIso(iso){
+  if(!iso) return Infinity;
+  const t = Date.parse(iso);
+  if(isNaN(t)) return Infinity;
+  return (Date.now() - t) / 86400000;
+}
 function priorityDollar(item){
   if(!item) return 0;
   const annual = item.margin_run_rate_annual || 0;
-  const w = RISK_WEIGHT[item.risk] != null ? RISK_WEIGHT[item.risk] : 0;
+  const risk = effectiveRisk(item);  // override-aware
+  const w = RISK_WEIGHT[risk] != null ? RISK_WEIGHT[risk] : 0;
   return Math.round(annual * w);
 }
 // Per-pool percentile thresholds. Recomputed lazily on first use of priorityTier.
@@ -1338,7 +1379,9 @@ function recomputePriorityThresholds(){
     inmo:   { urgent: pct(inmoScores, 0.10),   important: pct(inmoScores, 0.40) },
   };
 }
-function priorityTier(item, kind /* 'broker' | 'inmo' */){
+// Raw tier before cooldown is applied — used by priorityReason() to explain
+// the "why" even when the cooldown demoted the visible tier.
+function _priorityRawTier(item, kind){
   if(!_priorityThresholds) recomputePriorityThresholds();
   const p = priorityDollar(item);
   if(p === 0) return 'low';
@@ -1346,6 +1389,18 @@ function priorityTier(item, kind /* 'broker' | 'inmo' */){
   if(p >= t.urgent)    return 'urgent';
   if(p >= t.important) return 'important';
   return 'low';
+}
+function priorityTier(item, kind /* 'broker' | 'inmo' */){
+  const raw = _priorityRawTier(item, kind);
+  const days = daysSinceIso(lastActivityDate(item, kind));
+  // High-value (raw Urgente) accounts overdue ≥180d — keep them Urgente regardless.
+  if(raw === 'urgent' && days >= 180) return 'urgent';
+  // Cooldown demote — recently touched accounts step down one tier.
+  if(days <= 30){
+    if(raw === 'urgent')    return 'important';
+    if(raw === 'important') return 'low';
+  }
+  return raw;
 }
 // Visual badge — used in the worklists, banner, and inmo modal title.
 function priorityBadge(tier, withLabel = true){
@@ -1358,20 +1413,58 @@ function priorityBadge(tier, withLabel = true){
   return `<span class="pill" style="background:${m.bg};color:${m.fg};border:1px solid ${m.border};font-weight:700;letter-spacing:.005em">${m.icon}${withLabel?' '+m.label:''}</span>`;
 }
 // Plain-Spanish reason a CS sees on hover — explains the tier without showing math.
+// Context-aware: Urgente by VALUE (high margin × BAJO risk) gets a different message
+// than Urgente by RESCUE (high margin × ALTO/MEDIO risk). Also surfaces the cooldown
+// state so users see why a usually-Urgente cuenta is showing as Importante today.
 function priorityReason(item, kind){
+  kind = kind || _itemKind(item);
   const tier = priorityTier(item, kind);
+  const raw = _priorityRawTier(item, kind);
   const annual = item.margin_run_rate_annual || 0;
-  const risk = item.risk || 'BAJO';
+  const risk = effectiveRisk(item, kind);
+  const days = daysSinceIso(lastActivityDate(item, kind));
+  const dayStr = isFinite(days) ? `${Math.round(days)}d` : 'nunca';
+  const recent = days <= 30 ? ` Tocado hace ${Math.round(days)}d — en cooldown, no la vuelvas a atacar todavía.` : '';
+  const overdue = days >= 180 && isFinite(days);
+
   if(tier === 'urgent'){
-    return `Urgente — esta cuenta genera ~${fmt$(annual)} de margen anual y está en riesgo ${risk}. Atención esta semana protege la mayor parte de ese flujo.`;
+    if(risk === 'ALTO' || risk === 'MEDIO'){
+      return `🔥 Urgente · rescate — ~${fmt$(annual)} de margen anual con riesgo ${risk}. Acción esta semana protege la mayor parte de ese flujo.${overdue?` Última actividad: ${dayStr}.`:''}`;
+    }
+    // Urgente por VALOR — high margin × BAJO risk
+    return `🔥 Urgente por valor — ~${fmt$(annual)} de margen anual. Riesgo ${risk} hoy, pero está entre las cuentas más grandes de la cartera. NO es rescate: mantén la relación, contacto al menos cada 6 meses para que no se enfríe.${overdue?` Última actividad: ${dayStr} — ya te toca.`:''}`;
   }
   if(tier === 'important'){
-    return `Importante — ~${fmt$(annual)} de margen anual con riesgo ${risk}. Plantéalo en tu agenda de este mes.`;
+    if(raw === 'urgent'){
+      return `⚡ Importante · en cooldown — esta cuenta es 🔥 Urgente por margen (~${fmt$(annual)}), pero la tocaste hace ${dayStr}. Vuelve a ella en ~30 días.`;
+    }
+    return `⚡ Importante — ~${fmt$(annual)} de margen anual con riesgo ${risk}. Plantéalo en tu agenda de este mes.${recent}`;
   }
   if(annual > 0){
-    return `Saludable — ~${fmt$(annual)} de margen anual sin señales graves. Mantén la cadencia.`;
+    if(raw === 'important'){
+      return `💎 Saludable · en cooldown — Importante por margen (~${fmt$(annual)}) pero recién tocada (${dayStr}). Vuelve más adelante.`;
+    }
+    return `💎 Saludable — ~${fmt$(annual)} de margen anual sin señales graves. Mantén la cadencia.${recent}`;
   }
-  return 'Saludable — sin actividad reciente, baja prioridad. Verifica si la cuenta sigue viva antes de invertir tiempo.';
+  return '💎 Saludable — sin margen estimado y sin actividad reciente. Verifica si la cuenta sigue viva antes de invertir tiempo.';
+}
+// Reusable "Riesgo" fact cell with manual override dropdown. Used in both the
+// broker and the inmo drawer.
+function riskFactCell(item, kind){
+  const eff = effectiveRisk(item, kind);
+  const st = _itemState(item, kind);
+  const ov = st && st.risk_override;
+  const color = eff==='ALTO'?'var(--red)':eff==='MEDIO'?'var(--amber)':'var(--green)';
+  const opts = ['ALTO','MEDIO','BAJO'].map(v => `<option value="${v}" ${ov===v?'selected':''}>${v}</option>`).join('');
+  return `<div class="fact"><div class="k">Riesgo</div><div class="v" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:${color}">
+      <span style="font-weight:700">${eff}</span>
+      ${ov?'<span class="pill" style="font-size:9px;padding:1px 6px;background:#F0EEE8;color:var(--dark-gray);font-weight:600;border-radius:4px">manual</span>':''}
+      <select class="risk-override" data-rid="${escAttr(item.id)}" data-rkind="${kind}" style="font-size:11px;padding:2px 6px;border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--dark-gray);margin-left:auto;cursor:pointer">
+        <option value="">Override…</option>
+        ${opts}
+        ${ov?'<option value="__clear__">Quitar override</option>':''}
+      </select>
+    </div></div>`;
 }
 // "Tus próximas cuentas" banner — top 3 by priority (filtered to selected owner
 // if one is set). Aims to remove the "where do I start?" question.
@@ -1769,7 +1862,7 @@ function renderWorklist(){
     if(fo){ if(fo==='__unassigned__'){ if(r._a.owner) return false } else if(r._a.owner!==fo) return false }
     if(fcity){ const c=plazaFor(r); if(fcity==='__nocity__'){ if(c) return false } else if(c!==fcity) return false }
     if(fs && r.segment!==fs) return false;
-    if(fr && r.risk!==fr) return false;
+    if(fr && effectiveRisk(r, 'broker')!==fr) return false;
     if(flc && r.lifecycle!==flc) return false;
     if(fst && r._a.status!==fst) return false;
     if(fPic==='yes' && !r._pic) return false;
@@ -1820,7 +1913,7 @@ function renderWorklist(){
       <td>${segPill}</td>
       <td><strong style="color:var(--near-black)">${r.realized_deals_count||0}</strong> <small style="color:var(--dark-gray);font-weight:400">deals</small></td>
       <td class="money sm" title="Ingreso promedio MoradaUno por deal">${fmtK(r.avg_deal_revenue||0)}</td>
-      <td>${riskPill(r.risk)}</td>
+      <td>${riskPill(effectiveRisk(r, 'broker'))}${getA(r.id).risk_override?' <small style="color:var(--dark-gray);font-size:9.5px">manual</small>':''}</td>
       <td>${trendCell(r)}</td>
       <td>${renewalCell(r)}</td>
       <td><select class="cell-select sel-status" data-id="${escAttr(r.id)}">${PIPELINE_PHASES.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
@@ -2089,7 +2182,7 @@ function renderInmos(){
   });
   data = data.filter(i=>{
     if(q && !i.company.toLowerCase().includes(q)) return false;
-    if(fr && i.risk!==fr) return false;
+    if(fr && effectiveRisk(i, 'inmo')!==fr) return false;
     if(fPic==='yes' && !i._pic) return false;
     if(fPic==='no'  && i._pic) return false;
     if(fPlaza && i._plaza !== fPlaza) return false;
@@ -2138,7 +2231,7 @@ function renderInmos(){
       <td>${plazaPill(i._plaza)}</td>
       <td><strong style="color:var(--near-black)">${i.realized_deals_count||0}</strong> <small style="color:var(--dark-gray);font-weight:400">deals</small><br><small style="color:var(--dark-gray)">L12M: ${i.deals_l12m||0}</small></td>
       <td class="money sm" title="Ingreso promedio MoradaUno por deal">${fmtK(i.avg_deal_revenue||0)}</td>
-      <td>${riskPill(i.risk)} <small style="color:var(--dark-gray)">${i.risk_dist.ALTO}/${i.risk_dist.MEDIO}/${i.risk_dist.BAJO}</small></td>
+      <td>${riskPill(effectiveRisk(i, 'inmo'))}${getI(i.id).risk_override?' <small style="color:var(--dark-gray);font-size:9.5px">manual</small>':''} <small style="color:var(--dark-gray)">${i.risk_dist.ALTO}/${i.risk_dist.MEDIO}/${i.risk_dist.BAJO}</small></td>
       <td>${i.brokers_total}<br><small style="color:var(--dark-gray)">${i.brokers_active_90d} activos</small></td>
       <td><span style="color:${i.penetration>=50?'var(--green)':i.penetration>=25?'var(--amber)':'var(--red)'};font-weight:600">${i.penetration}%</span></td>
       <td>${trendCell(i)}</td>
@@ -2346,7 +2439,7 @@ function openBroker(id){
       <div class="fact"><div class="k">Segmento</div><div class="v">${r.segment}</div></div>
       <div class="fact"><div class="k tooltip" data-tip="Cuenta de deals Cerrados + Renovaciones — el negocio realizado. Excluye Open (en pipeline) y Cancelled.">Vol histórico</div><div class="v">${r.realized_deals_count||0} <small style="font-weight:400;color:var(--dark-gray);font-size:11px">deals (2Y)</small></div></div>
       <div class="fact"><div class="k tooltip" data-tip="Ingreso promedio MoradaUno por deal (Pago Total / # deals). Distinto del valor de la renta del inquilino.">Ticket promedio</div><div class="v">${fmt$(r.avg_deal_revenue||0)}</div></div>
-      <div class="fact"><div class="k">Riesgo</div><div class="v" style="color:${r.risk==='ALTO'?'var(--red)':r.risk==='MEDIO'?'var(--amber)':'var(--green)'}">${r.risk}</div></div>
+      ${riskFactCell(r, 'broker')}
       <div class="fact"><div class="k">Etapa del ciclo de vida</div><div class="v">${r.lifecycle}</div></div>
       <div class="fact accent"><div class="k">Revenue L12M</div><div class="v">${fmt$(r.revenue_l12m||0)}</div></div>
     </div>
@@ -2585,7 +2678,7 @@ function openInmo(id){
     <tr style="cursor:pointer" onclick="openBroker('${escAttr(b.id)}')">
       <td>${brokerStatusDot(b)}<strong>${esc(b.broker)}</strong>${b.agent?` <small style="color:var(--dark-gray)">· ${esc(b.agent)}</small>`:''}</td>
       <td>${picFor(b,'broker')?'<span style="color:#6D28D9;font-weight:700" title="PIC">★</span>':'<span style="color:var(--mid-gray)">—</span>'}</td>
-      <td>${riskPill(b.risk)}</td>
+      <td>${riskPill(effectiveRisk(b, 'broker'))}${getA(b.id).risk_override?' <small style="color:var(--dark-gray);font-size:9.5px">manual</small>':''}</td>
       <td><strong>${b.realized_deals_count||0}</strong> <small style="color:var(--dark-gray)">deals</small></td>
       <td class="money sm" title="Ingreso promedio MoradaUno por deal">${fmtK(b.avg_deal_revenue||0)}</td>
       <td><small style="color:${b.days_since_last>90?'var(--red)':b.days_since_last>30?'var(--amber)':'var(--green)'};font-weight:600">Hace ${b.days_since_last}d</small></td>
@@ -2640,7 +2733,7 @@ function openInmo(id){
       <div class="fact"><div class="k">Plaza</div><div class="v" style="font-size:14px">${esc(plaza||'—')}</div></div>
       <div class="fact"><div class="k tooltip" data-tip="Cuenta de deals Cerrados + Renovaciones — el negocio realizado. Excluye Open (en pipeline) y Cancelled.">Vol histórico</div><div class="v">${inmo.realized_deals_count||0} <small style="font-weight:400;color:var(--dark-gray);font-size:11px">deals (2Y)</small></div></div>
       <div class="fact"><div class="k tooltip" data-tip="Ingreso promedio MoradaUno por deal (Pago Total / # deals). Distinto del valor de la renta del inquilino.">Ticket promedio</div><div class="v">${fmt$(inmo.avg_deal_revenue||0)}</div></div>
-      <div class="fact"><div class="k">Riesgo</div><div class="v" style="color:${inmo.risk==='ALTO'?'var(--red)':inmo.risk==='MEDIO'?'var(--amber)':'var(--green)'}">${inmo.risk}</div></div>
+      ${riskFactCell(inmo, 'inmo')}
       <div class="fact"><div class="k">Brokers totales</div><div class="v">${inmo.brokers_total}</div></div>
       <div class="fact"><div class="k">Penetración</div><div class="v" style="color:${inmo.penetration>=50?'var(--green)':inmo.penetration>=25?'var(--amber)':'var(--red)'}">${inmo.penetration}%</div></div>
     </div>
@@ -4015,6 +4108,29 @@ $$('.worklist thead th.sortable').forEach(th=>th.onclick=()=>{
 
 $('#modal').onclick = e => { if(e.target.id==='modal') closeModal() };
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+// Round 2: manual risk override handler. Bound globally (delegation) so it
+// catches the .risk-override <select> in any drawer instance, even after
+// re-renders. Re-renders the modal in place so the priority + risk values
+// update without losing the user's scroll position.
+document.addEventListener('change', (e) => {
+  const t = e.target;
+  if(!t || !t.classList || !t.classList.contains('risk-override')) return;
+  const id = t.dataset.rid;
+  const kind = t.dataset.rkind;
+  const val = t.value;
+  if(!id || !kind) return;
+  const st = kind === 'inmo' ? getI(id) : getA(id);
+  if(val === '__clear__'){ st.risk_override = null; }
+  else if(val === 'ALTO' || val === 'MEDIO' || val === 'BAJO'){ st.risk_override = val; }
+  else { return; }  // empty placeholder → no-op
+  saveState();
+  _priorityThresholds = null;  // override changes priority distribution
+  renderAll();
+  // Reopen the same drawer so the user sees the updated risk + priority.
+  if(kind === 'inmo' && typeof openInmo === 'function'){ openInmo(id); }
+  else if(typeof openBroker === 'function'){ openBroker(id); }
+});
 
 function renderAll(){ renderMeta(); renderCoverage(); renderKPIs(); renderWorklist(); renderPipeline(); renderInmos(); renderAnalytics(); }
 renderAll();
