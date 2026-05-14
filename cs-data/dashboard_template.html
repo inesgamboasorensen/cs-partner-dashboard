@@ -445,6 +445,7 @@
             <th class="sortable tooltip" data-sort="realized_deals_count" data-tip="Cuenta de deals Cerrados + Renovaciones — el negocio realizado. Excluye Open (en pipeline) y Cancelled.">Vol histórico</th>
             <th class="sortable tooltip" data-sort="avg_deal_revenue" data-tip="Ingreso promedio que captura MoradaUno por deal (Pago Total / # deals). No es el valor de la renta del inquilino.">Ticket prom</th>
             <th class="tooltip" data-tip="ALTO = ≥1 señal grave (churned 180d+ con histórico, caída ≥50% en L180, o renovación copita <30%). MEDIO = señal moderada (sin actividad 60d+, caída ≥20%, renovación <50%). BAJO = sin señales. Toca el riesgo de una cuenta para ver las señales que la disparan.">Riesgo</th>
+            <th class="tooltip" data-tip="Etapa del ciclo de vida del broker.">Ciclo</th>
             <th class="sortable" data-sort="trend_l6m_pct">Tendencia</th>
             <th class="sortable" data-sort="renewal_rate">Renov.</th>
             <th>Estado</th>
@@ -528,13 +529,14 @@
           <select id="f-inmo-owner"><option value="">Todos los dueños</option></select>
           <select id="f-inmo-pic"><option value="">PIC · todos</option><option value="yes">★ Sólo PIC</option><option value="no">No PIC</option></select>
           <select id="f-inmo-plaza"><option value="">Todas las plazas</option></select>
+          <select id="f-inmo-lifecycle"><option value="">Todo ciclo de vida</option><option>Onboarding</option><option>Growing</option><option>Mature-Healthy</option><option>Active-Low</option><option>Declining</option><option>At-Risk</option><option>Churned</option></select>
           <select id="f-inmo-risk"><option value="">Todo riesgo</option><option>ALTO</option><option>MEDIO</option><option>BAJO</option></select>
           <select id="f-inmo-sort"><option value="__priority">Por Prioridad (default)</option><option value="margin_run_rate_annual">Por Margen anual</option><option value="realized_deals_count">Por Vol histórico</option><option value="avg_deal_revenue">Por Ticket promedio</option><option value="brokers_total">Por # brokers</option><option value="penetration">Por penetración</option><option value="deals_l12m">Por Deals L12M</option></select>
         </div>
       </div>
       <div style="overflow-x:auto;max-height:72vh;overflow-y:auto">
         <table class="worklist">
-          <thead><tr><th>#</th><th class="tooltip" data-tip="Lo que importa de un vistazo: 🔥 Urgente = enfócate hoy · ⚡ Importante = esta semana · 💎 Saludable = mantener cadencia. Ordenado por dónde tu hora rinde más margen.">Prioridad</th><th>Inmobiliaria</th><th>PIC</th><th>Plaza</th><th class="tooltip" data-tip="Cuenta de deals Cerrados + Renovaciones — el negocio realizado. Excluye Open (en pipeline) y Cancelled.">Vol histórico</th><th class="tooltip" data-tip="Ingreso promedio MoradaUno por deal (no es el valor de la renta).">Ticket prom</th><th class="tooltip" data-tip="ALTO = ≥1/3 de los brokers de la inmo en riesgo ALTO. MEDIO = más de la mitad en ALTO o MEDIO. BAJO = el resto. Toca la inmo para ver señales por broker.">Riesgo</th><th>Brokers</th><th>Penetración</th><th>Tendencia</th><th>Renov.</th><th>Cobertura</th></tr></thead>
+          <thead><tr><th>#</th><th class="tooltip" data-tip="Lo que importa de un vistazo: 🔥 Urgente = enfócate hoy · ⚡ Importante = esta semana · 💎 Saludable = mantener cadencia. Ordenado por dónde tu hora rinde más margen.">Prioridad</th><th>Inmobiliaria</th><th>PIC</th><th>Plaza</th><th class="tooltip" data-tip="Cuenta de deals Cerrados + Renovaciones — el negocio realizado. Excluye Open (en pipeline) y Cancelled.">Vol histórico</th><th class="tooltip" data-tip="Ingreso promedio MoradaUno por deal (no es el valor de la renta).">Ticket prom</th><th class="tooltip" data-tip="ALTO = ≥1/3 de los brokers de la inmo en riesgo ALTO. MEDIO = más de la mitad en ALTO o MEDIO. BAJO = el resto. Toca la inmo para ver señales por broker.">Riesgo</th><th class="tooltip" data-tip="Etapa dominante: la etapa del ciclo de vida más frecuente entre los brokers de esta inmo.">Ciclo</th><th>Brokers</th><th>Penetración</th><th>Tendencia</th><th>Renov.</th><th>Cobertura</th></tr></thead>
           <tbody id="tbody-inmo"></tbody>
         </table>
       </div>
@@ -714,10 +716,17 @@
         <div class="chart-sub">Cuántos brokers caen en ALTO / MEDIO / BAJO. Más rojo = más cuentas en riesgo.</div>
         <div id="chart-risk"></div>
       </div>
+    </div>
+    <div class="charts-grid">
       <div class="chart-card">
-        <h3>Distribución por etapa del ciclo de vida</h3>
-        <div class="chart-sub">Onboarding · Growing · Mature-Healthy · Active-Low · Declining · At-Risk · Churned.</div>
+        <h3>Distribución por etapa del ciclo de vida · Brokers</h3>
+        <div class="chart-sub">Cada broker en una sola etapa. Onboarding · Growing · Mature-Healthy · Active-Low · Declining · At-Risk · Churned.</div>
         <div id="chart-lc"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Distribución por etapa del ciclo de vida · Inmobiliarias</h3>
+        <div class="chart-sub">Cada inmo agrupada por <em>etapa dominante</em> (la más frecuente entre sus brokers).</div>
+        <div id="chart-lc-inmo"></div>
       </div>
     </div>
 
@@ -2042,15 +2051,16 @@ function renderWorklist(){
       <td><strong style="color:var(--near-black)">${r.realized_deals_count||0}</strong> <small style="color:var(--dark-gray);font-weight:400">deals</small></td>
       <td class="money sm" title="Ingreso promedio MoradaUno por deal">${fmtK(r.avg_deal_revenue||0)}</td>
       <td>${riskPill(effectiveRisk(r, 'broker'))}${getA(r.id).risk_override?' <small style="color:var(--dark-gray);font-size:9.5px">manual</small>':''}</td>
+      <td>${lifecyclePill(r.lifecycle)}</td>
       <td>${trendCell(r)}</td>
       <td>${renewalCell(r)}</td>
       <td><select class="cell-select sel-status" data-id="${escAttr(r.id)}">${PIPELINE_PHASES.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
       <td>${roleCell}${handoffCell?'<div style="margin-top:2px">'+handoffCell+'</div>':''}</td>
       <td><select class="cell-select sel-owner" data-id="${escAttr(r.id)}">${ownerOpts}</select></td>
     </tr>`;
-  }).join('') || `<tr><td colspan="14" class="empty">Sin cuentas que coincidan.</td></tr>`;
+  }).join('') || `<tr><td colspan="15" class="empty">Sin cuentas que coincidan.</td></tr>`;
   if(data.length > MAX_ROWS){
-    tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="14" class="empty">Mostrando primeras ${MAX_ROWS} de ${data.length} cuentas. Usa filtros para reducir.</td></tr>`);
+    tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="15" class="empty">Mostrando primeras ${MAX_ROWS} de ${data.length} cuentas. Usa filtros para reducir.</td></tr>`);
   }
 
   $$('.sel-status').forEach(el=>el.onchange=e=>{
@@ -2305,11 +2315,12 @@ function renderInmos(){
   const fr = $('#f-inmo-risk').value, sortKey = $('#f-inmo-sort').value;
   const fPic   = ($('#f-inmo-pic')?.value)||'';
   const fPlaza = ($('#f-inmo-plaza')?.value)||'';
+  const fLc    = ($('#f-inmo-lifecycle')?.value)||'';
   const fOwner = ($('#f-inmo-owner')?.value)||'';
   const fPriority = ($('#f-inmo-priority')?.value)||'';
   let data = INMOS.map(i=>{
     const iSt = getI(i.id);
-    return {...i, _pic: picFor(i,'inmo'), _plaza: inmoPlazaFor(i), _owner: iSt.owner || '', _priority: priorityTier(i,'inmo')};
+    return {...i, _pic: picFor(i,'inmo'), _plaza: inmoPlazaFor(i), _lifecycle: dominantStage(i.lifecycle_dist) || inmoLifecycle(i), _owner: iSt.owner || '', _priority: priorityTier(i,'inmo')};
   });
   data = data.filter(i=>{
     if(q && !i.company.toLowerCase().includes(q)) return false;
@@ -2317,6 +2328,7 @@ function renderInmos(){
     if(fPic==='yes' && !i._pic) return false;
     if(fPic==='no'  && i._pic) return false;
     if(fPlaza && i._plaza !== fPlaza) return false;
+    if(fLc && i._lifecycle !== fLc) return false;
     if(fOwner === '__unassigned__'){ if(i._owner) return false; }
     else if(fOwner && i._owner !== fOwner) return false;
     if(fPriority && i._priority !== fPriority) return false;
@@ -2361,14 +2373,15 @@ function renderInmos(){
       <td><strong style="color:var(--near-black)">${i.realized_deals_count||0}</strong> <small style="color:var(--dark-gray);font-weight:400">deals</small><br><small style="color:var(--dark-gray)">L12M: ${i.deals_l12m||0}</small></td>
       <td class="money sm" title="Ingreso promedio MoradaUno por deal">${fmtK(i.avg_deal_revenue||0)}</td>
       <td>${riskPill(effectiveRisk(i, 'inmo'))}${getI(i.id).risk_override?' <small style="color:var(--dark-gray);font-size:9.5px">manual</small>':''} <small style="color:var(--dark-gray)">${i.risk_dist.ALTO}/${i.risk_dist.MEDIO}/${i.risk_dist.BAJO}</small></td>
+      <td>${i._lifecycle ? lifecyclePill(i._lifecycle) : '<small style="color:var(--dark-gray)">—</small>'}</td>
       <td>${i.brokers_total}<br><small style="color:var(--dark-gray)">${i.brokers_active_90d} activos</small></td>
       <td><span style="color:${i.penetration>=50?'var(--green)':i.penetration>=25?'var(--amber)':'var(--red)'};font-weight:600">${i.penetration}%</span></td>
       <td>${trendCell(i)}</td>
       <td>${renewalCell({renewal_count:i.renewal_count,contracts_expired:i.contracts_expired,renewal_rate:i.renewal_rate,renewal_rate_copita:i.renewal_rate_copita,contracts_expired_copitas:i.contracts_expired_copitas})}</td>
       <td>${ownerLabel}${handoffChip?'<div style="margin-top:3px">'+handoffChip+'</div>':''}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="13" class="empty">—</td></tr>';
-  if(data.length>MAX) $('#tbody-inmo').insertAdjacentHTML('beforeend',`<tr><td colspan="13" class="empty">Mostrando ${MAX} de ${data.length}</td></tr>`);
+  }).join('') || '<tr><td colspan="14" class="empty">—</td></tr>';
+  if(data.length>MAX) $('#tbody-inmo').insertAdjacentHTML('beforeend',`<tr><td colspan="14" class="empty">Mostrando ${MAX} de ${data.length}</td></tr>`);
   $('#tc-inmo').textContent = data.length;
 }
 
@@ -3564,6 +3577,14 @@ function renderAnalytics(){
   };
   drawBars('#chart-lc', lcOrder.map(k=>({name:k, value:lcCounts[k]||0, color:LC_COLOR[k]})), '#14532D');
 
+  // Lifecycle distribution — Inmobiliarias, by dominant stage
+  const inmoLcCounts = {};
+  INMOS.forEach(i=>{
+    const stage = dominantStage(i.lifecycle_dist) || inmoLifecycle(i);
+    if(stage) inmoLcCounts[stage] = (inmoLcCounts[stage]||0)+1;
+  });
+  drawBars('#chart-lc-inmo', lcOrder.map(k=>({name:k, value:inmoLcCounts[k]||0, color:LC_COLOR[k]})), '#14532D');
+
   // Risk distribution — stacked horizontal bar
   const RISK_COLOR = {ALTO:'#DC2626', MEDIO:'#D97706', BAJO:'#059669'};
   const riskCounts = {ALTO:0, MEDIO:0, BAJO:0};
@@ -4317,7 +4338,7 @@ $('#btn-export').onclick=()=>{
 $('#f-search-inmo').oninput = renderInmos;
 $('#f-inmo-risk').onchange = renderInmos;
 $('#f-inmo-sort').onchange = renderInmos;
-['f-inmo-pic','f-inmo-plaza','f-inmo-owner','f-inmo-priority'].forEach(id=>{ const el=$('#'+id); if(el) el.onchange = renderInmos; });
+['f-inmo-pic','f-inmo-plaza','f-inmo-lifecycle','f-inmo-owner','f-inmo-priority'].forEach(id=>{ const el=$('#'+id); if(el) el.onchange = renderInmos; });
 
 $$('.worklist thead th.sortable').forEach(th=>th.onclick=()=>{
   const k = th.dataset.sort;
