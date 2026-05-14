@@ -653,6 +653,12 @@ def process():
         active_days = max(1, tenure_days)
         deals_per_month = round(deals_total / (active_days/30.0), 1) if active_days > 30 else deals_total
 
+        # Plaza: most-common plaza across this broker's deals (CSV BI history field).
+        # PIC: derived from broker_pic on the most recent deal — reflects current status.
+        plaza_counts = Counter(d.get('plaza') for d in ds_sorted if d.get('plaza'))
+        plaza = plaza_counts.most_common(1)[0][0] if plaza_counts else ''
+        pic = 1 if ds_sorted[-1].get('broker_pic') == 1 else 0
+
         # Segment — prefer canonical org from registry
         company = reg.get('org_name') or ds_sorted[-1].get('broker_company') or ''
         segment = 'Inmobiliaria' if company else 'Independiente'
@@ -682,6 +688,8 @@ def process():
             'agent': agent,
             'city': city,
             'state': state,
+            'plaza': plaza,
+            'pic': pic,
             'segment': segment,
             'renewal_participation': renewal_participation,
             'renewal_path': renewal_path,
@@ -918,9 +926,13 @@ def process():
         # Lifecycle distribution
         lc_dist = Counter(b['lifecycle'] for b in bs)
 
+        # Inmo PIC = any member broker is currently PIC.
+        inmo_pic = 1 if any(b.get('pic') for b in bs) else 0
+
         inmo = {
             'id': 'inmo:' + company,
             'company': company,
+            'pic': inmo_pic,
             'brokers_total': len(bs),
             'brokers_active_90d': active_brokers,
             'brokers_churned': churned_brokers,
