@@ -2,17 +2,17 @@
 """
 CS Strategic Allocation — Data Processor
 
-Reads raw deal records from cs-data/deals_2y.jsonl and produces
+Reads raw deal records from cs-data/deals_2y.jsonl.gz and produces
 cs-data/dashboard_data.json with broker + inmobiliaria lifecycle metrics.
 
 Designed to run headless (cron / scheduled task). Idempotent.
 """
-import json, os, sys, math
+import gzip, json, os, sys, math
 from datetime import datetime, date, timedelta
 from collections import defaultdict, Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-RAW_PATH = os.path.join(HERE, 'deals_2y.jsonl')
+RAW_PATH = os.path.join(HERE, 'deals_2y.jsonl.gz')
 REG_PATH = os.path.join(HERE, 'broker_registry.json')
 OUT_PATH = os.path.join(HERE, 'dashboard_data.json')
 
@@ -191,7 +191,7 @@ def process():
         print(f'ERROR: {RAW_PATH} not found', file=sys.stderr); sys.exit(1)
 
     deals = []
-    with open(RAW_PATH) as f:
+    with gzip.open(RAW_PATH, 'rt') as f:
         for line in f:
             line = line.strip()
             if not line: continue

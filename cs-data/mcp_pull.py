@@ -16,17 +16,17 @@ The input directory must contain:
     or inner `{brokers: [...]}`.
 
 Output (written to cs-data/, overwriting):
-  - deals_2y.jsonl (merged: existing ∪ MCP, MCP wins for shared deal IDs)
+  - deals_2y.jsonl.gz (merged: existing ∪ MCP, MCP wins for shared deal IDs)
   - broker_registry.json (rebuilt from MCP; manual notes preserved from
     existing if present)
 
 The script is idempotent and side-effect-only on cs-data/. It does NOT run
 process.py or build_dashboard.py — call those separately.
 """
-import json, os, sys, glob
+import gzip, json, os, sys, glob
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PROD_DEALS = os.path.join(HERE, 'deals_2y.jsonl')
+PROD_DEALS = os.path.join(HERE, 'deals_2y.jsonl.gz')
 PROD_REG   = os.path.join(HERE, 'broker_registry.json')
 
 
@@ -58,7 +58,7 @@ def merge_deals(input_dir):
 
     existing = {}
     if os.path.exists(PROD_DEALS):
-        with open(PROD_DEALS) as f:
+        with gzip.open(PROD_DEALS, 'rt') as f:
             for line in f:
                 line = line.strip()
                 if line:
@@ -69,7 +69,7 @@ def merge_deals(input_dir):
     new = len(mcp_by_id) - overwritten
     merged = {**existing, **mcp_by_id}
 
-    with open(PROD_DEALS, 'w') as f:
+    with gzip.open(PROD_DEALS, 'wt') as f:
         for d in sorted(merged.values(), key=lambda x: -x['id']):
             f.write(json.dumps(d, ensure_ascii=False) + '\n')
     print(f'deals: pages_seen={sorted(pages_seen) or "?"} '

@@ -14,7 +14,7 @@ and execute it.`).
 Refresh the CS Partner Dashboard with whatever new deals + broker state
 appeared since the last run. The dashboard lives at
 https://inesgamboasorensen.github.io/cs-partner-dashboard/ and is fed by
-`cs-data/deals_2y.jsonl` + `cs-data/broker_registry.json` in the same
+`cs-data/deals_2y.jsonl.gz` + `cs-data/broker_registry.json` in the same
 repo. The pipeline is already built — your job is just to pull the delta,
 re-merge, re-process, re-build the HTML, and commit + push.
 
@@ -56,7 +56,7 @@ get_brokers()  → save the inner `data` JSON to cs-data/_nightly_raw/get_broker
 Call `admin_deals(page=N, show=200)` starting at N=1. After each page:
 
 1. Save the inner `data` JSON to `cs-data/_nightly_raw/admin_deals_page{N}.json`
-2. Compare the deal IDs on that page against `cs-data/deals_2y.jsonl`.
+2. Compare the deal IDs on that page against `cs-data/deals_2y.jsonl.gz`.
    If **all 200 IDs are already in the file**, you've caught up — stop.
 3. Otherwise, increment N and call again.
 
@@ -86,9 +86,9 @@ explanation), enrich up to 100 of them this run. Newest-first.
 
 ```bash
 python3 - <<'PY'
-import json
+import gzip, json
 ids = []
-with open('cs-data/deals_2y.jsonl') as f:
+with gzip.open('cs-data/deals_2y.jsonl.gz', 'rt') as f:
     for line in f:
         line = line.strip()
         if not line: continue
@@ -134,7 +134,7 @@ the apply step is idempotent and re-runs only add what's new.
 
 ```bash
 cd /Users/inesgamboa/Desktop/cs-partner-dashboard
-git add cs-data/deals_2y.jsonl cs-data/broker_registry.json cs-dashboard.html index.html
+git add cs-data/deals_2y.jsonl.gz cs-data/broker_registry.json cs-dashboard.html index.html
 
 # Skip commit if nothing changed (idempotent no-op guard)
 if git diff --cached --quiet; then
@@ -145,7 +145,7 @@ fi
 # Capture some stats for the commit message
 NEW_DEALS=$(python3 -c "
 import json, subprocess
-diff = subprocess.run(['git','diff','--cached','--stat','cs-data/deals_2y.jsonl'], capture_output=True, text=True).stdout
+diff = subprocess.run(['git','diff','--cached','--stat','cs-data/deals_2y.jsonl.gz'], capture_output=True, text=True).stdout
 print(diff.strip().split()[-3] if diff else '?')")
 
 git commit -m "$(cat <<COMMIT
