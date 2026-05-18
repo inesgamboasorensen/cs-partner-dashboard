@@ -8,7 +8,7 @@ Internal tool for MoradaUno Customer Success. Tracks broker lifecycle, revenue h
 
 The dashboard gives CS a daily-refreshed view of every broker and inmobiliaria that has closed deals in the last 2 years. It classifies each broker by **lifecycle stage** and **risk level**, and surfaces actionable renewal and churn signals.
 
-**Live file:** `cs-dashboard.html` (project root) — open locally in Chrome or deploy as a static page.
+**Live file:** `index.html` (project root) — open locally in Chrome or via GitHub Pages at https://inesgamboasorensen.github.io/cs-partner-dashboard/.
 
 ---
 
@@ -16,7 +16,7 @@ The dashboard gives CS a daily-refreshed view of every broker and inmobiliaria t
 
 ```
 Apps - Claude/
-├── cs-dashboard.html             ← Built output (open in browser)
+├── index.html                    ← Built output (open in browser · served by GitHub Pages)
 ├── CS_DASHBOARD.md               ← This file
 └── cs-data/
     ├── raw_deals.jsonl           ← All ingested deals (append-only, deduplicated on rebuild)
@@ -25,7 +25,7 @@ Apps - Claude/
     ├── deal_rates.json           ← Per-deal enriched cost_percent from get_deal_detail API
     ├── pricing.json              ← Base rates (without IVA) by product/sub-product
     ├── process.py                ← Reads deals_2y.jsonl → dashboard_data.json
-    ├── build_dashboard.py        ← Embeds dashboard_data_embed.json into template → cs-dashboard.html
+    ├── build_dashboard.py        ← Embeds dashboard_data_embed.json into template → ../index.html
     ├── dashboard_template.html   ← HTML/JS template (source of truth for UI)
     ├── dashboard_data.json       ← Full processed dataset (not embedded)
     └── dashboard_data_embed.json ← Filtered/minified version for embedding
@@ -71,7 +71,7 @@ cd cs-data && python3 process.py
 # Filter to meaningful brokers/inmobiliarias
 python3 -c "<inline filter script>"
 cd cs-data && python3 build_dashboard.py
-# Output: cs-dashboard.html
+# Output: ../index.html
 ```
 
 ---
@@ -171,7 +171,7 @@ Task definition: `~/.claude/scheduled-tasks/cs-dashboard-daily-refresh/SKILL.md`
 To run manually:
 1. Open Claude Code
 2. Run the scheduled task, or execute the pipeline steps in order (A → F above)
-3. Open `cs-dashboard.html` in Chrome
+3. Open `index.html` in Chrome
 
 ---
 

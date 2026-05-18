@@ -117,13 +117,12 @@ python3 cs-data/apply_enrichment.py
 python3 cs-data/process.py
 cp cs-data/dashboard_data.json cs-data/dashboard_data_embed.json
 python3 cs-data/build_dashboard.py
-cp cs-dashboard.html index.html
 
 # clean up transient files (already gitignored, but tidy)
 rm -f cs-data/_enrichment_part_*.jsonl cs-data/_enrich_chunk_*.txt cs-data/_enrichment_todo.txt
 
 git status --short  # sanity
-git add cs-data/deals_2y.jsonl cs-dashboard.html index.html
+git add cs-data/deals_2y.jsonl index.html
 # broker_registry may or may not have changed — only add if it did
 git diff --cached --quiet cs-data/broker_registry.json || git add cs-data/broker_registry.json
 

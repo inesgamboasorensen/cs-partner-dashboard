@@ -74,7 +74,6 @@ python3 cs-data/mcp_pull.py cs-data/_nightly_raw/
 python3 cs-data/process.py
 cp cs-data/dashboard_data.json cs-data/dashboard_data_embed.json
 python3 cs-data/build_dashboard.py
-cp cs-dashboard.html index.html
 rm -rf cs-data/_nightly_raw/
 ```
 
@@ -123,7 +122,6 @@ python3 cs-data/apply_enrichment.py
 python3 cs-data/process.py
 cp cs-data/dashboard_data.json cs-data/dashboard_data_embed.json
 python3 cs-data/build_dashboard.py
-cp cs-dashboard.html index.html
 rm -f cs-data/_enrichment_pending.txt
 ```
 
@@ -134,7 +132,7 @@ the apply step is idempotent and re-runs only add what's new.
 
 ```bash
 cd /Users/inesgamboa/Desktop/cs-partner-dashboard
-git add cs-data/deals_2y.jsonl.gz cs-data/broker_registry.json cs-dashboard.html index.html
+git add cs-data/deals_2y.jsonl.gz cs-data/broker_registry.json index.html
 
 # Skip commit if nothing changed (idempotent no-op guard)
 if git diff --cached --quiet; then

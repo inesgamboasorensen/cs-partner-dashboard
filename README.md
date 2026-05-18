@@ -4,7 +4,16 @@ Interactive CS Strategic Allocation dashboard for MoradaUno. Helps 2 Customer Su
 
 ## Open the dashboard
 
-Open `cs-dashboard.html` in any browser. Self-contained — no server, no build step, no dependencies.
+- **Local:** open `index.html` in any browser. Self-contained — no server, no build step, no dependencies.
+- **Live (GitHub Pages):** https://inesgamboasorensen.github.io/cs-partner-dashboard/
+
+`index.html` is the single source of truth for the UI. Edit it directly, or regenerate it from the template via the pipeline below.
+
+## Edit & publish workflow
+
+1. Edit `index.html` (or the template + rerun the pipeline).
+2. Open `index.html` locally to verify.
+3. Run `./publish.sh "<commit message>"` to commit and push. GitHub Pages updates ~30-60s later.
 
 ## Pipeline to rebuild
 
@@ -14,18 +23,19 @@ The dashboard is generated from MoradaUno MCP data + pricing rules. Steps:
 cd cs-data
 python3 process.py              # reads deals_2y.jsonl, writes dashboard_data.json
 python3 -c "import json; d=json.load(open('dashboard_data.json')); json.dump(d, open('dashboard_data_embed.json','w'), separators=(',',':'))"
-python3 build_dashboard.py      # embeds JSON into template → ../cs-dashboard.html
+python3 build_dashboard.py      # embeds JSON into template → ../index.html
 ```
 
 ## Repo structure
 
 ```
 cs-partner-dashboard/
-├── cs-dashboard.html            ← main deliverable (open this)
+├── index.html                   ← main deliverable (open this · served by GitHub Pages)
+├── publish.sh                   ← one-command commit + push
 ├── CS_DASHBOARD.md              ← product notes
 └── cs-data/
     ├── process.py               ← main data processor (risk, lifecycle, renewals, revenue)
-    ├── build_dashboard.py       ← injects JSON into template
+    ├── build_dashboard.py       ← injects JSON into template → ../index.html
     ├── dashboard_template.html  ← HTML shell with chart fns and styles
     ├── pricing.json             ← base rates per sub-product (M3 30%, M6 40%, etc.)
     ├── broker_registry.json     ← canonical source for broker.created (tenure anchor)
