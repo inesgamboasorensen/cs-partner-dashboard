@@ -66,14 +66,41 @@ proceed anyway. Inés will investigate.
 
 Most nights pages 1–2 are enough.
 
-### 3. Merge + process + build
+### 3. Merge + process + swap data into index.html
+
+`index.html` is the source of truth for the UI — Inés has been editing it
+directly. `cs-data/dashboard_template.html` is stale and missing recent
+features (Fase column, Renta promedio, multi-column sort chips, owner
+selects, etc.). **Do NOT run `build_dashboard.py`** — it would rebuild
+from the stale template and regress the dashboard.
+
+Instead, refresh the data and swap the embedded JSON blob in `index.html`
+in place. The data lives between
+`<script id="acctdata" type="application/json">…</script>` (single line,
+near the top of the body).
 
 ```bash
 cd /Users/inesgamboa/Desktop/cs-partner-dashboard
 python3 cs-data/mcp_pull.py cs-data/_nightly_raw/
 python3 cs-data/process.py
 cp cs-data/dashboard_data.json cs-data/dashboard_data_embed.json
-python3 cs-data/build_dashboard.py
+
+# In-place data swap (replaces the script body, leaves all UI untouched)
+python3 - <<'PY'
+import re
+with open('cs-data/dashboard_data_embed.json') as f:
+    data = f.read().strip().replace('</script>', '<\\/script>')
+with open('index.html') as f:
+    html = f.read()
+pat = re.compile(r'(<script id="acctdata" type="application/json">)(.*?)(</script>)', re.DOTALL)
+m = pat.search(html)
+if not m: raise SystemExit('ERR: acctdata script tag not found in index.html')
+new_html = pat.sub(lambda _: m.group(1) + data + m.group(3), html, count=1)
+with open('index.html', 'w') as f:
+    f.write(new_html)
+print(f'swapped data ({len(data):,} chars)')
+PY
+
 rm -rf cs-data/_nightly_raw/
 ```
 
@@ -121,7 +148,23 @@ After the enrichment calls finish:
 python3 cs-data/apply_enrichment.py
 python3 cs-data/process.py
 cp cs-data/dashboard_data.json cs-data/dashboard_data_embed.json
-python3 cs-data/build_dashboard.py
+
+# Same in-place data swap as Step 3 — never run build_dashboard.py
+python3 - <<'PY'
+import re
+with open('cs-data/dashboard_data_embed.json') as f:
+    data = f.read().strip().replace('</script>', '<\\/script>')
+with open('index.html') as f:
+    html = f.read()
+pat = re.compile(r'(<script id="acctdata" type="application/json">)(.*?)(</script>)', re.DOTALL)
+m = pat.search(html)
+if not m: raise SystemExit('ERR: acctdata script tag not found in index.html')
+new_html = pat.sub(lambda _: m.group(1) + data + m.group(3), html, count=1)
+with open('index.html', 'w') as f:
+    f.write(new_html)
+print(f'swapped data ({len(data):,} chars)')
+PY
+
 rm -f cs-data/_enrichment_pending.txt
 ```
 
