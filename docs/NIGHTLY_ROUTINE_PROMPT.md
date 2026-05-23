@@ -86,10 +86,12 @@ python3 cs-data/process.py
 cp cs-data/dashboard_data.json cs-data/dashboard_data_embed.json
 
 # In-place data swap (replaces the script body, leaves all UI untouched)
+# Also writes version.json so cached clients learn there's a newer build.
 python3 - <<'PY'
-import re
+import re, json
 with open('cs-data/dashboard_data_embed.json') as f:
-    data = f.read().strip().replace('</script>', '<\\/script>')
+    raw = f.read().strip()
+data = raw.replace('</script>', '<\\/script>')
 with open('index.html') as f:
     html = f.read()
 pat = re.compile(r'(<script id="acctdata" type="application/json">)(.*?)(</script>)', re.DOTALL)
@@ -98,7 +100,10 @@ if not m: raise SystemExit('ERR: acctdata script tag not found in index.html')
 new_html = pat.sub(lambda _: m.group(1) + data + m.group(3), html, count=1)
 with open('index.html', 'w') as f:
     f.write(new_html)
-print(f'swapped data ({len(data):,} chars)')
+build_ts = json.loads(raw)['meta']['generated_at']
+with open('version.json', 'w') as f:
+    json.dump({'build': build_ts}, f)
+print(f'swapped data ({len(data):,} chars) · version.json build={build_ts}')
 PY
 
 rm -rf cs-data/_nightly_raw/
@@ -149,11 +154,13 @@ python3 cs-data/apply_enrichment.py
 python3 cs-data/process.py
 cp cs-data/dashboard_data.json cs-data/dashboard_data_embed.json
 
-# Same in-place data swap as Step 3 — never run build_dashboard.py
+# Same in-place data swap as Step 3 — never run build_dashboard.py.
+# Also updates version.json so cached clients can detect a newer build.
 python3 - <<'PY'
-import re
+import re, json
 with open('cs-data/dashboard_data_embed.json') as f:
-    data = f.read().strip().replace('</script>', '<\\/script>')
+    raw = f.read().strip()
+data = raw.replace('</script>', '<\\/script>')
 with open('index.html') as f:
     html = f.read()
 pat = re.compile(r'(<script id="acctdata" type="application/json">)(.*?)(</script>)', re.DOTALL)
@@ -162,7 +169,10 @@ if not m: raise SystemExit('ERR: acctdata script tag not found in index.html')
 new_html = pat.sub(lambda _: m.group(1) + data + m.group(3), html, count=1)
 with open('index.html', 'w') as f:
     f.write(new_html)
-print(f'swapped data ({len(data):,} chars)')
+build_ts = json.loads(raw)['meta']['generated_at']
+with open('version.json', 'w') as f:
+    json.dump({'build': build_ts}, f)
+print(f'swapped data ({len(data):,} chars) · version.json build={build_ts}')
 PY
 
 rm -f cs-data/_enrichment_pending.txt
@@ -175,7 +185,7 @@ the apply step is idempotent and re-runs only add what's new.
 
 ```bash
 cd /Users/inesgamboa/Desktop/cs-partner-dashboard
-git add cs-data/deals_2y.jsonl.gz cs-data/broker_registry.json index.html
+git add cs-data/deals_2y.jsonl.gz cs-data/broker_registry.json index.html version.json
 
 # Skip commit if nothing changed (idempotent no-op guard)
 if git diff --cached --quiet; then
