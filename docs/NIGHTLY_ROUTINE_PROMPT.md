@@ -27,7 +27,7 @@ step gets skipped.
 ### 1. Set up + safety check
 
 ```bash
-cd /Users/inesgamboa/Desktop/cs-partner-dashboard
+cd "/Users/inesgamboa/Desktop/Apps - Claude/cs-partner-dashboard"
 git remote -v   # MUST show inesgamboasorensen/cs-partner-dashboard, NOT m1-csai-tracker
 git status      # should be clean — if not, stop and ping Inés
 mkdir -p cs-data/_nightly_raw
@@ -48,8 +48,21 @@ select:mcp__c1bdb2c1-1018-41fc-a6b7-0900cc38b92f__admin_deals,mcp__c1bdb2c1-1018
 #### 2a. Brokers
 
 ```
-get_brokers()  → save the inner `data` JSON to cs-data/_nightly_raw/get_brokers.json
+get_brokers()  → save the FULL response JSON to cs-data/_nightly_raw/get_brokers.json
 ```
+
+The response is large and will land in a tool-result file — copy that file
+straight to `get_brokers.json` (mcp_pull accepts the full `{result,code,data}`
+wrapper, no need to unwrap).
+
+⚠️ **Heads-up on get_brokers:** with no filter it returns only the most recent
+~1000 brokers, and most of those are empty `"New Broker"` placeholders (~93% on
+the 2026-07 run → only ~70 real names). This is expected. `mcp_pull.py` now
+**unions** the fresh records onto the existing `broker_registry.json` instead of
+rebuilding it, so the hundreds of established brokers outside that 1000-window
+are preserved. Watch the mcp_pull output: it prints `total=N (was M)` and warns
+loudly if the registry ever shrinks. **If you see a shrink warning, STOP and
+report to Inés — do not commit a smaller registry.**
 
 #### 2b. Deals — paginate until caught up
 
@@ -60,11 +73,37 @@ Call `admin_deals(page=N, show=200)` starting at N=1. After each page:
    If **all 200 IDs are already in the file**, you've caught up — stop.
 3. Otherwise, increment N and call again.
 
-**Safety stop**: cap at 5 pages (1000 deals). If you haven't caught up by
-page 5, something is wrong — log a warning in the commit message and
-proceed anyway. Inés will investigate.
-
 Most nights pages 1–2 are enough.
+
+**When the gap is large (e.g. the last run was many days/weeks ago):** keep
+paginating until you actually catch up — do NOT stop at an arbitrary page and
+merge a partial set. A partial merge of only the newest pages leaves a *hole*
+in the middle (newest deals present, a block of older ones missing) which is
+worse than not merging at all. To catch up you must reach a page whose IDs
+overlap the current file. Quick way to size it up front:
+
+```bash
+python3 - <<'PY'
+import gzip, json
+mx=0
+with gzip.open('cs-data/deals_2y.jsonl.gz','rt') as f:
+    for line in f:
+        line=line.strip()
+        if line: mx=max(mx, json.loads(line)['id'])
+print('max id in file:', mx, '· pages of 200 ≈ (newest_id - max_id)/200')
+PY
+```
+
+Fetch pages in parallel batches (10–15 admin_deals calls per message; each lands
+in its own tool-result file). After each batch, copy every file to
+`cs-data/_nightly_raw/admin_deals_page{N}.json` (read the `page` field from each
+to name it) and check the lowest `min_id` reached. Stop once a page's `min_id`
+drops to/below the file's max id — that's the overlap point, you're caught up.
+
+**Safety stop / anomaly guard**: if pages keep returning 200 brand-new deals far
+past what the elapsed-time gap would explain (e.g. >50 pages for a one-week
+gap), something's off — log a warning in the commit message and ping Inés rather
+than blindly draining thousands of pages.
 
 ### 3. Merge + process + swap data into index.html
 
@@ -80,7 +119,7 @@ in place. The data lives between
 near the top of the body).
 
 ```bash
-cd /Users/inesgamboa/Desktop/cs-partner-dashboard
+cd "/Users/inesgamboa/Desktop/Apps - Claude/cs-partner-dashboard"
 python3 cs-data/mcp_pull.py cs-data/_nightly_raw/
 python3 cs-data/process.py
 cp cs-data/dashboard_data.json cs-data/dashboard_data_embed.json
@@ -141,11 +180,21 @@ For each id in `cs-data/_enrichment_pending.txt`, call
 `cs-data/_enrichment_more.jsonl`:
 
 ```
-{"id":<id>,"cost_percent":<steps[0].data.cost_percent>,"revenue":<steps[0].data.revenue>}
+{"id":<id>,"cost_percent":<cp>,"revenue":<rev>}
 ```
 
-Fire 15–20 calls per message in parallel, extract values, and Bash-append
-to the file. Don't let unparsed responses accumulate in your context.
+⚠️ **Where to read `cost_percent` + `revenue`:** find the entry in `data.steps[]`
+whose `"step"` field equals `"Contratos"` and read them from THAT entry's `data`
+dict. Do **not** assume `steps[0]` — the Contratos step index varies per deal
+(seen at 0, 2, 3, and 4). If a deal has no `"Contratos"` step with a data dict,
+or `cost_percent` is null/0, **skip it** (write no line). On the 2026-07 run,
+5 of 100 deals legitimately had no Contratos step.
+
+This step is context-heavy (each detail response is ~2–3k tokens). If you're
+doing the full 100 inline, consider delegating the lookups to a subagent that
+returns only the compact JSONL — it keeps the main context lean. Otherwise fire
+15–20 calls per message in parallel, extract the two numbers, Bash-append, and
+move on without re-reading the responses.
 
 After the enrichment calls finish:
 
@@ -184,7 +233,7 @@ the apply step is idempotent and re-runs only add what's new.
 ### 5. Commit + push (conditional)
 
 ```bash
-cd /Users/inesgamboa/Desktop/cs-partner-dashboard
+cd "/Users/inesgamboa/Desktop/Apps - Claude/cs-partner-dashboard"
 git add cs-data/deals_2y.jsonl.gz cs-data/broker_registry.json index.html version.json
 
 # Skip commit if nothing changed (idempotent no-op guard)

@@ -93,12 +93,19 @@ def merge_brokers(input_dir):
         with open(PROD_REG) as f:
             existing_reg = json.load(f)
 
-    out = {}
+    # UNION, not rebuild. get_brokers() (no filter) returns only the most
+    # recent ~1000 brokers, most of them empty "New Broker" placeholders, so a
+    # from-scratch rebuild would silently drop the hundreds of established
+    # brokers that fall outside that window. Start from the existing registry
+    # and overlay the fresh MCP records on top (MCP wins for shared names).
+    out = dict(existing_reg)
     org_pop = 0
     preserved = 0
+    added = 0
+    refreshed = 0
     for b in mcp_brokers:
         name = b.get('name')
-        if not name:
+        if not name or name == 'New Broker':
             continue
         org = b.get('organization') or {}
         if org: org_pop += 1
@@ -128,12 +135,21 @@ def merge_brokers(input_dir):
             if v:
                 entry[k] = v
                 preserved += 1
+        if name in existing_reg:
+            refreshed += 1
+        else:
+            added += 1
         out[name] = entry
 
     with open(PROD_REG, 'w') as f:
         json.dump(out, f, indent=2, ensure_ascii=False)
-    print(f'brokers: mcp={len(mcp_brokers)} unique={len(out)} '
+    real = added + refreshed
+    print(f'brokers: mcp={len(mcp_brokers)} real={real} added={added} '
+          f'refreshed={refreshed} total={len(out)} (was {len(existing_reg)}) '
           f'with_org={org_pop} manual_notes_preserved={preserved}')
+    if len(out) < len(existing_reg):
+        print(f'WARN: registry shrank ({len(existing_reg)} -> {len(out)}) — '
+              f'union should never shrink; investigate before committing')
     return len(out)
 
 
