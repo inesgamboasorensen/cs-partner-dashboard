@@ -123,7 +123,7 @@ def lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_
     """Classify broker lifecycle stage.
 
     Priority order (cada uno sobreescribe los siguientes):
-      1. Churned       — > 190 días sin actividad
+      1. Churned       — > 180 días sin actividad
       2. At-Risk       — 60-90 días sin actividad
       3. Onboarding    — tenure < 3 meses
       4. Declining     — año-contra-año: ≥2 de 3 ventanas (60d, 90d, 365d) cayendo
@@ -133,7 +133,7 @@ def lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_
       6. Growing       — tenure 3-12 meses con 2+ deals L90D
       7. Active-Low    — default: cliente activo con baja productividad (<0.5 rentas/mes)
     """
-    if days_since_last > 190: return 'Churned'
+    if days_since_last > 180: return 'Churned'
     if 60 <= days_since_last <= 90: return 'At-Risk'
     if tenure_months < 3: return 'Onboarding'
     if declining_yoy: return 'Declining'
