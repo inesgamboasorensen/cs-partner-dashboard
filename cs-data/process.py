@@ -119,14 +119,16 @@ def parse_dt(s):
         try: return datetime.fromisoformat(s)
         except: return None
 
-def lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_per_month=0):
+def lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_per_month=0, declining_yoy=False):
     """Classify broker lifecycle stage.
 
     Priority order (cada uno sobreescribe los siguientes):
       1. Churned       — > 190 días sin actividad
       2. At-Risk       — 60-90 días sin actividad
       3. Onboarding    — tenure < 3 meses
-      4. Declining     — tenure 6+ meses con trend < -20%
+      4. Declining     — año-contra-año: ≥2 de 3 ventanas (60d, 90d, 365d) cayendo
+                         ≥20% interanual. Requiere ≥12 meses de historia (si no,
+                         no es medible → no puede ser Declining). Ver `declining_yoy`.
       5. Mature-Healthy — tenure 12+ meses, trend ≥ 0, 2+ deals L90D
       6. Growing       — tenure 3-12 meses con 2+ deals L90D
       7. Active-Low    — default: cliente activo con baja productividad (<0.5 rentas/mes)
@@ -134,7 +136,7 @@ def lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_
     if days_since_last > 190: return 'Churned'
     if 60 <= days_since_last <= 90: return 'At-Risk'
     if tenure_months < 3: return 'Onboarding'
-    if tenure_months >= 6 and (trend_pct or 0) < -20: return 'Declining'
+    if declining_yoy: return 'Declining'
     if tenure_months >= 12 and (trend_pct or 0) >= 0 and deals_90d >= 2: return 'Mature-Healthy'
     if 3 <= tenure_months < 12 and deals_90d >= 2: return 'Growing'
     return 'Active-Low'
@@ -356,6 +358,28 @@ def process():
         deals_90_180 = sum(1 for d in ds if 90 < (TODAY - parse_dt(d['created'])).days <= 180)
         deals_180_365 = sum(1 for d in ds if 180 < (TODAY - parse_dt(d['created'])).days <= 365)
         deals_365_plus = sum(1 for d in ds if (TODAY - parse_dt(d['created'])).days > 365)
+
+        # YoY windows for the Declining definition (v7, Jul-2026). Each recent window
+        # is compared against the SAME window one year earlier (true interanual):
+        #   60d : últimos 60d      vs días (365, 425]
+        #   90d : últimos 90d      vs días (365, 455]
+        #   365d: últimos 365d     vs días (365, 730]
+        _age = lambda d: (TODAY - parse_dt(d['created'])).days
+        deals_60d       = sum(1 for d in ds if _age(d) <= 60)
+        deals_365d      = sum(1 for d in ds if _age(d) <= 365)
+        deals_60d_yoy   = sum(1 for d in ds if 365 < _age(d) <= 425)
+        deals_90d_yoy   = sum(1 for d in ds if 365 < _age(d) <= 455)
+        deals_365d_yoy  = sum(1 for d in ds if 365 < _age(d) <= 730)
+
+        def _yoy_drop(recent, prior):
+            # A window counts as "cayendo" only if there was a nonzero baseline a
+            # year ago to fall from (crecer desde 0 no es una caída).
+            return prior > 0 and (recent - prior) / prior <= -0.20
+        yoy_windows_dropping = (_yoy_drop(deals_60d,  deals_60d_yoy)
+                              + _yoy_drop(deals_90d,  deals_90d_yoy)
+                              + _yoy_drop(deals_365d, deals_365d_yoy))
+        # Sólo medible con ≥12 meses de historia en MoradaUno; si no, no es Declining.
+        declining_yoy = tenure_months >= 12 and yoy_windows_dropping >= 2
 
         # New windows for the L6M-vs-prior-L6M trend (smoother, less noisy than 90/90 split).
         # L6M = last 180 days. Prior L6M = days 180-360 (the 180 days right before the L6M window).
@@ -717,6 +741,15 @@ def process():
             'trend_l6m_pct': trend_l6m_pct,     # primary L6M vs prior L6M
             'low_volume': low_volume,
             'rev_trend_pct': rev_trend_pct,
+            # YoY windows + Declining decision (v7). Each *_yoy is the same-length
+            # window one year earlier; declining_yoy drives the Declining stage.
+            'deals_60d': deals_60d,
+            'deals_365d': deals_365d,
+            'deals_60d_yoy': deals_60d_yoy,
+            'deals_90d_yoy': deals_90d_yoy,
+            'deals_365d_yoy': deals_365d_yoy,
+            'yoy_windows_dropping': yoy_windows_dropping,
+            'declining_yoy': declining_yoy,
             # Deal type breakdown
             'open_count': open_ct,
             'renewal_count': renewal_ct,
@@ -800,7 +833,7 @@ def process():
         broker_obj['risk'] = risk
         broker_obj['primary_signal'] = primary
         broker_obj['signals'] = all_signals
-        broker_obj['lifecycle'] = lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_per_month)
+        broker_obj['lifecycle'] = lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_per_month, declining_yoy)
 
         brokers.append(broker_obj)
 
