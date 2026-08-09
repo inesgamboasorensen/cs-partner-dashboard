@@ -2,18 +2,18 @@
   {
     "date": "2026-08-09",
     "brokers": {
-      "Onboarding": 624,
-      "Crecimiento": 220,
-      "Mantenimiento": 1599,
-      "Declive": 2539,
+      "Onboarding": 803,
+      "Crecimiento": 286,
+      "Mantenimiento": 1884,
+      "Declive": 2009,
       "Churned": 3141
     },
     "inmos": {
-      "Onboarding": 203,
-      "Crecimiento": 92,
-      "Mantenimiento": 573,
-      "Declive": 696,
-      "Churned": 783
+      "Onboarding": 262,
+      "Crecimiento": 114,
+      "Mantenimiento": 655,
+      "Declive": 535,
+      "Churned": 781
     },
     "brokers_active_90d": 3604,
     "deals_l90d": 12175,

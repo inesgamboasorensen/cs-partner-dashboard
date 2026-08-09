@@ -123,10 +123,11 @@ def lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_
     """Classify broker lifecycle stage (v10).
 
     Las 3 etapas SANAS se definen SOLO por permanencia. Declive (Declining/At-Risk)
-    y Churned se definen por USO/ACTIVIDAD y tienen prioridad sobre la permanencia:
+    y Churned se definen por USO/ACTIVIDAD y tienen prioridad sobre la permanencia.
+    Declive = actividad cayendo, A CUALQUIER PERMANENCIA (rescate antes de churn):
       1. Churned       — > 180 días sin actividad (uso)
       2. Declining     — ventas interanuales cayendo ≥20% en ≥2 de 3 ventanas (Declive)
-      3. At-Risk       — 60-180 días sin actividad (Declive)
+      3. At-Risk       — 90-180 días sin actividad (Declive)
       4. Onboarding    — permanencia < 4 meses
       5. Growing       — permanencia 4-9 meses  (ciclo Crecimiento)
       6. Mature-Healthy — permanencia 10+ meses (ciclo Mantenimiento)
@@ -135,7 +136,7 @@ def lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_
     """
     if days_since_last > 180: return 'Churned'
     if declining_yoy: return 'Declining'
-    if days_since_last >= 60: return 'At-Risk'
+    if days_since_last >= 90: return 'At-Risk'
     if tenure_months < 4: return 'Onboarding'
     if tenure_months <= 9: return 'Growing'
     return 'Mature-Healthy'
@@ -377,8 +378,10 @@ def process():
         yoy_windows_dropping = (_yoy_drop(deals_60d,  deals_60d_yoy)
                               + _yoy_drop(deals_90d,  deals_90d_yoy)
                               + _yoy_drop(deals_365d, deals_365d_yoy))
-        # Sólo medible con ≥12 meses de historia en MoradaUno; si no, no es Declining.
-        declining_yoy = tenure_months >= 12 and yoy_windows_dropping >= 2
+        # Declive a CUALQUIER permanencia: no gate de tenure. La ventana YoY sólo
+        # cuenta como caída si el baseline de hace un año fue > 0 (_yoy_drop), así que
+        # un broker realmente nuevo (sin ventana hace un año) da 0 y no clasifica Declining.
+        declining_yoy = yoy_windows_dropping >= 2
 
         # New windows for the L6M-vs-prior-L6M trend (smoother, less noisy than 90/90 split).
         # L6M = last 180 days. Prior L6M = days 180-360 (the 180 days right before the L6M window).
