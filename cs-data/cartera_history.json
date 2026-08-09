@@ -1,0 +1,22 @@
+[
+  {
+    "date": "2026-08-09",
+    "brokers": {
+      "Onboarding": 624,
+      "Crecimiento": 220,
+      "Mantenimiento": 1599,
+      "Declive": 2539,
+      "Churned": 3141
+    },
+    "inmos": {
+      "Onboarding": 203,
+      "Crecimiento": 92,
+      "Mantenimiento": 573,
+      "Declive": 696,
+      "Churned": 783
+    },
+    "brokers_active_90d": 3604,
+    "deals_l90d": 12175,
+    "revenue_total": 576519631
+  }
+]

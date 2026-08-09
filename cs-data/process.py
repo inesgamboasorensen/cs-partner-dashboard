@@ -1045,7 +1045,47 @@ def process():
         'revenue_at_risk': sum(b['total_revenue'] for b in brokers if b['risk']=='ALTO'),
     }
 
-    out = {'meta': meta, 'brokers': brokers, 'inmobiliarias': inmobiliarias}
+    # --- Snapshot histórico de la cartera (movimiento por ciclo + usos) ---
+    # Una foto por fecha de build (upsert). Deja ver cómo se mueve la cartera
+    # entre ciclos y en usos build-a-build. Se embebe en el blob como `history`.
+    def _cycle_of(st):
+        if st == 'Onboarding': return 'Onboarding'
+        if st in ('Growing', 'Active-Low'): return 'Crecimiento'
+        if st == 'Mature-Healthy': return 'Mantenimiento'
+        if st in ('Declining', 'At-Risk'): return 'Declive'
+        if st == 'Churned': return 'Churned'
+        return 'Mantenimiento'
+    def _inmo_dom_stage(i):
+        dist = i.get('lifecycle_dist') or {}
+        best, bn = None, 0
+        for k in ('Onboarding','Growing','Mature-Healthy','Active-Low','Declining','At-Risk','Churned'):
+            if dist.get(k, 0) > bn: best, bn = k, dist[k]
+        return best
+    CYC = ['Onboarding', 'Crecimiento', 'Mantenimiento', 'Declive', 'Churned']
+    bro_cyc = Counter(_cycle_of(b['lifecycle']) for b in brokers)
+    inmo_cyc = Counter(_cycle_of(_inmo_dom_stage(i)) for i in inmobiliarias if _inmo_dom_stage(i))
+    snapshot = {
+        'date': TODAY.strftime('%Y-%m-%d'),
+        'brokers': {k: int(bro_cyc.get(k, 0)) for k in CYC},
+        'inmos':   {k: int(inmo_cyc.get(k, 0)) for k in CYC},
+        'brokers_active_90d': sum(1 for b in brokers if b.get('active_now')),
+        'deals_l90d': sum(b.get('deals_90d', 0) for b in brokers),
+        'revenue_total': int(meta['revenue_total']),
+    }
+    HIST_PATH = os.path.join(HERE, 'cartera_history.json')
+    history = []
+    if os.path.exists(HIST_PATH):
+        try:
+            with open(HIST_PATH) as f: history = json.load(f)
+        except Exception: history = []
+    history = [h for h in history if h.get('date') != snapshot['date']]
+    history.append(snapshot)
+    history.sort(key=lambda h: h['date'])
+    with open(HIST_PATH, 'w') as f:
+        json.dump(history, f, indent=2)
+    print(f'  History: {len(history)} snapshot(s) → {snapshot["brokers"]}')
+
+    out = {'meta': meta, 'brokers': brokers, 'inmobiliarias': inmobiliarias, 'history': history}
     with open(OUT_PATH, 'w') as f:
         json.dump(out, f, separators=(',',':'))
     print(f'Wrote {OUT_PATH}')

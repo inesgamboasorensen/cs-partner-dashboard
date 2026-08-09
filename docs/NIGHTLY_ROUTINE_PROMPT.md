@@ -234,7 +234,7 @@ the apply step is idempotent and re-runs only add what's new.
 
 ```bash
 cd "/Users/inesgamboa/Desktop/Apps - Claude/cs-partner-dashboard"
-git add cs-data/deals_2y.jsonl.gz cs-data/broker_registry.json index.html version.json
+git add cs-data/deals_2y.jsonl.gz cs-data/broker_registry.json cs-data/cartera_history.json index.html version.json
 
 # Skip commit if nothing changed (idempotent no-op guard)
 if git diff --cached --quiet; then
