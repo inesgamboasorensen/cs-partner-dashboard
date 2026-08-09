@@ -120,26 +120,25 @@ def parse_dt(s):
         except: return None
 
 def lifecycle_stage(days_since_last, tenure_months, deals_90d, trend_pct, deals_per_month=0, declining_yoy=False):
-    """Classify broker lifecycle stage.
+    """Classify broker lifecycle stage (v10).
 
-    Priority order (cada uno sobreescribe los siguientes):
-      1. Churned       — > 180 días sin actividad
-      2. At-Risk       — 60-90 días sin actividad
-      3. Onboarding    — tenure < 3 meses
-      4. Declining     — año-contra-año: ≥2 de 3 ventanas (60d, 90d, 365d) cayendo
-                         ≥20% interanual. Requiere ≥12 meses de historia (si no,
-                         no es medible → no puede ser Declining). Ver `declining_yoy`.
-      5. Mature-Healthy — tenure 12+ meses, trend ≥ 0, 2+ deals L90D
-      6. Growing       — tenure 3-12 meses con 2+ deals L90D
-      7. Active-Low    — default: cliente activo con baja productividad (<0.5 rentas/mes)
+    Las 3 etapas SANAS se definen SOLO por permanencia. Declive (Declining/At-Risk)
+    y Churned se definen por USO/ACTIVIDAD y tienen prioridad sobre la permanencia:
+      1. Churned       — > 180 días sin actividad (uso)
+      2. Declining     — ventas interanuales cayendo ≥20% en ≥2 de 3 ventanas (Declive)
+      3. At-Risk       — 60-180 días sin actividad (Declive)
+      4. Onboarding    — permanencia < 4 meses
+      5. Growing       — permanencia 4-9 meses  (ciclo Crecimiento)
+      6. Mature-Healthy — permanencia 10+ meses (ciclo Mantenimiento)
+    Usos/ticket NO cambian la etapa sana — son señales de PRIORIZACIÓN aparte.
+    (deals_90d/trend_pct siguen en la firma por compatibilidad; ya no clasifican.)
     """
     if days_since_last > 180: return 'Churned'
-    if 60 <= days_since_last <= 90: return 'At-Risk'
-    if tenure_months < 3: return 'Onboarding'
     if declining_yoy: return 'Declining'
-    if tenure_months >= 12 and (trend_pct or 0) >= 0 and deals_90d >= 2: return 'Mature-Healthy'
-    if 3 <= tenure_months < 12 and deals_90d >= 2: return 'Growing'
-    return 'Active-Low'
+    if days_since_last >= 60: return 'At-Risk'
+    if tenure_months < 4: return 'Onboarding'
+    if tenure_months <= 9: return 'Growing'
+    return 'Mature-Healthy'
 
 def risk_signals(b):
     """Returns (risk_level, primary_signal, all_signals_list).
