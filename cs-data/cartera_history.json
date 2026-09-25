@@ -18,5 +18,25 @@
     "brokers_active_90d": 3604,
     "deals_l90d": 12175,
     "revenue_total": 576519631
+  },
+  {
+    "date": "2026-09-25",
+    "brokers": {
+      "Onboarding": 810,
+      "Crecimiento": 317,
+      "Mantenimiento": 1953,
+      "Declive": 2050,
+      "Churned": 3362
+    },
+    "inmos": {
+      "Onboarding": 236,
+      "Crecimiento": 130,
+      "Mantenimiento": 685,
+      "Declive": 522,
+      "Churned": 826
+    },
+    "brokers_active_90d": 3668,
+    "deals_l90d": 12197,
+    "revenue_total": 621229587
   }
 ]
