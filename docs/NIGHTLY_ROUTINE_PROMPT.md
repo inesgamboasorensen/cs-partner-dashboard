@@ -230,6 +230,20 @@ rm -f cs-data/_enrichment_pending.txt
 If a usage limit hits mid-enrichment, the partial file still has value —
 the apply step is idempotent and re-runs only add what's new.
 
+### 4b. IDs del MCP para cuentas nuevas del CS Partner Dashboard
+
+Las cuentas que los CS Partners tocan por primera vez no tienen todavía sus IDs del Admin.
+Ver `../cs-state-sync/README.md` → "IDs del MCP". Resumen:
+
+1. Lista de cuentas sin IDs:
+   `cd ../cs-state-sync && ../cf-worker/node_modules/.bin/wrangler d1 execute cs-partner-db --remote --json --command="select id from accounts where id not in (select account_id from account_refs)"`
+2. Para cada una, `get_brokers(filter=<nombre del broker>)` (para `inmo:inmo:X`, el nombre de uno de
+   sus brokers en `deals_2y.jsonl.gz`). Escribe una línea JSONL por cuenta en
+   `<scratchpad>/ids/out_nightly.jsonl` con el formato de `scripts/import_refs.py`.
+3. `python3 scripts/import_refs.py <scratchpad>/ids`
+
+Si son más de ~40, repártelas en subagentes de 40 que solo devuelvan el JSONL.
+
 ### 5. Commit + push (conditional)
 
 ```bash

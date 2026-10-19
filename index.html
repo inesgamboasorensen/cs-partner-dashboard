@@ -564,6 +564,19 @@
 
   <!-- LEADERBOARD -->
   <section class="tab-pane" id="tab-leaderboard">
+    <div class="section" id="cs-goals">
+      <div class="section-hdr">
+        <h2>Metas semanales · CS Partner</h2>
+        <div class="filters">
+          <select id="cs-week" onchange="renderCsGoals()"><option value="0">Esta semana</option><option value="1">Semana pasada</option><option value="2">Hace 2 semanas</option></select>
+          <span id="cs-week-label" style="font-size:11.5px;color:var(--dark-gray)"></span>
+          <select id="cs-dl-period" title="Periodo de la descarga de actividades"><option value="week">Esta semana</option><option value="lastweek">Semana pasada</option><option value="month">Últimos 30 días</option><option value="all">Todo</option></select>
+          <button class="btn" onclick="downloadActivities()">⬇ Actividades (CSV)</button>
+          <button class="btn" onclick="downloadAssignmentHistory()">⬇ Historial de asignaciones (CSV)</button>
+        </div>
+      </div>
+      <div style="padding:14px 20px" id="cs-goals-body"></div>
+    </div>
     <div class="kpi-row">
       <div class="kpi accent">
         <div class="label">Valor total atribuido</div>
@@ -1215,7 +1228,7 @@ function percentilePill(value, sortedArr, poolLabel){
 //   • BDR             — cuentas Churned (auto-asignadas a esta cartera para reactivación)
 // El handoff manual se conserva como evento histórico (snapshot del AM) pero el rol
 // efectivo ya se deriva del lifecycle, no de la flag handed_off.
-const ACCOUNT_MANAGERS = ['Wendy Varela','Marlo Loza','Itzel Gómez'];
+const ACCOUNT_MANAGERS = ['Wendy Varela','Marlo Loza','Itzel Gómez','Itzel Alarcón','Elizabeth Castro'];
 const CS_PARTNERS = ['Lorena Dominguez','Dylan Arellano'];
 const CITY_MANAGERS = ['Joseph Haydn Orozco Vega','Zion Nieto']; // Retención · Plazas
 const TRAINERS = []; // por definir
@@ -1462,7 +1475,9 @@ function setOwner(stateObj, newOwner, source){
       role: roleOfOwner(newOwner) || '—',
       since: today,
       until: null,
-      source: source||'manual'
+      source: source||'manual',
+      by: (typeof _syncActor === 'string' && _syncActor) || '',   // who made the change
+      stage: _stageOfStateObj(stateObj)                             // lifecycle when the owner took it
     });
   }
   stateObj.owner = newOwner;
@@ -2768,25 +2783,39 @@ function refreshInmoPlazaFilterOptions(){
 
 // ─── MODAL: Broker 360 ───
 function renderOwnerHistory(stateObj){
-  const hist = stateObj.owner_history || [];
+  const hist = (stateObj.owner_history || []).map((h,i)=>({...h,_i:i}));
   if(!hist.length){
-    return `<div class="empty" style="padding:14px">Aún no hay historial de owners.</div>`;
+    return `<div class="empty" style="padding:14px">Aún no hay historial de responsables.</div>`;
   }
-  const sourceLabel = {bootstrap:'asignación inicial', handoff:'traspaso a CS', manual:'cambio manual', legacy:'previo al tracking'};
-  // Render most-recent first
-  return `<div style="display:flex;flex-direction:column;gap:6px">${hist.slice().reverse().map((h,idx)=>{
-    const isCurrent = idx===0 && !h.until;
-    const sinceTxt = h.since ? fmtDate(h.since) : '<span style="color:var(--mid-gray)">desconocido</span>';
-    const untilTxt = h.until ? `→ ${fmtDate(h.until)}` : (isCurrent?'<span style="color:var(--green);font-weight:700">· activo</span>':'');
-    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 10px;background:${isCurrent?'#FAFAF9':'#fff'};border:1px solid var(--light-gray);border-radius:4px;font-size:12px">
-      <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
-        <span class="pill role-${h.role||'—'}">${h.role||'—'}</span>
-        <strong style="color:var(--near-black)">${esc(h.owner)}</strong>
-        <small style="color:var(--dark-gray);font-size:10.5px">${sinceTxt} ${untilTxt}</small>
+  const sourceLabel = {bootstrap:'asignación inicial', handoff:'traspaso a CS', manual:'cambio manual', legacy:'previo al registro', 'cesta-am-2026':'cesta AM 2026'};
+  // Chronological order (unknown dates first), then newest first for display.
+  hist.sort((x,y)=> (x.since||'').localeCompare(y.since||'') || x._i - y._i);
+  const rows = hist.map((h,idx)=>({...h, prev: idx>0 ? hist[idx-1].owner : null}));
+  const last = rows[rows.length-1];
+  const today = _todayIso();
+  const daysBetween = (a,b)=> Math.max(0, Math.round((new Date(b) - new Date(a)) / 86400000));
+  const items = rows.slice().reverse().map((h,idx)=>{
+    const isCurrent = !h.until && h === last && !!stateObj.owner;
+    const when = h.since ? fmtDate(h.since) : '<span style="color:var(--mid-gray)">fecha desconocida</span>';
+    const change = h.prev && h.prev !== h.owner
+      ? `<span style="color:var(--dark-gray)">${esc(h.prev)}</span> <span style="color:var(--mid-gray)">→</span> <strong style="color:var(--near-black)">${esc(h.owner)}</strong>`
+      : `Asignada a <strong style="color:var(--near-black)">${esc(h.owner)}</strong>`;
+    const span = h.until
+      ? `hasta ${fmtDate(h.until)}${h.since?` · ${daysBetween(h.since,h.until)} días`:''}`
+      : (isCurrent ? `<span style="color:var(--green);font-weight:700">responsable actual${h.since?` · ${daysBetween(h.since,today)} días`:''}</span>` : '');
+    const meta = [sourceLabel[h.source]||esc(h.source||''), h.by?`por ${esc(h.by)}`:'', h.stage?`etapa al asignar: ${cycleLabel(cycleOf(h.stage))}`:''].filter(Boolean).join(' · ');
+    return `<div style="display:grid;grid-template-columns:96px 1fr;gap:10px;padding:8px 10px;background:${isCurrent?'#FAFAF9':'#fff'};border:1px solid var(--light-gray);border-radius:4px;font-size:12px">
+      <div style="font-weight:700;color:var(--near-black);font-variant-numeric:tabular-nums">${when}</div>
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="pill role-${h.role||'—'}">${h.role||'—'}</span>${change}</div>
+        <small style="color:var(--dark-gray);font-size:10.5px">${span}${span&&meta?' · ':''}${meta}</small>
       </div>
-      <small style="color:var(--mid-gray);font-size:10.5px;white-space:nowrap">${sourceLabel[h.source]||esc(h.source||'')}</small>
     </div>`;
-  }).join('')}</div>`;
+  });
+  if(last && last.until && !stateObj.owner){
+    items.unshift(`<div style="padding:8px 10px;border:1px dashed var(--light-gray);border-radius:4px;font-size:12px;color:var(--dark-gray)"><strong>${fmtDate(last.until)}</strong> · ${esc(last.owner)} → sin responsable</div>`);
+  }
+  return `<div style="display:flex;flex-direction:column;gap:6px">${items.join('')}</div>`;
 }
 function renderHandoffSectionBroker(r, a){
   const tenure = r.tenure_months ?? 0;
@@ -3106,6 +3135,7 @@ function openBroker(id){
       <summary>Actividad del equipo</summary>
       <div class="log-form">
         <div class="row">
+          <input type="date" id="act-date" value="${_todayIso()}" max="${_todayIso()}" title="Fecha en que se hizo el contacto" style="flex:0 0 auto"/>
           <select id="act-type"><option value="call">📞 Llamada</option><option value="wa">💬 WhatsApp</option><option value="email">✉ Email</option><option value="meeting">🎯 Meeting</option><option value="note">📝 Nota</option></select>
           <select id="act-csm">${ALL_OWNERS.map(o=>`<option ${a.owner===o?'selected':''} value="${esc(o)}">${esc(o)} · ${roleOfOwner(o)||'—'}</option>`).join('')}</select>
           <select id="act-outcome">
@@ -3363,6 +3393,7 @@ function openInmo(id){
       <summary>📝 Actividad del equipo</summary>
       <div class="log-form">
         <div class="row">
+          <input type="date" id="inmo-act-date" value="${_todayIso()}" max="${_todayIso()}" title="Fecha en que se hizo el contacto" style="flex:0 0 auto"/>
           <select id="inmo-act-type"><option value="call">📞 Llamada</option><option value="wa">💬 WhatsApp</option><option value="email">✉ Email</option><option value="meeting">🎯 Meeting</option><option value="note">📝 Nota</option></select>
           <select id="inmo-act-csm">${ALL_OWNERS.map(o=>`<option ${iSt0.owner===o?'selected':''} value="${esc(o)}">${esc(o)} · ${roleOfOwner(o)||'—'}</option>`).join('')}</select>
           <select id="inmo-act-outcome">
@@ -3455,7 +3486,7 @@ function addAct(id){
   const type=$('#act-type').value, csm=$('#act-csm').value, outcome=$('#act-outcome').value, text=$('#act-text').value.trim();
   if(!text && !outcome){ alert('Agrega descripción o resultado.'); return }
   const a = getA(id);
-  a.activities.push({date:nowLocalIso(),type,csm,outcome,text});
+  a.activities.push({date:_contactDate('#act-date'),type,csm,outcome,text,logged_at:nowLocalIso()});
   if(outcome==='Activación'||outcome==='Renovación firmada'){
     a.status='En Mantenimiento';
     const r = BROKERS.find(x=>x.id===id);
@@ -3473,7 +3504,7 @@ function quickLog(id,type){
   const r = BROKERS.find(x=>x.id===id);
   const a = getA(id);
   const fallback = r ? ownersForRole(roleFor(r))[0] : ALL_OWNERS[0];
-  a.activities.push({date:nowLocalIso(),type,csm:a.owner||fallback,outcome:'Contactado',text:'Quick log'});
+  a.activities.push({date:nowLocalIso(),type,csm:a.owner||fallback,outcome:'Contactado',text:'Quick log',logged_at:nowLocalIso()});
   if(a.status==='No Contactado') a.status='Trabajando';
   a._modified = new Date().toISOString();
   saveState(); openBroker(id); renderAll();
@@ -3590,7 +3621,7 @@ function addInmoActFromForm(inmoId){
   const type=$('#inmo-act-type').value, csm=$('#inmo-act-csm').value, outcome=$('#inmo-act-outcome').value, text=$('#inmo-act-text').value.trim();
   if(!text && !outcome){ alert('Agrega descripción o resultado.'); return; }
   const i = getI(inmoId);
-  i.activities.push({date:nowLocalIso(),type,csm,outcome,text});
+  i.activities.push({date:_contactDate('#inmo-act-date'),type,csm,outcome,text,logged_at:nowLocalIso()});
   // Auto-transition phase based on outcome (mirrors broker behavior in addAct)
   if(outcome === 'Activación' || outcome === 'Renovación firmada'){
     i.status = 'En Mantenimiento';
@@ -4818,7 +4849,7 @@ $$('.tab-btn').forEach(b=>b.onclick=()=>{
   if(b.dataset.tab==='analytics') renderAnalytics();
   if(b.dataset.tab==='pipeline') renderPipeline();
   if(b.dataset.tab==='inmobiliarias') renderInmos();
-  if(b.dataset.tab==='leaderboard') renderLeaderboard();
+  if(b.dataset.tab==='leaderboard'){ renderLeaderboard(); renderCsGoals(); }
 });
 ['lb-role','lb-city','lb-sort','lb-period','lb-pool'].forEach(id=>{ const el=$('#'+id); if(el) el.onchange = renderLeaderboard; });
 // Pipeline filters
@@ -4910,6 +4941,198 @@ renderAll();
     .catch(() => {});
 })();
 
+// ─── CS PARTNER: metas semanales, reto semanal y descargas ─────────────────
+// Metas acordadas (oct-2026). Cambiar aquí si cambian.
+const CS_GOALS = {
+  calls:     {min: 40, max: 50},   // llamadas por semana
+  meetings:  4,                    // reuniones por semana
+  sameDay:   100,                  // % de actividades registradas el mismo día del contacto
+  declineRegularized: 30,          // % de cuentas en declive (asignadas en los últimos 90 días) que hoy están sanas
+  followupDays: 7,                 // "Trabajando" sin actividad en más de N días = sin seguimiento
+};
+function _pad2(n){ return String(n).padStart(2,'0'); }
+function _todayIso(){ const d = new Date(); return `${d.getFullYear()}-${_pad2(d.getMonth()+1)}-${_pad2(d.getDate())}`; }
+// Contact date from a date picker: today keeps the current time; past dates get noon.
+function _contactDate(sel){
+  const v = ($(sel) && $(sel).value) || '';
+  if(!v || v >= _todayIso()) return nowLocalIso();
+  return `${v} 12:00`;
+}
+var _brokerById = null, _inmoById = null;
+function _maps(){
+  if(!_brokerById){ _brokerById = {}; BROKERS.forEach(b=>{ _brokerById[b.id] = b; }); }
+  if(!_inmoById){ _inmoById = {}; INMOS.forEach(i=>{ _inmoById[i.id] = i; }); }
+}
+function _clientTypeOf(key){ return key.startsWith('inmo:') ? 'organization' : 'broker'; }
+// Current dashboard lifecycle stage of an account key (STATE key).
+function _stageNow(key){
+  _maps();
+  if(key.startsWith('inmo:')){ const im = _inmoById[key.slice(5)]; return im ? inmoLifecycle(im) : null; }
+  const b = _brokerById[key]; return b ? b.lifecycle : null;
+}
+function _stageOfStateObj(obj){
+  for(const k in STATE){ if(STATE[k] === obj) return _stageNow(k); }
+  return null;
+}
+function _isDecline(st){ return st === 'Declining' || st === 'At-Risk'; }
+function _isHealthyStage(st){ return !!st && !_isDecline(st) && st !== 'Churned'; }
+function _acctLabel(key){
+  if(key.startsWith('inmo:')) return {name: key.split(':').slice(2).join(':') || key.slice(5), broker: '', inmo: key.split(':').slice(2).join(':') || key.slice(5)};
+  const [b, ...c] = key.split('|'); return {name: b, broker: b, inmo: c.join('|')};
+}
+function _refsOf(key){
+  const r = (STATE[key] && STATE[key]._refs) || {};
+  _maps();
+  const b = _brokerById[key];
+  return {
+    broker_id: r.broker_id || (b && b.broker_id) || '',
+    organization_id: r.organization_id || (b && b.org_id) || '',
+  };
+}
+// Monday-based week window [start, end) as 'YYYY-MM-DD' strings. offset 0 = this week.
+function _weekRange(offset){
+  const d = new Date(); d.setHours(0,0,0,0);
+  const dow = (d.getDay() + 6) % 7;            // Monday = 0
+  d.setDate(d.getDate() - dow - 7*offset);
+  const e = new Date(d); e.setDate(e.getDate() + 7);
+  const f = x => `${x.getFullYear()}-${_pad2(x.getMonth()+1)}-${_pad2(x.getDate())}`;
+  return {start: f(d), end: f(e)};
+}
+// Every logged activity with its account key.
+function _allActivities(){
+  const out = [];
+  for(const key in STATE){
+    const st = STATE[key]; if(!st || !Array.isArray(st.activities)) continue;
+    st.activities.forEach(a=>{ if(a && a.date) out.push({key, ...a}); });
+  }
+  return out;
+}
+function _lastActivityDate(st){
+  let m = '';
+  (st.activities||[]).forEach(a=>{ if(a && a.date && a.date > m) m = a.date; });
+  return m;
+}
+function _csGoalStats(person, week){
+  const acts = _allActivities().filter(a => a.csm === person);
+  const inWeek = acts.filter(a => { const d = a.date.slice(0,10); return d >= week.start && d < week.end; });
+  const calls = inWeek.filter(a => a.type === 'call').length;
+  const meetings = inWeek.filter(a => a.type === 'meeting').length;
+  const withLog = inWeek.filter(a => a.logged_at);
+  const sameDay = withLog.filter(a => a.logged_at.slice(0,10) === a.date.slice(0,10)).length;
+  // Declive → sana: cuentas que se le asignaron en los últimos 90 días estando en Declive.
+  const since90 = new Date(Date.now() - 90*86400000).toISOString().slice(0,10);
+  const cohort = [];
+  for(const key in STATE){
+    const st = STATE[key]; if(!st) continue;
+    (st.owner_history||[]).forEach(h=>{
+      if(h.owner === person && h.since && h.since >= since90 && _isDecline(h.stage)) cohort.push({key, healthy: _isHealthyStage(_stageNow(key))});
+    });
+  }
+  // Trabajando sin seguimiento.
+  const cut = new Date(Date.now() - CS_GOALS.followupDays*86400000);
+  const cutStr = `${cut.getFullYear()}-${_pad2(cut.getMonth()+1)}-${_pad2(cut.getDate())}`;
+  const stale = [];
+  for(const key in STATE){
+    const st = STATE[key];
+    if(st && st.owner === person && st.status === 'Trabajando'){
+      const last = _lastActivityDate(st);
+      if(!last || last.slice(0,10) < cutStr) stale.push({key, last});
+    }
+  }
+  return {total: inWeek.length, calls, meetings, logged: withLog.length, sameDay,
+          cohort: cohort.length, regularized: cohort.filter(c=>c.healthy).length, stale};
+}
+function _goalRow(label, valueTxt, pct, ok, hint){
+  const w = Math.max(0, Math.min(100, pct));
+  const color = ok ? 'var(--green)' : (pct >= 60 ? 'var(--amber,#D97706)' : 'var(--red)');
+  return `<div style="display:grid;grid-template-columns:150px 1fr 92px;gap:10px;align-items:center;font-size:12px;padding:5px 0">
+    <span style="color:var(--dark-gray)">${label}</span>
+    <span style="height:8px;background:var(--light-gray);border-radius:99px;overflow:hidden"><span style="display:block;height:100%;width:${w}%;background:${color};border-radius:99px"></span></span>
+    <span style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums" title="${esc(hint||'')}">${valueTxt} ${ok?'<span style="color:var(--green)">✓</span>':''}</span>
+  </div>`;
+}
+function _openAcct(key){
+  if(key.startsWith('inmo:')) openInmo(key.slice(5)); else openBroker(key);
+}
+function renderCsGoals(){
+  const host = $('#cs-goals-body'); if(!host) return;
+  const week = _weekRange(parseInt(($('#cs-week')||{}).value||'0',10));
+  const wkLbl = $('#cs-week-label'); if(wkLbl){ const e = new Date(week.end); e.setDate(e.getDate()-1); wkLbl.textContent = `${fmtDate(week.start)} – ${fmtDate(e.toISOString().slice(0,10))}`; }
+  const cards = CS_PARTNERS.map(p=>{
+    const s = _csGoalStats(p, week);
+    const sameDayPct = s.logged ? Math.round(s.sameDay / s.logged * 100) : null;
+    const regPct = s.cohort ? Math.round(s.regularized / s.cohort * 100) : null;
+    const staleList = s.stale.slice(0,12).map(x=>`<a href="#" onclick="_openAcct('${escAttr(x.key)}');return false" style="display:block;color:var(--near-black)">${esc(_acctLabel(x.key).name)} <small style="color:var(--mid-gray)">${x.last?'última actividad '+fmtDate(x.last):'sin actividades'}</small></a>`).join('');
+    return `<div style="border:1px solid var(--light-gray);border-radius:8px;padding:14px 16px;background:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><strong>${esc(p)}</strong><small style="color:var(--dark-gray)">${s.total} actividades esta semana</small></div>
+      ${_goalRow('Llamadas', `${s.calls} / ${CS_GOALS.calls.min}–${CS_GOALS.calls.max}`, s.calls/CS_GOALS.calls.min*100, s.calls >= CS_GOALS.calls.min, 'Meta: 40–50 llamadas por semana')}
+      ${_goalRow('Reuniones', `${s.meetings} / ${CS_GOALS.meetings}`, s.meetings/CS_GOALS.meetings*100, s.meetings >= CS_GOALS.meetings, 'Meta: 4 reuniones por semana')}
+      ${_goalRow('Registradas el mismo día', sameDayPct==null?'—':`${sameDayPct}%`, sameDayPct==null?0:sameDayPct, sameDayPct===100, 'Actividades cuya fecha de registro coincide con la fecha del contacto. Solo cuenta actividades registradas desde que existe este dato.')}
+      ${_goalRow('Declive → sana (3 meses)', regPct==null?'—':`${regPct}% · ${s.regularized}/${s.cohort}`, regPct==null?0:regPct/CS_GOALS.declineRegularized*100, regPct!=null && regPct >= CS_GOALS.declineRegularized, 'De las cuentas que se le asignaron en los últimos 90 días estando en Declive, cuántas hoy están en una etapa sana. Meta: 30%.')}
+      ${_goalRow('“Trabajando” sin seguimiento', `${s.stale.length}`, s.stale.length===0?100:0, s.stale.length===0, `Cuentas en “Trabajando” sin actividad en más de ${CS_GOALS.followupDays} días. Meta: 0.`)}
+      ${s.stale.length?`<details style="margin-top:4px"><summary style="cursor:pointer;font-size:11.5px;color:var(--dark-gray)">Ver cuentas sin seguimiento (${s.stale.length})</summary><div style="font-size:12px;display:flex;flex-direction:column;gap:3px;margin-top:6px">${staleList}${s.stale.length>12?`<small style="color:var(--mid-gray)">y ${s.stale.length-12} más</small>`:''}</div></details>`:''}
+    </div>`;
+  }).join('');
+  // Reto semanal: everyone with activity this week.
+  const tally = {};
+  _allActivities().forEach(a=>{
+    const d = a.date.slice(0,10); if(d < week.start || d >= week.end || !a.csm) return;
+    const t = tally[a.csm] = tally[a.csm] || {total:0, call:0, meeting:0, wa:0, other:0};
+    t.total++; if(a.type==='call') t.call++; else if(a.type==='meeting') t.meeting++; else if(a.type==='wa') t.wa++; else t.other++;
+  });
+  const ranked = Object.entries(tally).sort((a,b)=>b[1].total-a[1].total);
+  const top = ranked.length ? ranked[0][1].total : 1;
+  const medal = i => ['🥇','🥈','🥉'][i] || `${i+1}.`;
+  const reto = ranked.length ? ranked.map(([who,t],i)=>`<div style="display:grid;grid-template-columns:34px 170px 1fr 210px;gap:10px;align-items:center;font-size:12.5px;padding:5px 0;border-top:${i?'1px solid var(--light-gray)':'none'}">
+      <span style="font-size:15px">${medal(i)}</span><strong>${esc(who)}</strong>
+      <span style="height:10px;background:var(--light-gray);border-radius:99px;overflow:hidden"><span style="display:block;height:100%;width:${t.total/top*100}%;background:var(--purple,#832694);border-radius:99px"></span></span>
+      <span style="text-align:right;color:var(--dark-gray);font-variant-numeric:tabular-nums"><strong style="color:var(--near-black)">${t.total}</strong> · 📞 ${t.call} · 🎯 ${t.meeting} · 💬 ${t.wa}</span>
+    </div>`).join('') : `<div class="empty" style="padding:10px">Nadie ha registrado actividades esta semana.</div>`;
+  host.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px">${cards}</div>
+    <h3 style="font-size:12px;font-weight:700;color:var(--dark-gray);text-transform:uppercase;letter-spacing:.1em;margin:18px 0 6px">Reto semanal · actividades registradas</h3>
+    <div style="border:1px solid var(--light-gray);border-radius:8px;padding:8px 14px;background:#fff">${reto}</div>`;
+}
+// ─── Descargas CSV ───
+function _csv(rows){
+  const cell = v => { if(v==null) return ''; const s = String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+  return '﻿' + rows.map(r => r.map(cell).join(',')).join('\n') + '\n';
+}
+function _download(name, text){
+  const url = URL.createObjectURL(new Blob([text], {type:'text/csv;charset=utf-8'}));
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+function _dlRange(){
+  const v = ($('#cs-dl-period')||{}).value || 'week';
+  if(v === 'all') return {start:'0000', end:'9999'};
+  if(v === 'lastweek') return _weekRange(1);
+  if(v === 'month'){ const d = new Date(Date.now()-30*86400000); return {start: d.toISOString().slice(0,10), end:'9999'}; }
+  return _weekRange(0);
+}
+function downloadActivities(){
+  const r = _dlRange();
+  const rows = [['cuenta','tipo_cliente','broker','inmobiliaria','broker_id','organization_id','tipo_actividad','fecha_contacto','fecha_registro','registrada_mismo_dia','realizada_por','resultado','responsable_actual','etapa_actual']];
+  _allActivities().filter(a=>{ const d=a.date.slice(0,10); return d>=r.start && d<r.end; })
+    .sort((a,b)=>a.date.localeCompare(b.date))
+    .forEach(a=>{
+      const L = _acctLabel(a.key), R = _refsOf(a.key), st = STATE[a.key]||{};
+      rows.push([L.name, _clientTypeOf(a.key), L.broker, L.inmo, R.broker_id, R.organization_id, actLabel(a.type), a.date, a.logged_at||'',
+        a.logged_at ? (a.logged_at.slice(0,10)===a.date.slice(0,10)?'sí':'no') : '', a.csm||'', a.outcome||'', st.owner||'', cycleLabel(cycleOf(_stageNow(a.key)||''))]);
+    });
+  _download(`actividades_cs_partner_${_todayIso()}.csv`, _csv(rows));
+}
+function downloadAssignmentHistory(){
+  const rows = [['cuenta','tipo_cliente','broker','inmobiliaria','broker_id','organization_id','persona_anterior','persona_asignada','rol','fecha_asignacion','fecha_cambio','fuente','cambio_hecho_por','etapa_al_asignar','responsable_actual']];
+  Object.keys(STATE).forEach(key=>{
+    const st = STATE[key]; const hist = ((st && st.owner_history)||[]).map((h,i)=>({...h,_i:i})).sort((x,y)=>(x.since||'').localeCompare(y.since||'') || x._i-y._i);
+    if(!hist.length) return;
+    const L = _acctLabel(key), R = _refsOf(key);
+    hist.forEach((h,i)=>rows.push([L.name, _clientTypeOf(key), L.broker, L.inmo, R.broker_id, R.organization_id, i?hist[i-1].owner:'', h.owner, h.role||'',
+      h.since||'', h.until||'', h.source||'', h.by||'', h.stage?cycleLabel(cycleOf(h.stage)):'', st.owner||'']));
+  });
+  _download(`historial_asignaciones_${_todayIso()}.csv`, _csv(rows));
+}
+
 // ─── SHARED-STATE SYNC ───────────────────────────────────────────────
 // Cloudflare Worker (cs-state-sync) holds team state — owner assignments,
 // statuses, activities, value_events — in a D1 database (one row per account,
@@ -4942,7 +5165,7 @@ const SYNC_MIGRATED_KEY = 'm1cs_d1_migrated_v1';   // one-time re-send after the
 
 let _syncStatus = 'init';   // init | busy | ok | off
 let _syncSince = '';        // X-Server-Time of the last successful pull
-let _syncActor = '';
+var _syncActor = '';
 try { _syncActor = localStorage.getItem(SYNC_ACTOR_KEY) || ''; } catch(e) {}
 
 function _isDefaultItem(it){
@@ -5001,11 +5224,15 @@ function _syncFetch(method, body){
 
 function _unionAppendOnly(a, b){
   const key = e => JSON.stringify([e && (e.date||e.since), e && e.owner, e && e.type, e && e.amount, e && e.text, e && e.outcome, e && e.source]);
-  const seen = new Set();
+  const seen = new Map();
   const out = [];
   for (const e of [...(a||[]), ...(b||[])]) {
     const k = key(e);
-    if (!seen.has(k)) { seen.add(k); out.push(e); }
+    const prev = seen.get(k);
+    if (!prev) { const c = {...e}; seen.set(k, c); out.push(c); continue; }
+    // Same entry from both sides: keep it once, but take details only one side has
+    // (until, by, stage, logged_at…), so database-side enrichment reaches the browser.
+    for (const f in e) if (e[f] != null && e[f] !== '' && (prev[f] == null || prev[f] === '')) prev[f] = e[f];
   }
   return out;
 }
@@ -5041,11 +5268,13 @@ async function pullSync(){
         // Local scalars newer — still merge in remote's append-only entries.
         for(const k of SYNC_APPEND_FIELDS){
           if(Array.isArray(rem[k]) && rem[k].length){
-            const before = (loc[k] || []).length;
+            const before = JSON.stringify(loc[k] || []);
             loc[k] = _unionAppendOnly(loc[k], rem[k]);
-            if(loc[k].length !== before) changed = true;
+            if(JSON.stringify(loc[k]) !== before) changed = true;
           }
         }
+        // Server-only reference data (MCP ids, client type) always comes from the database.
+        if(rem._refs && JSON.stringify(rem._refs) !== JSON.stringify(loc._refs)){ loc._refs = rem._refs; changed = true; }
       }
     }
     if(changed){
